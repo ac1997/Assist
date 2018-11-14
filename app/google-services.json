@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "52205876233",
+    "firebase_url": "https://assist-2e415.firebaseio.com",
+    "project_id": "assist-2e415",
+    "storage_bucket": "assist-2e415.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:52205876233:android:78100be3e64e705e",
+        "android_client_info": {
+          "package_name": "com.caltruism.assist"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "52205876233-gakf2qho5qu96rjtqmgo1cmt5936c1ma.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.caltruism.assist",
+            "certificate_hash": "cafe3badec1651139e440dea5f0f4cc4969a10ee"
+          }
+        },
+        {
+          "client_id": "52205876233-opa5ji2rns3l4h3r739vgmnlsfeh6dc5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDjNVtis90dNQL-ykEt4qQzqNSPtdmOMuE"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "52205876233-opa5ji2rns3l4h3r739vgmnlsfeh6dc5.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
