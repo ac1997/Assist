@@ -11,9 +11,14 @@
     <style name="LoginTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
-        <item name="android:windowBackground">@color/colorPrimary</item>
+        <item name="android:windowBackground">@color/colorGrey6</item>
+    </style>
+
+    <style name="mainButtonStyle" parent="@android:style/Widget.Button">
+        <item name="android:textColor">#ffffff</item>
+        <item name="android:background">@color/colorAccent</item>
     </style>
 
 

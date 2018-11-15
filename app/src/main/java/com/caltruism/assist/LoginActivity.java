@@ -1,11 +1,15 @@
 package com.caltruism.assist;
 
+import android.content.Context;
 import android.content.Intent;
-import android.support.annotation.NonNull;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.widget.Toast;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
@@ -14,66 +18,109 @@ import com.facebook.FacebookException;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
 import com.facebook.Profile;
+import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
-import com.facebook.login.widget.LoginButton;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
 
 
 public class LoginActivity extends AppCompatActivity {
 
-    FirebaseFirestore db = FirebaseFirestore.getInstance();
-    private FirebaseAuth.AuthStateListener mAuthListener;
-    private FirebaseAuth mAuth;
-    LoginButton loginButton;
-    CallbackManager mCallbackManager;
-    String TAG ="Hey";
+    private final String TAG ="LoginActivity";
+    private static final int RC_SIGN_IN = 9001;
+
+    private final String EMAIL = "Email";
+    private final String FACEBOOK = "Facebook";
+    private final String GOOGLE = "Google";
+    private final String EMAIL_LOGIN_ERROR = "Login failed. Please try agian.";
+    private final String FACEBOOK_LOGIN_ERROR = "Facebook login failed. Please try again.";
+    private final String GOOGLE_LOGIN_ERROR = "Google login failed. Please try again.";
+    private FirebaseFirestore db;
+    private FirebaseAuth auth;
+    private GoogleSignInClient GoogleSignInClient;
+    private CallbackManager callbackManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
+        db = FirebaseFirestore.getInstance();
+        auth = FirebaseAuth.getInstance();
 
-        loginButton = (LoginButton) findViewById(R.id.login_button);
+        callbackManager = CallbackManager.Factory.create();
 
-        mAuth = FirebaseAuth.getInstance();
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(getString(R.string.default_web_client_id))
+                .requestEmail()
+                .build();
+        GoogleSignInClient = GoogleSignIn.getClient(this, gso);
 
-        mCallbackManager = CallbackManager.Factory.create();
-        loginButton.setReadPermissions("email, public_profile, user_gender, user_age_range");
-        loginButton.registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {
+        LoginManager.getInstance().registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
             @Override
             public void onSuccess(LoginResult loginResult) {
-
-                Log.i(TAG,"Hello"+loginResult.getAccessToken().getToken());
-                Toast.makeText(LoginActivity.this, "Token:"+loginResult.getAccessToken(), Toast.LENGTH_SHORT).show();
-
                 handleFacebookAccessToken(loginResult.getAccessToken());
-                setFacebookData(loginResult);
             }
 
             @Override
             public void onCancel() {
-
+                Log.d(TAG, "Facebook login canceled");
             }
 
             @Override
-            public void onError(FacebookException error) {
+            public void onError(FacebookException exception) {
+                Log.e(TAG, "Facebook login error", exception);
+            }
+        });
 
+        Button loginButtonEmail = findViewById(R.id.buttonLoginEmail);
+        loginButtonEmail.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                EditText editTextEmail = findViewById(R.id.editTextEmail);
+                EditText editTextPassword = findViewById(R.id.editTextPassword);
+                String email = editTextEmail.getText().toString();
+                String password = editTextPassword.getText().toString();
+
+                // TODO: Verify format
+
+                handleEmailPassswordLogin(email, password);
+            }
+        });
+
+        Button loginButtonFacebook = findViewById(R.id.buttonLoginFacebook);
+        loginButtonFacebook.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                LoginManager.getInstance().logInWithReadPermissions(LoginActivity.this, Arrays.asList("email", "public_profile", "user_gender", "user_age_range"));
+            }
+        });
+
+        Button loginButtonGoogle = findViewById(R.id.buttonLoginGoogle);
+        loginButtonGoogle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent signInIntent = GoogleSignInClient.getSignInIntent();
+                startActivityForResult(signInIntent, RC_SIGN_IN);
             }
         });
     }
@@ -82,102 +129,173 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
-        // Pass the activity result back to the Facebook SDK
-        mCallbackManager.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == RC_SIGN_IN) {
+            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
+            try {
+                GoogleSignInAccount account = task.getResult(ApiException.class);
+                assert account != null;
+                handleGoogleLogin(account);
+            } catch (ApiException e) {
+                Log.e(TAG, "Google sign in failed", e);
+                Snackbar snackbar = Snackbar.make(LoginActivity.this.findViewById(R.id.loginConstraintLayout), GOOGLE_LOGIN_ERROR, Snackbar.LENGTH_LONG);
+                snackbar.show();
+            }
+        } else {
+            callbackManager.onActivityResult(requestCode, resultCode, data);
+        }
     }
 
-    private void handleFacebookAccessToken(AccessToken token) {
-        Log.d(TAG, "handleFacebookAccessToken:" + token);
+    private void handleEmailPassswordLogin(String email, String password) {
+        auth.signInWithEmailAndPassword(email, password).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+            @Override
+            public void onComplete(@NonNull Task<AuthResult> task) {
+                if (task.isSuccessful()) {
+                    Log.d(TAG, "Email login success");
+                    checkUserInDatabase(EMAIL, null, null);
+                } else {
+                    Log.e(TAG, "Email authentication failed", task.getException());
+                    Snackbar snackbar = Snackbar.make(LoginActivity.this.findViewById(R.id.loginConstraintLayout), EMAIL_LOGIN_ERROR, Snackbar.LENGTH_LONG);
+                    snackbar.show();
+                }
+            }
+        });
+    }
 
+    private void handleFacebookAccessToken(final AccessToken token) {
         AuthCredential credential = FacebookAuthProvider.getCredential(token.getToken());
-        mAuth.signInWithCredential(credential)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-
-                        if (task.isSuccessful()) {
-                            Log.w(TAG, "signInWithCredential", task.getException());
-                            Toast.makeText(LoginActivity.this, "Success",
-                                    Toast.LENGTH_SHORT).show();
-                        } else {
-                            Toast.makeText(LoginActivity.this, "Authentication error",
-                                    Toast.LENGTH_SHORT).show();
-
-                        }
-
-
-                    }
-                });
+        auth.signInWithCredential(credential).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+            @Override
+            public void onComplete(@NonNull Task<AuthResult> task) {
+                if (task.isSuccessful()) {
+                    Log.d(TAG, "Facebook login success");
+                    checkUserInDatabase(FACEBOOK, token, null);
+                } else {
+                    Log.e(TAG, "Facebook authentication failed", task.getException());
+                    Snackbar snackbar = Snackbar.make(LoginActivity.this.findViewById(R.id.loginConstraintLayout), FACEBOOK_LOGIN_ERROR, Snackbar.LENGTH_LONG);
+                    snackbar.show();
+                }
+            }
+        });
     }
 
-    private void setFacebookData(final LoginResult loginResult)
+    private void handleGoogleLogin(final GoogleSignInAccount acct) {
+        AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
+        auth.signInWithCredential(credential).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+            @Override
+            public void onComplete(@NonNull Task<AuthResult> task) {
+                if (task.isSuccessful()) {
+                    Log.d(TAG, "Google login success");
+                    checkUserInDatabase(GOOGLE, null, acct);
+                } else {
+                    Log.e(TAG, "Google authentication failed", task.getException());
+                    Snackbar snackbar = Snackbar.make(LoginActivity.this.findViewById(R.id.loginConstraintLayout), GOOGLE_LOGIN_ERROR, Snackbar.LENGTH_LONG);
+                    snackbar.show();
+                }
+            }
+        });
+    }
+
+    private void checkUserInDatabase(final String method, final AccessToken token, final GoogleSignInAccount acct)
     {
-        GraphRequest request = GraphRequest.newMeRequest(
-                loginResult.getAccessToken(),
-                new GraphRequest.GraphJSONObjectCallback() {
-                    @Override
-                    public void onCompleted(JSONObject object, GraphResponse response) {
-                        // Application code
-                        try {
-                            Log.i("Response",response.toString());
+        DocumentReference docRef = db.collection("users").document(auth.getCurrentUser().getUid());
 
-                            String email = response.getJSONObject().getString("email");
-                            String firstName = response.getJSONObject().getString("first_name");
-                            String lastName = response.getJSONObject().getString("last_name");
-                            String gender = response.getJSONObject().getString("gender");
-                            String user_age_range = response.getJSONObject().getString("age_range");
+        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot document = task.getResult();
 
+                    assert document != null;
 
-                            Profile profile = Profile.getCurrentProfile();
-                            String id = profile.getId();
-                            String link = profile.getLinkUri().toString();
-                            Log.i("Link",link);
-                            if (Profile.getCurrentProfile()!=null)
-                            {
-                                Log.i("Login", "ProfilePic" + Profile.getCurrentProfile().getProfilePictureUri(200, 200));
-                                link = Profile.getCurrentProfile().getProfilePictureUri(200, 200).toString();
-                            }
+                    if (document.exists()) {
+                        Intent activityIntent;
+                        Context mainContext = LoginActivity.this;
+                        Object memberTypeObject = document.get("memberType");
 
-                            Log.i("Login Email", email);
-                            Log.i("Login FirstName", firstName);
-                            Log.i("Login LastName", lastName);
-                            Log.i("Login Gender", gender);
-                            Log.i("Login user_age_range", user_age_range);
+                        if (memberTypeObject == null) {
+                            Log.d(TAG, document.getData().toString());
+                            activityIntent = new Intent(mainContext, GetMemberTypeActivity.class);
+                        } else {
+                            String memberTypeString = memberTypeObject.toString();
 
-                            // Create a new user with a first and last name
-                            Map<String, Object> user = new HashMap<>();
-                            user.put("first", firstName);
-                            user.put("last", lastName);
-                            user.put("gender", gender);
-                            user.put("age_range", user_age_range);
-                            user.put("pictureURL", link);
-
-                            // Add a new document with a generated ID
-                            db.collection("users")
-                                    .document(Objects.requireNonNull(mAuth.getCurrentUser()).getUid()).set(user)
-                                    .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                        @Override
-                                        public void onSuccess(Void aVoid) {
-                                            Log.d(TAG, "DocumentSnapshot added with ID: " + mAuth.getCurrentUser().getUid());
-                                        }
-                                    })
-                                    .addOnFailureListener(new OnFailureListener() {
-                                        @Override
-                                        public void onFailure(@NonNull Exception e) {
-                                            Log.w(TAG, "Error adding document", e);
-                                        }
-                                    });
-
-
-                        } catch (JSONException e) {
-                            e.printStackTrace();
+                            if (memberTypeString.equals(getResources().getString(R.string.volunteer_type)))
+                                activityIntent = new Intent(mainContext, RequestListVolunteerActivity.class);
+                            else if (memberTypeString.equals(getResources().getString(R.string.disabled_type)))
+                                activityIntent = new Intent(mainContext, RequestListDisabledActivity.class);
+                            else
+                                activityIntent = new Intent(mainContext, GetMemberTypeActivity.class);
                         }
+                        startActivity(activityIntent);
+                        finish();
+                    } else {
+                        if (method.equals(FACEBOOK))
+                            setFacebookData(token);
+                        else if (method.equals(GOOGLE))
+                            setGoogleData(acct);
                     }
-                });
+                } else {
+                    Log.e(TAG, "Get failed with ", task.getException());
+                    Snackbar snackbar = Snackbar.make(LoginActivity.this.findViewById(R.id.loginConstraintLayout), FACEBOOK_LOGIN_ERROR, Snackbar.LENGTH_LONG);
+                    snackbar.show();
+                }
+            }
+        });
+    }
+
+    private void setFacebookData(final AccessToken token)
+    {
+        GraphRequest request = GraphRequest.newMeRequest(token, new GraphRequest.GraphJSONObjectCallback() {
+            @Override
+            public void onCompleted(JSONObject object, GraphResponse response) {
+                try {
+                    String email = response.getJSONObject().getString("email");
+                    String firstName = response.getJSONObject().getString("first_name");
+                    String lastName = response.getJSONObject().getString("last_name");
+                    String gender = response.getJSONObject().getString("gender");
+                    String userAgeRange = response.getJSONObject().getString("age_range");
+                    String profileURL = Profile.getCurrentProfile().getProfilePictureUri(200, 200).toString();
+
+                    HashMap<String, Object> userData = new HashMap<>();
+                    userData.put("firstName", firstName);
+                    userData.put("lastName", lastName);
+                    userData.put("email", email);
+                    userData.put("gender", gender);
+                    userData.put("ageRange", userAgeRange);
+                    userData.put("pictureURL", profileURL);
+
+                    Intent intent = new Intent(LoginActivity.this, GetMemberTypeActivity.class);
+                    intent.putExtra("userData", userData);
+                    startActivity(intent);
+                    finish();
+                } catch (JSONException e) {
+                    Log.e(TAG, "Facebook sign in failed", e);
+                    Snackbar snackbar = Snackbar.make(LoginActivity.this.findViewById(R.id.loginConstraintLayout), FACEBOOK_LOGIN_ERROR, Snackbar.LENGTH_LONG);
+                    snackbar.show();
+                }
+            }
+        });
+
         Bundle parameters = new Bundle();
-        parameters.putString("fields", "id,email,first_name,last_name,gender,age_range");
+        parameters.putString("fields", "id, email, first_name, last_name, gender, age_range");
         request.setParameters(parameters);
         request.executeAsync();
+    }
+
+    private void setGoogleData(GoogleSignInAccount acct) {
+        String email = acct.getEmail();
+        String firstName = acct.getGivenName();
+        String lastName = acct.getFamilyName();
+        String profileURL = acct.getPhotoUrl().toString();
+
+        HashMap<String, Object> userData = new HashMap<>();
+        userData.put("firstName", firstName);
+        userData.put("lastName", lastName);
+        userData.put("email", email);
+        userData.put("pictureURL", profileURL);
+
+        Intent intent = new Intent(LoginActivity.this, GetMemberTypeActivity.class);
+        intent.putExtra("userData", userData);
+        startActivity(intent);
+        finish();
     }
 }

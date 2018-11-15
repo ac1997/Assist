@@ -2,4 +2,7 @@
     <string name="app_name">Assist</string>
     <string name="facebook_app_id">950732761786596</string>
     <string name="fb_login_protocol_scheme">fb950732761786596</string>
+
+    <string name="volunteer_type">volunteer</string>
+    <string name="disabled_type">disabled</string>
 </resources>
