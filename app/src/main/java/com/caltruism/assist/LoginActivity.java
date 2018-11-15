@@ -228,7 +228,12 @@ public class LoginActivity extends AppCompatActivity {
                         startActivity(activityIntent);
                         finish();
                     } else {
-                        if (method.equals(FACEBOOK))
+                        if (method.equals(EMAIL)) {
+                            Log.e(TAG, "Email sign in with user data not exist in database");
+                            Snackbar snackbar = Snackbar.make(LoginActivity.this.findViewById(R.id.loginConstraintLayout), "Please contact use.", Snackbar.LENGTH_LONG);
+                            snackbar.show();
+                        }
+                        else if (method.equals(FACEBOOK))
                             setFacebookData(token);
                         else if (method.equals(GOOGLE))
                             setGoogleData(acct);
