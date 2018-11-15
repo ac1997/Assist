@@ -15,8 +15,6 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-import java.util.Objects;
-
 public class MainEmptyActivity extends AppCompatActivity {
 
     private final String TAG = "MainEmptyActivity";
@@ -25,39 +23,55 @@ public class MainEmptyActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        final Context current = this;
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        FirebaseAuth mAuth = FirebaseAuth.getInstance();
+        FirebaseAuth auth = FirebaseAuth.getInstance();
 
-        if (mAuth.getCurrentUser() != null) {
-            DocumentReference docRef = db.collection("users").document(mAuth.getCurrentUser().getUid());
+        if (auth.getCurrentUser() != null) {
+            DocumentReference docRef = db.collection("users").document(auth.getCurrentUser().getUid());
 
             docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                 @Override
                 public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                    Intent activityIntent;
+                    Context mainContext = MainEmptyActivity.this;
+
                     if (task.isSuccessful()) {
                         DocumentSnapshot document = task.getResult();
+
                         assert document != null;
 
                         if (document.exists()) {
-                            Log.i(TAG, "DocumentSnapshot data: " + document.getData());
-                            String lastLoggedInType = Objects.requireNonNull(document.get("memberType")).toString();
-                            if (lastLoggedInType.equals("volunteer"))
-                                startActivity(new Intent(current, RequestListVolunteerActivity.class));
-                            else if (lastLoggedInType.equals("disabled"))
-                                startActivity(new Intent(current, RequestListDisabledActivity.class));
+                            Object memberTypeObject = document.get("memberType");
+                            if (memberTypeObject == null) {
+                                Log.d(TAG, document.getData().toString());
+                                activityIntent = new Intent(mainContext, GetMemberTypeActivity.class);
+                            } else {
+                                String memberTypeString = memberTypeObject.toString();
+
+                                if (memberTypeString.equals(getResources().getString(R.string.volunteer_type))) {
+                                    activityIntent = new Intent(mainContext, RequestListVolunteerActivity.class);
+                                } else if (memberTypeString.equals(getResources().getString(R.string.disabled_type))) {
+                                    activityIntent = new Intent(mainContext, RequestListDisabledActivity.class);
+                                } else {
+                                    activityIntent = new Intent(mainContext, GetMemberTypeActivity.class);
+                                }
+                            }
                         } else {
                             Log.e(TAG, "Users not exist.");
+                            activityIntent = new Intent(mainContext, LoginActivity.class);
                         }
                     } else {
                         Log.e(TAG, "Get failed with ", task.getException());
+                        activityIntent = new Intent(mainContext, LoginActivity.class);
                     }
+
+                    startActivity(activityIntent);
+                    finish();
                 }
             });
         } else {
-            startActivity(new Intent(current, LoginActivity.class));
+            startActivity(new Intent(this, LoginActivity.class));
+            finish();
         }
-
-        finish();
     }
 }

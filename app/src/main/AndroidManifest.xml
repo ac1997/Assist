@@ -10,8 +10,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".MainEmptyActivity"
-            android:theme="@android:style/Theme.NoDisplay">
+            android:name=".MainEmptyActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -19,9 +18,12 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".LoginActivity"
+            android:theme="@style/LoginTheme" />
+        <activity android:name=".GetMemberTypeActivity" />
         <activity android:name=".RequestListVolunteerActivity" />
         <activity android:name=".RequestListDisabledActivity" />
-        <activity android:name=".LoginActivity" />
 
         <meta-data android:name="com.facebook.sdk.ApplicationId"
             android:value="@string/facebook_app_id"/>
