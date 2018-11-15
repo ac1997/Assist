@@ -58,7 +58,7 @@ public class MainEmptyActivity extends AppCompatActivity {
                                 }
                             }
                         } else {
-                            Log.e(TAG, "Users not exist.");
+                            Log.d(TAG, "Users not exist.");
                             activityIntent = new Intent(mainContext, LoginActivity.class);
                         }
                     } else {
