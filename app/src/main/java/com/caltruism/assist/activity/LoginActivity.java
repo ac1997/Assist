@@ -1,4 +1,4 @@
-package com.caltruism.assist;
+package com.caltruism.assist.activity;
 
 import android.content.Context;
 import android.content.Intent;
@@ -11,6 +11,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.caltruism.assist.R;
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
@@ -34,6 +35,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import org.json.JSONException;
@@ -257,21 +259,15 @@ public class LoginActivity extends AppCompatActivity {
                     String firstName = response.getJSONObject().getString("first_name");
                     String lastName = response.getJSONObject().getString("last_name");
                     String gender = response.getJSONObject().getString("gender");
-                    String userAgeRange = response.getJSONObject().getString("age_range");
-                    String profileURL = Profile.getCurrentProfile().getProfilePictureUri(200, 200).toString();
+                    String ageRange = response.getJSONObject().getString("age_range");
+                    String pictureURL = Profile.getCurrentProfile().getProfilePictureUri(200, 200).toString();
 
-                    HashMap<String, Object> userData = new HashMap<>();
-                    userData.put("firstName", firstName);
-                    userData.put("lastName", lastName);
-                    userData.put("email", email);
-                    userData.put("gender", gender);
-                    userData.put("ageRange", userAgeRange);
-                    userData.put("pictureURL", profileURL);
-
-                    Intent intent = new Intent(LoginActivity.this, GetMemberTypeActivity.class);
-                    intent.putExtra("userData", userData);
-                    startActivity(intent);
-                    finish();
+                    initUser(email, firstName, lastName, pictureURL, gender, ageRange);
+//
+//                    Intent intent = new Intent(LoginActivity.this, GetMemberTypeActivity.class);
+//                    intent.putExtra("userData", userData);
+//                    startActivity(intent);
+//                    finish();
                 } catch (JSONException e) {
                     Log.e(TAG, "Facebook sign in failed", e);
                     Snackbar snackbar = Snackbar.make(LoginActivity.this.findViewById(R.id.loginConstraintLayout), FACEBOOK_LOGIN_ERROR, Snackbar.LENGTH_LONG);
@@ -290,15 +286,37 @@ public class LoginActivity extends AppCompatActivity {
         String email = acct.getEmail();
         String firstName = acct.getGivenName();
         String lastName = acct.getFamilyName();
-        String profileURL = acct.getPhotoUrl().toString();
+        String pictureURL = acct.getPhotoUrl().toString();
 
+        initUser(email, firstName, lastName, pictureURL, null, null);
+
+//        Intent intent = new Intent(LoginActivity.this, GetMemberTypeActivity.class);
+//        intent.putExtra("userData", userData);
+//        startActivity(intent);
+//        finish();
+    }
+
+    private void initUser(String email, String firstName, String lastName, String pictureURL, String gender, String ageRange) {
         HashMap<String, Object> userData = new HashMap<>();
+        userData.put("email", email);
         userData.put("firstName", firstName);
         userData.put("lastName", lastName);
-        userData.put("email", email);
-        userData.put("pictureURL", profileURL);
+        userData.put("pictureURL", pictureURL);
 
-        Intent intent = new Intent(LoginActivity.this, GetMemberTypeActivity.class);
+        if (gender != null)
+            userData.put("gender", gender);
+        if (ageRange != null)
+            userData.put("ageRange", ageRange);
+
+        userData.put("ratings", 0.0);
+
+        HashMap<String, Object> stats = new HashMap<>();
+        stats.put("servicedTime", 0);
+        stats.put("requestCompleted", 0);
+
+        userData.put("stats", stats);
+
+        Intent intent = new Intent(this, GetMemberTypeActivity.class);
         intent.putExtra("userData", userData);
         startActivity(intent);
         finish();
