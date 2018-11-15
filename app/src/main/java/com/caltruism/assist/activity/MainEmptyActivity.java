@@ -1,4 +1,4 @@
-package com.caltruism.assist;
+package com.caltruism.assist.activity;
 
 import android.content.Context;
 import android.content.Intent;
@@ -8,6 +8,7 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
+import com.caltruism.assist.R;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
