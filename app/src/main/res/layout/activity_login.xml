@@ -49,9 +49,8 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent" />
 
-    <Button
+    <android.support.design.button.MaterialButton
         android:id="@+id/buttonLoginEmail"
-        style="@style/mainButtonStyle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="20dp"
@@ -97,7 +96,7 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toEndOf="@+id/textView2" />
 
-    <Button
+    <android.support.design.button.MaterialButton
         android:id="@+id/buttonLoginFacebook"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -110,7 +109,7 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent" />
 
-    <Button
+    <android.support.design.button.MaterialButton
         android:id="@+id/buttonLoginGoogle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"

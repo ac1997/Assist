@@ -18,7 +18,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 public class MainEmptyActivity extends AppCompatActivity {
 
-    private final String TAG = "MainEmptyActivity";
+    private static final String TAG = "MainEmptyActivity";
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {

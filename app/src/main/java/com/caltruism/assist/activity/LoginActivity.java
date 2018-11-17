@@ -35,7 +35,6 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import org.json.JSONException;
@@ -47,15 +46,16 @@ import java.util.HashMap;
 
 public class LoginActivity extends AppCompatActivity {
 
-    private final String TAG ="LoginActivity";
+    private static final String TAG ="LoginActivity";
     private static final int RC_SIGN_IN = 9001;
 
-    private final String EMAIL = "Email";
-    private final String FACEBOOK = "Facebook";
-    private final String GOOGLE = "Google";
-    private final String EMAIL_LOGIN_ERROR = "Login failed. Please try agian.";
-    private final String FACEBOOK_LOGIN_ERROR = "Facebook login failed. Please try again.";
-    private final String GOOGLE_LOGIN_ERROR = "Google login failed. Please try again.";
+    private static final String EMAIL = "Email";
+    private static final String FACEBOOK = "Facebook";
+    private static final String GOOGLE = "Google";
+    private static final String EMAIL_LOGIN_ERROR = "Login failed. Please try agian.";
+    private static final String FACEBOOK_LOGIN_ERROR = "Facebook login failed. Please try again.";
+    private static final String GOOGLE_LOGIN_ERROR = "Google login failed. Please try again.";
+
     private FirebaseFirestore db;
     private FirebaseAuth auth;
     private GoogleSignInClient GoogleSignInClient;
@@ -105,7 +105,7 @@ public class LoginActivity extends AppCompatActivity {
 
                 // TODO: Verify format
 
-                handleEmailPassswordLogin(email, password);
+                handleEmailPasswordLogin(email, password);
             }
         });
 
@@ -147,7 +147,7 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
-    private void handleEmailPassswordLogin(String email, String password) {
+    private void handleEmailPasswordLogin(String email, String password) {
         auth.signInWithEmailAndPassword(email, password).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
@@ -263,11 +263,6 @@ public class LoginActivity extends AppCompatActivity {
                     String pictureURL = Profile.getCurrentProfile().getProfilePictureUri(200, 200).toString();
 
                     initUser(email, firstName, lastName, pictureURL, gender, ageRange);
-//
-//                    Intent intent = new Intent(LoginActivity.this, GetMemberTypeActivity.class);
-//                    intent.putExtra("userData", userData);
-//                    startActivity(intent);
-//                    finish();
                 } catch (JSONException e) {
                     Log.e(TAG, "Facebook sign in failed", e);
                     Snackbar snackbar = Snackbar.make(LoginActivity.this.findViewById(R.id.loginConstraintLayout), FACEBOOK_LOGIN_ERROR, Snackbar.LENGTH_LONG);
@@ -289,11 +284,6 @@ public class LoginActivity extends AppCompatActivity {
         String pictureURL = acct.getPhotoUrl().toString();
 
         initUser(email, firstName, lastName, pictureURL, null, null);
-
-//        Intent intent = new Intent(LoginActivity.this, GetMemberTypeActivity.class);
-//        intent.putExtra("userData", userData);
-//        startActivity(intent);
-//        finish();
     }
 
     private void initUser(String email, String firstName, String lastName, String pictureURL, String gender, String ageRange) {

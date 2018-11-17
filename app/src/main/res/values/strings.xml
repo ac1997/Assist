@@ -5,4 +5,5 @@
 
     <string name="volunteer_type">volunteer</string>
     <string name="disabled_type">disabled</string>
+    <string name="title_activity_toberemove">Map</string>
 </resources>

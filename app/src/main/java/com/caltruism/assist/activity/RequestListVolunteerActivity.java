@@ -14,14 +14,8 @@ public class RequestListVolunteerActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_request_list_volunteer);
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
 
         Button logout = findViewById(R.id.logoutButton);
-
         logout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
