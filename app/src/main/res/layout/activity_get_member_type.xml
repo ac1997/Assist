@@ -6,9 +6,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <Button
+    <android.support.design.button.MaterialButton
         android:id="@+id/buttonDisabled"
-        style="@style/mainButtonStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
@@ -16,9 +15,8 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:layout_editor_absoluteX="118dp" />
 
-    <Button
+    <android.support.design.button.MaterialButton
         android:id="@+id/buttonVolunteer"
-        style="@style/mainButtonStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"

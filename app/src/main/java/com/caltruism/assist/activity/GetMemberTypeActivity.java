@@ -23,8 +23,8 @@ import java.util.HashMap;
 import java.util.Objects;
 
 public class GetMemberTypeActivity extends AppCompatActivity {
-    private final String TAG = "GetMemberActivity";
-    private final String ERROR = "Something went wrong. Please try again.";
+    private static final String TAG = "GetMemberActivity";
+    private static final String ERROR = "Something went wrong. Please try again.";
 
     private FirebaseFirestore db;
     private FirebaseAuth auth;
