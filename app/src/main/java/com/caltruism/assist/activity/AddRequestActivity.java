@@ -2,7 +2,9 @@ package com.caltruism.assist.activity;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
@@ -19,6 +21,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.format.DateUtils;
@@ -55,22 +58,18 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
-import com.google.firebase.firestore.SetOptions;
 import com.shuhart.stepview.StepView;
 
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
 
 public class AddRequestActivity extends AppCompatActivity implements AddRequestActivityDataListener {
 
@@ -95,7 +94,7 @@ public class AddRequestActivity extends AppCompatActivity implements AddRequestA
     private static final String DURATION_KEY = "duration";
 
     private int currentStep = 0;
-    private int highestStepCompleted = 0;
+    private int highestStepCompleted = -1;
 
     private int requestType;
     private String requestTitle;
@@ -208,9 +207,10 @@ public class AddRequestActivity extends AppCompatActivity implements AddRequestA
         int id = item.getItemId();
 
         if (id == R.id.action_close) {
-            Intent intent = new Intent(this, RequestListDisabledActivity.class);
-            startActivity(intent);
-            finish();
+            if (highestStepCompleted != -1)
+                showCloseAlertDialog();
+            else
+                super.onBackPressed();
             return true;
         }
 
@@ -221,6 +221,16 @@ public class AddRequestActivity extends AppCompatActivity implements AddRequestA
     public boolean onSupportNavigateUp() {
         onBackPressed();
         return true;
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (currentStep > 0)
+            updateUI(currentStep - 1);
+        else if (highestStepCompleted != -1)
+            showCloseAlertDialog();
+        else
+            super.onBackPressed();
     }
 
     @Override
@@ -384,6 +394,19 @@ public class AddRequestActivity extends AppCompatActivity implements AddRequestA
                         }
                     }
                 });
+    }
+
+    private void showCloseAlertDialog() {
+        // TODO: Rephrase
+        new AlertDialog.Builder(this).setTitle("Exit from creating request?")
+                .setMessage("Are you sure you want to exit?")
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        setResult(Activity.RESULT_CANCELED);
+                        finish();
+                    }
+                }).setNegativeButton("No", null).show();
     }
 
     private void updateUI(int nextStep) {
@@ -678,7 +701,11 @@ public class AddRequestActivity extends AppCompatActivity implements AddRequestA
                         if (nameObject == null) {
                             Log.e(TAG, "User has no name field: " + document.getData().toString());
                         } else {
-                            setSharedPreferences(nameObject.toString());
+                            SharedPreferences sharedPreferences = getSharedPreferences(Constants.USER_DATA_SHARED_PREFERENCE, Context.MODE_PRIVATE);
+                            SharedPreferences.Editor editor = sharedPreferences.edit();
+                            editor.putString("name", nameObject.toString());
+                            editor.apply();
+
                             commitData(nameObject.toString());
                         }
                     } else {
@@ -712,6 +739,7 @@ public class AddRequestActivity extends AppCompatActivity implements AddRequestA
         requestData.put("title", requestTitle);
         requestData.put("description", requestDescription);
         requestData.put("isNow", requestIsNow);
+        requestData.put("date", requestDateTime / DateUtils.MINUTE_IN_MILLIS);
         requestData.put("startTime", startTime);
         requestData.put("endTime", startTime + requestDuration);
         requestData.put("duration", requestDuration);
@@ -723,6 +751,7 @@ public class AddRequestActivity extends AppCompatActivity implements AddRequestA
             @Override
             public void onSuccess(DocumentReference documentReference) {
                 Log.d(TAG, "DocumentSnapshot written with ID: " + documentReference.getId());
+                setResult(Activity.RESULT_OK);
                 finish();
             }
         }).addOnFailureListener(new OnFailureListener() {
@@ -733,9 +762,5 @@ public class AddRequestActivity extends AppCompatActivity implements AddRequestA
                 snackbar.show();
             }
         });
-    }
-
-    private void setSharedPreferences(String name) {
-
     }
 }
