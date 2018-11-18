@@ -2,6 +2,7 @@ package com.caltruism.assist.fragment;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -16,23 +17,40 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.caltruism.assist.R;
-import com.caltruism.assist.utils.AddRequestDataListener;
+import com.caltruism.assist.utils.AddRequestActivityDataListener;
+import com.caltruism.assist.utils.AddRequestFragmentDataListener;
+import com.caltruism.assist.utils.Constants;
+import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
+import com.google.android.gms.common.GooglePlayServicesRepairableException;
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.places.AutocompleteFilter;
+import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.ui.PlaceAutocomplete;
 
 import java.util.HashMap;
 
-public class AddRequestInputDetailsFragment extends Fragment {
+import static android.app.Activity.RESULT_CANCELED;
+import static android.app.Activity.RESULT_OK;
+
+public class AddRequestInputDetailsFragment extends Fragment implements AddRequestFragmentDataListener {
+
+    private static final String TAG = "AddRequestInputDetailsFragment";
+    private static final int REQUEST_CODE_AUTOCOMPLETE = 1;
+
+    private static final String GOOGLE_PLAY_SERVICE_ERROR = "Google Play Services is not available";
 
     private static final String TITLE_KEY = "title";
     private static final String DESCRIPTION_KEY = "description";
-    private static final String LOCATION_KEY = "location";
-    private static final String CURRENT_LOCATION = "Current Location";
+    private static final String IS_CURRENT_LOCATION_KEY = "isCurrentLocation";
+    private static final String LOCATION_NAME_KEY = "locationName";
+    private static final String LOCATION_ADDRESS_KEY = "locationAddress";
+    private static final String LOCATION_LAT_LNG_KEY = "locationLatLng";
 
-    private AddRequestDataListener listener;
-
-    private HashMap<String, String> data = new HashMap<>();
-    private int requestType;
+    private AddRequestActivityDataListener listener;
 
     private ImageView imageViewType;
     private TextView textViewType;
@@ -40,14 +58,17 @@ public class AddRequestInputDetailsFragment extends Fragment {
     private EditText editTextDescription;
     private EditText editTextLocation;
 
+    private HashMap<String, Object> dataMap = new HashMap<>();
+    private int requestType;
+
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
 
-        if (context instanceof AddRequestDataListener) {
-            listener = (AddRequestDataListener) context;
+        if (context instanceof AddRequestActivityDataListener) {
+            listener = (AddRequestActivityDataListener) context;
         } else {
-            throw new RuntimeException(context.toString() + " must implement AddRequestDataListener!");
+            throw new RuntimeException(context.toString() + " must implement AddRequestActivityDataListener!");
         }
     }
 
@@ -65,7 +86,7 @@ public class AddRequestInputDetailsFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        data.put(LOCATION_KEY, CURRENT_LOCATION);
+        dataMap.put(IS_CURRENT_LOCATION_KEY, true);
 
         imageViewType = getView().findViewById(R.id.imageViewInputDetailsRequestType);
         textViewType = getView().findViewById(R.id.textViewInputDetailsRequestType);
@@ -83,7 +104,7 @@ public class AddRequestInputDetailsFragment extends Fragment {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                handleDataChange(TITLE_KEY, s);
+                handleDataChange(TITLE_KEY, s, true);
             }
 
             @Override
@@ -100,24 +121,7 @@ public class AddRequestInputDetailsFragment extends Fragment {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                handleDataChange(DESCRIPTION_KEY, s);
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-
-            }
-        });
-
-        editTextLocation.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                handleDataChange(LOCATION_KEY, s);
+                handleDataChange(DESCRIPTION_KEY, s, true);
             }
 
             @Override
@@ -129,45 +133,90 @@ public class AddRequestInputDetailsFragment extends Fragment {
         editTextLocation.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                if(MotionEvent.ACTION_UP == event.getAction()) {
-                    if (editTextLocation.getText().toString().equals(CURRENT_LOCATION))
-                        editTextLocation.setText("");
-                }
+                if(MotionEvent.ACTION_UP == event.getAction())
+                    openAutocompleteActivity();
                 return false;
             }
         });
     }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == REQUEST_CODE_AUTOCOMPLETE) {
+            if (resultCode == RESULT_OK) {
+                Place place = PlaceAutocomplete.getPlace(getActivity(), data);
+                Log.i(TAG, "Place: " + place.getName());
+
+                editTextLocation.setText(place.getAddress());
+                dataMap.put(IS_CURRENT_LOCATION_KEY, false);
+                handleDataChange(LOCATION_NAME_KEY, place.getName(), false);
+                handleDataChange(LOCATION_ADDRESS_KEY, place.getAddress(), false);
+                handleDataChange(LOCATION_LAT_LNG_KEY, place.getLatLng(), true);
+            } else if (resultCode == PlaceAutocomplete.RESULT_ERROR) {
+                Status status = PlaceAutocomplete.getStatus(getActivity(), data);
+                Log.e(TAG, status.getStatusMessage());
+            }
+        }
+    }
+
+    @Override
+    public void onDataChange(Object... data) {
+        requestType = (int) data[0];
+        setRequestType();
+    }
+
+    private void openAutocompleteActivity() {
+        try {
+            AutocompleteFilter typeFilter = new AutocompleteFilter.Builder().setCountry("US").build();
+            Intent intent = new PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_FULLSCREEN).setFilter(typeFilter).build(getActivity());
+            startActivityForResult(intent, REQUEST_CODE_AUTOCOMPLETE);
+        } catch (GooglePlayServicesRepairableException e) {
+            GoogleApiAvailability.getInstance().getErrorDialog(getActivity(), e.getConnectionStatusCode(), 0).show();
+        } catch (GooglePlayServicesNotAvailableException e) {
+            String message = GOOGLE_PLAY_SERVICE_ERROR+ ": " + GoogleApiAvailability.getInstance().getErrorString(e.errorCode);
+
+            Log.e(TAG, message);
+            Toast.makeText(getActivity(), GOOGLE_PLAY_SERVICE_ERROR, Toast.LENGTH_SHORT).show();
+        }
+    }
+
     private void setRequestType() {
         switch (requestType) {
-            case 0:
+            case Constants.GROCERY_TYPE:
                 imageViewType.setImageResource(R.drawable.ic_add_request_grocery);
                 textViewType.setText("Grocery");
                 break;
 
-            case 1:
+            case Constants.LAUNDRY_TYPE:
                 imageViewType.setImageResource(R.drawable.ic_add_request_laundry);
                 textViewType.setText("Laundry");
                 break;
 
-            case 2:
+            case Constants.WALKING_TYPE:
                 imageViewType.setImageResource(R.drawable.ic_add_request_walking);
                 textViewType.setText("Walking");
                 break;
 
-            case 3:
+            case Constants.OTHER_TYPE:
                 imageViewType.setImageResource(R.drawable.ic_add_request_other);
                 textViewType.setText("Other Request");
                 break;
         }
     }
 
-    private void handleDataChange(String key, CharSequence value) {
-        if (value.toString().length() != 0)
-            data.put(key, value.toString());
-        else
-            data.remove(key);
+    private void handleDataChange(String key, Object value, boolean signal) {
+        if (value instanceof CharSequence) {
+            if (value.toString().length() != 0)
+                dataMap.put(key, value.toString());
+            else
+                dataMap.remove(key);
+        } else {
+            dataMap.put(key, value);
+        }
 
-        listener.onDataChange(1, data);
+        if (signal)
+            listener.onDataChange(1, dataMap);
     }
 }

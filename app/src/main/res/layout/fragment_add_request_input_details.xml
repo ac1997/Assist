@@ -55,7 +55,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/linearLayoutInputDateTimeRequestType" >
 
-        <EditText
+        <android.support.design.widget.TextInputEditText
             android:id="@+id/editTextInputDetailsTitle"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -76,7 +76,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textInputDetailsTitle" >
 
-        <EditText
+        <android.support.design.widget.TextInputEditText
             android:id="@+id/editTextInputDetailsDescription"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -102,14 +102,18 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textInputDetailsDescription">
 
-        <EditText
+        <AutoCompleteTextView
             android:id="@+id/editTextInputDetailsLocation"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="60dp"
             android:ems="10"
+            android:paddingEnd="12dp"
+            android:paddingStart="12dp"
+            android:singleLine="true"
+            android:focusable="false"
+            android:inputType="none"
             android:hint="Location"
-            android:inputType="text"
-            android:text="Current Location" />
+            android:text="Current Location"/>
     </android.support.design.widget.TextInputLayout>
 
 </android.support.constraint.ConstraintLayout>

@@ -1,6 +1,7 @@
 package com.caltruism.assist.utils;
 
 import android.icu.util.Calendar;
+import android.text.format.DateUtils;
 import android.util.Log;
 
 import java.text.SimpleDateFormat;
@@ -11,66 +12,57 @@ import java.util.Locale;
 public class CustomDateTimeUtil {
     private static final String TAG = "CustomDateTimeUtil";
 
-    public static String getDateWithDay(String dateTimeMili) {
-        long timeStamp;
-
-        try {
-            timeStamp = Long.parseLong(dateTimeMili);
-        } catch (Exception e) {
-            Log.e(TAG, "Failed to parse date time: getDateWithDay", e);
-            return "";
+    public static String getDate(long dateTimeMili) {
+        if (DateUtils.isToday(dateTimeMili)) {
+            return "Today";
+        } else if (DateUtils.isToday(dateTimeMili - DateUtils.DAY_IN_MILLIS)) {
+            return "Tomorrow";
+        } else {
+            SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yy", Locale.US);
+            return sdf.format(dateTimeMili);
         }
-
-        Calendar requestDateAndTime = Calendar.getInstance();
-        requestDateAndTime.setTimeInMillis(timeStamp);
-        SimpleDateFormat sdf = new SimpleDateFormat("EEEE, MMMMM dd", Locale.US);
-        return sdf.format(requestDateAndTime.getTime());
     }
 
-    public static String getTime(String dateTimeMili) {
-        long timeStamp;
-
-        try {
-            timeStamp = Long.parseLong(dateTimeMili);
-        } catch (Exception e) {
-            Log.e(TAG, "Failed to parse date time: getTime", e);
-            return "";
+    public static String getDateWithDay(long timeStamp) {
+        if (DateUtils.isToday(timeStamp)) {
+            return "Today";
+        } else if (DateUtils.isToday(timeStamp - DateUtils.DAY_IN_MILLIS)) {
+            return "Tomorrow";
+        } else {
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTimeInMillis(timeStamp);
+            SimpleDateFormat sdf = new SimpleDateFormat("EEEE, MMMM dd", Locale.US);
+            return sdf.format(calendar.getTime());
         }
+    }
 
-        Calendar requestDateAndTime = Calendar.getInstance();
-        requestDateAndTime.setTimeInMillis(timeStamp);
+    public static String getTime(long timeStamp) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(timeStamp);
         SimpleDateFormat sdf = new SimpleDateFormat("h:mm a", Locale.US);
-        return sdf.format(requestDateAndTime.getTime());
+        return sdf.format(calendar.getTime());
     }
 
-    public static List<String> getDateWithDayandTime(String dateTimeMili) {
-        long timeStamp;
+    public static String[] getDateWithDayAndTime(long timeStamp) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(timeStamp);
 
-        try {
-            timeStamp = Long.parseLong(dateTimeMili);
-        } catch (Exception e) {
-            Log.e(TAG, "Failed to parse date time: getDateWithDay", e);
-            return null;
+        String date;
+        if (DateUtils.isToday(timeStamp)) {
+            date = "Today";
+        } else if (DateUtils.isToday(timeStamp - DateUtils.DAY_IN_MILLIS)) {
+            date = "Tomorrow";
+        } else {
+            SimpleDateFormat sdf = new SimpleDateFormat("EEEE, MMMM dd", Locale.US);
+            date = sdf.format(calendar.getTime());
         }
 
-        Calendar requestDateAndTime = Calendar.getInstance();
-        requestDateAndTime.setTimeInMillis(timeStamp);
-        SimpleDateFormat sdf = new SimpleDateFormat("EEE, MMMM dd", Locale.US);
         SimpleDateFormat sdf1 = new SimpleDateFormat("h:mm a", Locale.US);
 
-        return Arrays.asList(sdf.format(requestDateAndTime.getTime()), sdf1.format(requestDateAndTime.getTime()));
+        return new String[]{date, sdf1.format(calendar.getTime())};
     }
 
-    public static String getFormattedDuration(String durationInMinutes) {
-        int totalMinutes;
-
-        try {
-            totalMinutes = Integer.parseInt(durationInMinutes);
-        } catch (Exception e) {
-            Log.e(TAG, "Failed to parse duration: getFormattedDuration", e);
-            return "";
-        }
-
+    public static String getFormattedDuration(int totalMinutes) {
         int hour = totalMinutes / 60;
         int minute = totalMinutes % 60;
 
@@ -78,5 +70,12 @@ public class CustomDateTimeUtil {
             return String.format(Locale.getDefault(), "%d hr %d mins", hour, minute);
         else
             return String.format(Locale.getDefault(), "%d minutes", minute);
+    }
+
+    public static int getStartTime(long timeStamp) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(timeStamp);
+
+        return calendar.get(Calendar.HOUR_OF_DAY) * 60 + calendar.get(Calendar.MINUTE);
     }
 }

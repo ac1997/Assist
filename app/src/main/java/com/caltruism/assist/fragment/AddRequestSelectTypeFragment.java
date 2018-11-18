@@ -17,21 +17,12 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.caltruism.assist.R;
-import com.caltruism.assist.utils.AddRequestDataListener;
+import com.caltruism.assist.utils.AddRequestActivityDataListener;
+import com.caltruism.assist.utils.Constants;
 
 public class AddRequestSelectTypeFragment extends Fragment {
 
-    private static final int GROCERY = 0;
-    private static final int LAUNDRY = 1;
-    private static final int WALKING = 2;
-    private static final int OTHER = 3;
-
-    private int previousSelected = -1;
-    private float elevationDP;
-    private int colorAccent;
-    private int colorAccentLight;
-
-    private AddRequestDataListener listener;
+    private AddRequestActivityDataListener listener;
 
     private ConstraintLayout groceryConstraintLayout;
     private ImageView groceryImageView;
@@ -49,14 +40,19 @@ public class AddRequestSelectTypeFragment extends Fragment {
     private ImageView otherImageView;
     private TextView otherTextView;
 
+    private int previousSelected = -1;
+    private float elevationDP;
+    private int colorAccent;
+    private int colorAccentLight;
+
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
 
-        if (context instanceof AddRequestDataListener) {
-            listener = (AddRequestDataListener) context;
+        if (context instanceof AddRequestActivityDataListener) {
+            listener = (AddRequestActivityDataListener) context;
         } else {
-            throw new RuntimeException(context.toString() + " must implement AddRequestDataListener!");
+            throw new RuntimeException(context.toString() + " must implement AddRequestActivityDataListener!");
         }
     }
 
@@ -80,7 +76,7 @@ public class AddRequestSelectTypeFragment extends Fragment {
         groceryConstraintLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                updateViewStyle(GROCERY);
+                updateViewStyle(Constants.GROCERY_TYPE);
             }
         });
 
@@ -90,7 +86,7 @@ public class AddRequestSelectTypeFragment extends Fragment {
         laundryConstraintLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                updateViewStyle(LAUNDRY);
+                updateViewStyle(Constants.LAUNDRY_TYPE);
             }
         });
 
@@ -100,7 +96,7 @@ public class AddRequestSelectTypeFragment extends Fragment {
         walkingConstraintLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                updateViewStyle(WALKING);
+                updateViewStyle(Constants.WALKING_TYPE);
             }
         });
 
@@ -110,19 +106,9 @@ public class AddRequestSelectTypeFragment extends Fragment {
         otherConstraintLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                updateViewStyle(OTHER);
+                updateViewStyle(Constants.OTHER_TYPE);
             }
         });
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-
-        if (previousSelected != -1) {
-            updateSelectedView();
-            listener.onDataChange(0, previousSelected);
-        }
     }
 
     public void updateViewStyle(int currentSelected) {
@@ -141,19 +127,19 @@ public class AddRequestSelectTypeFragment extends Fragment {
 
     public void updateUnselectedView() {
         switch (previousSelected) {
-            case GROCERY:
+            case Constants.GROCERY_TYPE:
                 updateGrocery(Color.WHITE, colorAccentLight, elevationDP);
                 break;
 
-            case LAUNDRY:
+            case Constants.LAUNDRY_TYPE:
                 updateLaundry(Color.WHITE, colorAccentLight, elevationDP);
                 break;
 
-            case WALKING:
+            case Constants.WALKING_TYPE:
                 updateWalking(Color.WHITE, colorAccentLight, elevationDP);
                 break;
 
-            case OTHER:
+            case Constants.OTHER_TYPE:
                 updateOther(Color.WHITE, colorAccentLight, elevationDP);
                 break;
         }
@@ -162,19 +148,19 @@ public class AddRequestSelectTypeFragment extends Fragment {
 
     public void updateSelectedView() {
         switch (previousSelected) {
-            case GROCERY:
+            case Constants.GROCERY_TYPE:
                 updateGrocery(colorAccent, Color.WHITE, 0);
                 break;
 
-            case LAUNDRY:
+            case Constants.LAUNDRY_TYPE:
                 updateLaundry(colorAccent, Color.WHITE, 0);
                 break;
 
-            case WALKING:
+            case Constants.WALKING_TYPE:
                 updateWalking(colorAccent, Color.WHITE, 0);
                 break;
 
-            case OTHER:
+            case Constants.OTHER_TYPE:
                 updateOther(colorAccent, Color.WHITE, 0);
                 break;
         }

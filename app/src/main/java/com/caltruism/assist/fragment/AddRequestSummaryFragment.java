@@ -9,6 +9,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,39 +18,48 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.caltruism.assist.R;
+import com.caltruism.assist.utils.AddRequestFragmentDataListener;
+import com.caltruism.assist.utils.Constants;
 import com.caltruism.assist.utils.CustomDateTimeUtil;
 import com.caltruism.assist.utils.CustomMapView;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.List;
 
-public class AddRequestSummaryFragment extends Fragment implements OnMapReadyCallback, ActivityCompat.OnRequestPermissionsResultCallback {
+public class AddRequestSummaryFragment extends Fragment implements AddRequestFragmentDataListener, OnMapReadyCallback, ActivityCompat.OnRequestPermissionsResultCallback {
 
     public static final String TAG = "AddRequestSummaryFragment";
-    private static final int REQUEST_LOCATION = 0;
-
-    private int requestType;
-    private String requestTitle;
-    private String requestDescription;
-    private String requestLocation;
-    private String requestDateTime;
-    private String requestDuration;
-
-    CustomMapView mapView;
-    GoogleMap map;
+    private static final float ZOOM_LEVEL = 18;
 
     TextView textViewTitle;
     TextView textViewDate;
     TextView textViewType;
     TextView textViewTime;
     TextView textViewDuration;
+    TextView textViewLocationName;
     TextView textViewLocationAddress;
     TextView textViewDescription;
     ImageView imageViewType;
+    CustomMapView mapView;
+
+    GoogleMap map;
+    Marker marker;
+
+    private int requestType;
+    private String requestTitle;
+    private String requestDescription;
+    private String requestLocationName;
+    private String requestLocationAddress;
+    private LatLng requestLocationLatLng;
+    private boolean requestIsNow;
+    private long requestDateTime;
+    private int requestDuration;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -58,9 +68,12 @@ public class AddRequestSummaryFragment extends Fragment implements OnMapReadyCal
         requestType = arguments.getInt("requestType");
         requestTitle = arguments.getString("requestTitle");
         requestDescription = arguments.getString("requestDescription");
-        requestLocation = arguments.getString("requestLocation");
-        requestDateTime = arguments.getString("requestDateTime");
-        requestDuration = arguments.getString("requestDuration");
+        requestLocationAddress = arguments.getString("requestLocationAddress");
+        requestLocationName = arguments.getString("requestLocationName");
+        requestLocationLatLng = arguments.getParcelable("requestLocationLatLng");
+        requestIsNow = arguments.getBoolean("requestIsNow");
+        requestDateTime = arguments.getLong("requestDateTime");
+        requestDuration = arguments.getInt("requestDuration");
 
         return inflater.inflate(R.layout.fragment_add_request_summary, container, false);
     }
@@ -78,6 +91,7 @@ public class AddRequestSummaryFragment extends Fragment implements OnMapReadyCal
         textViewType = getView().findViewById(R.id.textViewAddRequestSummaryType);
         textViewTime = getView().findViewById(R.id.textViewAddRequestSummaryTime);
         textViewDuration = getView().findViewById(R.id.textViewAddRequestSummaryDuration);
+        textViewLocationName = getView().findViewById(R.id.textViewAddRequestSummaryLocationName);
         textViewLocationAddress = getView().findViewById(R.id.textViewAddRequestSummaryLocationAddress);
         textViewDescription = getView().findViewById(R.id.textViewAddRequestSummaryDescription);
         imageViewType = getView().findViewById(R.id.imageViewAddRequestSummaryType);
@@ -85,24 +99,16 @@ public class AddRequestSummaryFragment extends Fragment implements OnMapReadyCal
         setUpViews();
     }
 
+    @SuppressLint("MissingPermission")
     @Override
     public void onMapReady(GoogleMap googleMap) {
         map = googleMap;
         map.getUiSettings().setMyLocationButtonEnabled(false);
-        if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) !=
-                PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getContext(),
-                Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            requestLocationPermission();
-        } else {
-            map.setMyLocationEnabled(true);
-        }
+        map.getUiSettings().setZoomGesturesEnabled(true);
+        map.setMyLocationEnabled(true);
 
-        // Updates the location and zoom of the MapView
-        /*CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(new LatLng(43.1, -87.9), 10);
-        map.animateCamera(cameraUpdate);*/
-        LatLng sydney = new LatLng(-33.852, 151.211);
-        googleMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(sydney, 15));
+        marker = googleMap.addMarker(new MarkerOptions().position(requestLocationLatLng).title(requestTitle));
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(requestLocationLatLng, ZOOM_LEVEL));
     }
 
     @Override
@@ -130,98 +136,72 @@ public class AddRequestSummaryFragment extends Fragment implements OnMapReadyCal
         mapView.onLowMemory();
     }
 
-    @SuppressLint("MissingPermission")
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
+    public void onDataChange(Object... data) {
+        requestType = (int) data[0];
+        requestTitle = (String) data[1];
+        requestDescription = (String) data[2];
+        requestLocationName = (String) data[3];
+        requestLocationAddress = (String) data[4];
+        requestLocationLatLng = (LatLng) data[5];
+        requestIsNow = (boolean) data[6];
+        requestDateTime = (long) data[7];
+        requestDuration = (int) data[8];
 
-        if (requestCode == REQUEST_LOCATION) {
-            // BEGIN_INCLUDE(permission_result)
-            // Received permission result for camera permission.
-            Log.i(TAG, "Received response for Camera permission request.");
-
-            // Check if the only required permission has been granted
-            if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Camera permission has been granted, preview can be displayed
-                Log.i(TAG, "CAMERA permission has now been granted. Showing preview.");
-                Snackbar.make(getView(), "granted",
-                        Snackbar.LENGTH_SHORT).show();
-                map.setMyLocationEnabled(true);
-
-            } else {
-                Log.i(TAG, "CAMERA permission was NOT granted.");
-                Snackbar.make(getView(), "not granted",
-                        Snackbar.LENGTH_SHORT).show();
-
-            }
-            // END_INCLUDE(permission_result)
-
-        } else {
-            super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        }
+        setUpViews();
     }
 
     private void setUpViews() {
         textViewTitle.setText(requestTitle);
-        textViewLocationAddress.setText(requestLocation);
+        textViewLocationAddress.setText(requestLocationAddress);
         textViewDescription.setText(requestDescription);
         textViewDuration.setText(CustomDateTimeUtil.getFormattedDuration(requestDuration));
 
-        List<String> dateTime = CustomDateTimeUtil.getDateWithDayandTime(requestDateTime);
-        if (dateTime != null && dateTime.size() == 2) {
-            textViewDate.setText(dateTime.get(0));
-            textViewTime.setText(dateTime.get(1));
+        if (requestIsNow) {
+            textViewDate.setText(CustomDateTimeUtil.getDateWithDay(requestDateTime));
+            textViewTime.setText(Html.fromHtml("<font color='#f48760'>Now</font>", Html.FROM_HTML_MODE_LEGACY));
+        } else {
+            String[] dateTime = CustomDateTimeUtil.getDateWithDayAndTime(requestDateTime);
+            if (dateTime.length == 2) {
+                textViewDate.setText(dateTime[0]);
+                textViewTime.setText(dateTime[1]);
+            }
+        }
+
+        if (requestLocationName.length() > 0) {
+            if (textViewLocationName.getVisibility() == View.GONE)
+                textViewLocationName.setVisibility(View.VISIBLE);
+            textViewLocationName.setText(requestLocationName);
+        } else if (textViewLocationName.getVisibility() == View.VISIBLE) {
+            textViewLocationName.setVisibility(View.GONE);
+        }
+
+        if (map != null && marker != null) {
+            marker.remove();
+            marker = map.addMarker(new MarkerOptions().position(requestLocationLatLng).title(requestTitle));
+            map.animateCamera(CameraUpdateFactory.newLatLngZoom(requestLocationLatLng, ZOOM_LEVEL));
         }
 
         switch (requestType) {
-            case 0:
+            case Constants.GROCERY_TYPE:
                 imageViewType.setImageResource(R.drawable.ic_shopping_cart_solid);
                 textViewType.setText("Grocery");
                 break;
 
-            case 1:
+            case Constants.LAUNDRY_TYPE:
                 imageViewType.setImageResource(R.drawable.ic_washer_solid);
                 textViewType.setText("Laundry");
                 break;
 
-            case 2:
+            case Constants.WALKING_TYPE:
                 imageViewType.setImageResource(R.drawable.ic_walking_solid);
                 textViewType.setText("Walking");
                 break;
 
-            case 3:
+            case Constants.OTHER_TYPE:
                 imageViewType.setImageResource(R.drawable.ic_question_solid);
                 textViewType.setText("Other Request");
                 break;
-        }
-    }
-
-    private void requestLocationPermission() {
-        Log.i(TAG, "CAMERA permission has NOT been granted. Requesting permission.");
-
-        if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(),
-                Manifest.permission.ACCESS_FINE_LOCATION)) {
-            // Provide an additional rationale to the user if the permission was not granted
-            // and the user would benefit from additional context for the use of the permission.
-            // For example if the user has previously denied the permission.
-            Log.i(TAG,
-                    "Displaying camera permission rationale to provide additional context.");
-            Snackbar.make(getView(), "get permission",
-                    Snackbar.LENGTH_INDEFINITE)
-                    .setAction("OK", new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            ActivityCompat.requestPermissions(getActivity(),
-                                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                                    REQUEST_LOCATION);
-                        }
-                    })
-                    .show();
-        } else {
-
-            // Camera permission has not been granted yet. Request it directly.
-            ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                    REQUEST_LOCATION);
         }
     }
 }
