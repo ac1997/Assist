@@ -8,12 +8,15 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
+import android.text.InputType;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -96,11 +99,12 @@ public class AddRequestInputDetailsFragment extends Fragment implements AddReque
 
         setRequestType();
 
+        editTextDescription.setImeOptions(EditorInfo.IME_ACTION_DONE);
+        editTextDescription.setRawInputType(InputType.TYPE_CLASS_TEXT);
+
         editTextTitle.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
@@ -108,16 +112,12 @@ public class AddRequestInputDetailsFragment extends Fragment implements AddReque
             }
 
             @Override
-            public void afterTextChanged(Editable s) {
-
-            }
+            public void afterTextChanged(Editable s) {}
         });
 
         editTextDescription.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
@@ -125,16 +125,18 @@ public class AddRequestInputDetailsFragment extends Fragment implements AddReque
             }
 
             @Override
-            public void afterTextChanged(Editable s) {
-
-            }
+            public void afterTextChanged(Editable s) {}
         });
+
 
         editTextLocation.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                if(MotionEvent.ACTION_UP == event.getAction())
+                if(MotionEvent.ACTION_UP == event.getAction()) {
                     openAutocompleteActivity();
+                    editTextLocation.setClickable(false);
+                    return true;
+                }
                 return false;
             }
         });
@@ -145,9 +147,10 @@ public class AddRequestInputDetailsFragment extends Fragment implements AddReque
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == REQUEST_CODE_AUTOCOMPLETE) {
+            editTextLocation.setClickable(true);
+
             if (resultCode == RESULT_OK) {
                 Place place = PlaceAutocomplete.getPlace(getActivity(), data);
-                Log.i(TAG, "Place: " + place.getName());
 
                 editTextLocation.setText(place.getAddress());
                 dataMap.put(IS_CURRENT_LOCATION_KEY, false);
