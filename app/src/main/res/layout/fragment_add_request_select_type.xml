@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/requestTypeGrocery"
+        android:layout_width="156dp"
+        android:layout_height="156dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="32dp"
+        android:background="@android:color/white"
+        android:clickable="true"
+        android:elevation="8dp"
+        android:foreground="?attr/selectableItemBackground"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/imageSelectTypeGrocery"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
+            android:layout_marginEnd="40dp"
+            android:layout_marginStart="40dp"
+            android:layout_marginTop="40dp"
+            android:adjustViewBounds="true"
+            android:tint="@color/colorAccentLight"
+            app:layout_constraintBottom_toTopOf="@+id/textViewSelectTypeGrocery"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_shopping_cart_solid" />
+
+        <TextView
+            android:id="@+id/textViewSelectTypeGrocery"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="25dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
+            android:text="Grocery"
+            android:textColor="@color/colorAccentLight"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+    </android.support.constraint.ConstraintLayout>
+
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/requestTypeLaundry"
+        android:layout_width="156dp"
+        android:layout_height="156dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginTop="32dp"
+        android:background="@android:color/white"
+        android:clickable="true"
+        android:elevation="8dp"
+        android:foreground="?attr/selectableItemBackground"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/imageSelectTypeLaundry"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
+            android:layout_marginEnd="50dp"
+            android:layout_marginStart="50dp"
+            android:layout_marginTop="40dp"
+            android:adjustViewBounds="true"
+            android:tint="@color/colorAccentLight"
+            app:layout_constraintBottom_toTopOf="@+id/textViewSelectTypeLaundry"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_washer_solid" />
+
+        <TextView
+            android:id="@+id/textViewSelectTypeLaundry"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="25dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
+            android:text="Laundry"
+            android:textColor="@color/colorAccentLight"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+    </android.support.constraint.ConstraintLayout>
+
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/requestTypeWalking"
+        android:layout_width="156dp"
+        android:layout_height="156dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="32dp"
+        android:background="@android:color/white"
+        android:clickable="true"
+        android:elevation="8dp"
+        android:foreground="?attr/selectableItemBackground"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/requestTypeGrocery">
+
+        <ImageView
+            android:id="@+id/imageSelectTypeWalking"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
+            android:layout_marginEnd="55dp"
+            android:layout_marginStart="55dp"
+            android:layout_marginTop="40dp"
+            android:adjustViewBounds="true"
+            android:tint="@color/colorAccentLight"
+            app:layout_constraintBottom_toTopOf="@+id/textViewSelectTypeWalking"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_walking_solid" />
+
+        <TextView
+            android:id="@+id/textViewSelectTypeWalking"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="25dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
+            android:text="Walking"
+            android:textColor="@color/colorAccentLight"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+    </android.support.constraint.ConstraintLayout>
+
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/requestTypeOther"
+        android:layout_width="156dp"
+        android:layout_height="156dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginTop="32dp"
+        android:background="@android:color/white"
+        android:clickable="true"
+        android:elevation="8dp"
+        android:foreground="?attr/selectableItemBackground"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/requestTypeLaundry">
+
+        <ImageView
+            android:id="@+id/imageSelectTypeOther"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
+            android:layout_marginEnd="50dp"
+            android:layout_marginStart="50dp"
+            android:layout_marginTop="40dp"
+            android:adjustViewBounds="true"
+            android:tint="@color/colorAccentLight"
+            app:layout_constraintBottom_toTopOf="@+id/textViewSelectTypeOther"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_question_solid" />
+
+        <TextView
+            android:id="@+id/textViewSelectTypeOther"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="25dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
+            android:text="Other"
+            android:textColor="@color/colorAccentLight"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+    </android.support.constraint.ConstraintLayout>
+
+</android.support.constraint.ConstraintLayout>

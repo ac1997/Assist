@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/addRequestConstraintLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbarAddRequest"
+        android:layout_width="0dp"
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        android:minHeight="?attr/actionBarSize"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:theme="@style/ToolBarStyle">
+
+        <TextView
+            android:id="@+id/textViewAddRequestTitle"
+            style="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            tools:layout_editor_absoluteX="16dp"
+            tools:layout_editor_absoluteY="15dp" />
+
+    </android.support.v7.widget.Toolbar>
+
+    <com.shuhart.stepview.StepView
+        android:id="@+id/stepView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="16dp"
+        android:padding="16dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toolbarAddRequest"
+        app:sv_animationType="All"
+        app:sv_doneCircleColor="@color/colorAccent"
+        app:sv_doneCircleRadius="12dp"
+        app:sv_doneStepLineColor="@color/colorAccent"
+        app:sv_doneStepMarkColor="@android:color/white"
+        app:sv_doneTextColor="@color/colorGrey3"
+        app:sv_nextStepLineColor="@color/colorGrey3"
+        app:sv_nextTextColor="@color/colorGrey3"
+        app:sv_selectedCircleColor="@color/colorAccent"
+        app:sv_selectedCircleRadius="12dp"
+        app:sv_selectedStepNumberColor="@android:color/white"
+        app:sv_selectedTextColor="@color/colorAccent"
+        app:sv_stepLineWidth="1dp"
+        app:sv_stepNumberTextSize="12sp"
+        app:sv_stepPadding="4dp"
+        app:sv_stepViewStyle="@style/StepView" />
+
+    <FrameLayout
+        android:id="@+id/fragmentCreateRequest"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginBottom="12dp"
+        app:layout_constraintBottom_toTopOf="@+id/buttonAddRequestNext"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/stepView"
+        app:layout_constraintVertical_bias="0.0" />
+
+    <android.support.design.button.MaterialButton
+        android:id="@+id/buttonAddRequestNext"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="16dp"
+        android:enabled="false"
+        android:text="NEXT"
+        android:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <android.support.design.button.MaterialButton
+        android:id="@+id/buttonAddRequestEdit"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="16dp"
+        android:text="EDIT"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/guideline"
+        app:layout_constraintStart_toStartOf="parent"
+        app:strokeColor="@color/colorAccent"
+        app:strokeWidth="2dp" />
+
+    <android.support.design.button.MaterialButton
+        android:id="@+id/buttonAddRequestRequest"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="8dp"
+        android:text="REQUEST"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/guideline" />
+
+    <android.support.constraint.Guideline
+        android:id="@+id/guideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.5" />
+
+</android.support.constraint.ConstraintLayout>

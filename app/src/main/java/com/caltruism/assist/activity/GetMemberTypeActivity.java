@@ -2,6 +2,7 @@ package com.caltruism.assist.activity;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -12,6 +13,7 @@ import android.view.View;
 import android.widget.Button;
 
 import com.caltruism.assist.R;
+import com.caltruism.assist.utils.Constants;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -23,8 +25,8 @@ import java.util.HashMap;
 import java.util.Objects;
 
 public class GetMemberTypeActivity extends AppCompatActivity {
-    private final String TAG = "GetMemberActivity";
-    private final String ERROR = "Something went wrong. Please try again.";
+    private static final String TAG = "GetMemberActivity";
+    private static final String ERROR = "Something went wrong. Please try again.";
 
     private FirebaseFirestore db;
     private FirebaseAuth auth;
@@ -48,19 +50,19 @@ public class GetMemberTypeActivity extends AppCompatActivity {
         buttonVolunteer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                setUserData(getResources().getString(R.string.volunteer_type));
+                addUserData(getResources().getString(R.string.volunteer_type));
             }
         });
 
         buttonDisabled.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                setUserData(getResources().getString(R.string.disabled_type));
+                addUserData(getResources().getString(R.string.disabled_type));
             }
         });
     }
 
-    private void setUserData(final String memberType) {
+    private void addUserData(final String memberType) {
         if (userData == null)
             userData = new HashMap<>();
 
@@ -94,5 +96,10 @@ public class GetMemberTypeActivity extends AppCompatActivity {
                 snackbar.show();
             }
         });
+
+        SharedPreferences sharedPreferences = getSharedPreferences(Constants.USER_DATA_SHARED_PREFERENCE, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString("memberType", memberType);
+        editor.apply();
     }
 }

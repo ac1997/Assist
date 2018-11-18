@@ -2,6 +2,7 @@ package com.caltruism.assist.activity;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
@@ -12,6 +13,7 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import com.caltruism.assist.R;
+import com.caltruism.assist.utils.Constants;
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
@@ -28,6 +30,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.Timestamp;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FacebookAuthProvider;
@@ -35,7 +38,6 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import org.json.JSONException;
@@ -44,18 +46,21 @@ import org.json.JSONObject;
 import java.util.Arrays;
 import java.util.HashMap;
 
+import static java.lang.Float.NaN;
+
 
 public class LoginActivity extends AppCompatActivity {
 
-    private final String TAG ="LoginActivity";
+    private static final String TAG ="LoginActivity";
     private static final int RC_SIGN_IN = 9001;
 
-    private final String EMAIL = "Email";
-    private final String FACEBOOK = "Facebook";
-    private final String GOOGLE = "Google";
-    private final String EMAIL_LOGIN_ERROR = "Login failed. Please try agian.";
-    private final String FACEBOOK_LOGIN_ERROR = "Facebook login failed. Please try again.";
-    private final String GOOGLE_LOGIN_ERROR = "Google login failed. Please try again.";
+    private static final String EMAIL = "Email";
+    private static final String FACEBOOK = "Facebook";
+    private static final String GOOGLE = "Google";
+    private static final String EMAIL_LOGIN_ERROR = "Login failed. Please try agian.";
+    private static final String FACEBOOK_LOGIN_ERROR = "Facebook login failed. Please try again.";
+    private static final String GOOGLE_LOGIN_ERROR = "Google login failed. Please try again.";
+
     private FirebaseFirestore db;
     private FirebaseAuth auth;
     private GoogleSignInClient GoogleSignInClient;
@@ -105,7 +110,7 @@ public class LoginActivity extends AppCompatActivity {
 
                 // TODO: Verify format
 
-                handleEmailPassswordLogin(email, password);
+                handleEmailPasswordLogin(email, password);
             }
         });
 
@@ -131,6 +136,7 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+
         if (requestCode == RC_SIGN_IN) {
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
             try {
@@ -147,7 +153,7 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
-    private void handleEmailPassswordLogin(String email, String password) {
+    private void handleEmailPasswordLogin(String email, String password) {
         auth.signInWithEmailAndPassword(email, password).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
@@ -212,7 +218,25 @@ public class LoginActivity extends AppCompatActivity {
                     if (document.exists()) {
                         Intent activityIntent;
                         Context mainContext = LoginActivity.this;
+
+                        SharedPreferences sharedPreferences = getSharedPreferences(Constants.USER_DATA_SHARED_PREFERENCE, Context.MODE_PRIVATE);
+                        SharedPreferences.Editor editor = sharedPreferences.edit();
+
+                        Object memberNameObject = document.get("name");
+                        Object memberPictureURLObject = document.get("pictureURL");
+                        Object memberRatingsObject = document.get("ratings");
                         Object memberTypeObject = document.get("memberType");
+
+                        if (memberNameObject != null)
+                            editor.putString("name", memberNameObject.toString());
+
+                        if (memberPictureURLObject != null)
+                            editor.putString("pictureURL", memberPictureURLObject.toString());
+
+                        if (memberRatingsObject != null)
+                            editor.putFloat("ratings", Float.parseFloat(memberRatingsObject.toString()));
+
+                        // TODO: Get joinedOn timestamp
 
                         if (memberTypeObject == null) {
                             Log.d(TAG, document.getData().toString());
@@ -226,7 +250,10 @@ public class LoginActivity extends AppCompatActivity {
                                 activityIntent = new Intent(mainContext, RequestListDisabledActivity.class);
                             else
                                 activityIntent = new Intent(mainContext, GetMemberTypeActivity.class);
+
+                            editor.putString("memberType", memberTypeString);
                         }
+                        editor.apply();
                         startActivity(activityIntent);
                         finish();
                     } else {
@@ -263,11 +290,6 @@ public class LoginActivity extends AppCompatActivity {
                     String pictureURL = Profile.getCurrentProfile().getProfilePictureUri(200, 200).toString();
 
                     initUser(email, firstName, lastName, pictureURL, gender, ageRange);
-//
-//                    Intent intent = new Intent(LoginActivity.this, GetMemberTypeActivity.class);
-//                    intent.putExtra("userData", userData);
-//                    startActivity(intent);
-//                    finish();
                 } catch (JSONException e) {
                     Log.e(TAG, "Facebook sign in failed", e);
                     Snackbar snackbar = Snackbar.make(LoginActivity.this.findViewById(R.id.loginConstraintLayout), FACEBOOK_LOGIN_ERROR, Snackbar.LENGTH_LONG);
@@ -289,11 +311,6 @@ public class LoginActivity extends AppCompatActivity {
         String pictureURL = acct.getPhotoUrl().toString();
 
         initUser(email, firstName, lastName, pictureURL, null, null);
-
-//        Intent intent = new Intent(LoginActivity.this, GetMemberTypeActivity.class);
-//        intent.putExtra("userData", userData);
-//        startActivity(intent);
-//        finish();
     }
 
     private void initUser(String email, String firstName, String lastName, String pictureURL, String gender, String ageRange) {
@@ -301,6 +318,7 @@ public class LoginActivity extends AppCompatActivity {
         userData.put("email", email);
         userData.put("firstName", firstName);
         userData.put("lastName", lastName);
+        userData.put("name", firstName + " " + lastName);
         userData.put("pictureURL", pictureURL);
 
         if (gender != null)

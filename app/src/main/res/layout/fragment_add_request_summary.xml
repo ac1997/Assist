@@ -1,0 +1,343 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <android.support.design.card.MaterialCardView xmlns:card_view="http://schemas.android.com/apk/res-auto"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="4dp"
+            card_view:cardElevation="4dp"
+            card_view:cardUseCompatPadding="true">
+
+            <android.support.constraint.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/textViewAddRequestSummaryTitle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="8dp"
+                    android:gravity="center"
+                    android:text="Request Title Placeholder"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Headline"
+                    android:textColor="@color/mainTextLighterBlack"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    app:layout_constraintBottom_toTopOf="@+id/addRequestTitleDivider"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintVertical_chainStyle="packed" />
+
+                <View
+                    android:id="@+id/addRequestTitleDivider"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginTop="8dp"
+                    android:background="@android:color/darker_gray"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/textViewAddRequestSummaryTitle" />
+
+                <TextView
+                    android:id="@+id/textViewAddRequestSummaryDateTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="16dp"
+                    android:text="Date"
+                    android:textColor="@color/mainTextLighterBlack"
+                    android:textSize="16sp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/addRequestTitleDivider" />
+
+                <ImageView
+                    android:id="@+id/imageViewAddRequsetSummaryDate"
+                    android:layout_width="13dp"
+                    android:layout_height="14dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="7dp"
+                    android:tint="@color/colorAccent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/textViewAddRequestSummaryDateTitle"
+                    app:srcCompat="@drawable/ic_calendar_solid" />
+
+                <TextView
+                    android:id="@+id/textViewAddRequestSummaryDate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="7dp"
+                    android:layout_marginTop="3dp"
+                    android:text="Sun, January 1st"
+                    android:textColor="@color/colorGrey3"
+                    android:textSize="14sp"
+                    app:layout_constraintStart_toEndOf="@+id/imageViewAddRequsetSummaryDate"
+                    app:layout_constraintTop_toBottomOf="@+id/textViewAddRequestSummaryDateTitle" />
+
+                <TextView
+                    android:id="@+id/textViewAddRequestSummaryTypeTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="75dp"
+                    android:text="Type"
+                    android:textColor="@color/mainTextLighterBlack"
+                    android:textSize="16sp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/addRequestTitleDivider" />
+
+                <ImageView
+                    android:id="@+id/imageViewAddRequestSummaryType"
+                    android:layout_width="13dp"
+                    android:layout_height="14dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="7dp"
+                    android:tint="@color/colorAccent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/textViewAddRequestSummaryTypeTitle"
+                    app:srcCompat="@drawable/ic_add_request_icon_placeholder" />
+
+                <TextView
+                    android:id="@+id/textViewAddRequestSummaryType"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:layout_marginStart="7dp"
+                    android:layout_marginTop="3dp"
+                    android:text="Type Placeholder"
+                    android:textColor="@color/colorGrey3"
+                    android:textSize="14sp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/imageViewAddRequestSummaryType"
+                    app:layout_constraintTop_toBottomOf="@+id/textViewAddRequestSummaryTypeTitle" />
+
+                <TextView
+                    android:id="@+id/textViewAddRequestSummaryTimeTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="16dp"
+                    android:text="Time"
+                    android:textColor="@color/mainTextLighterBlack"
+                    android:textSize="16sp"
+                    app:layout_constraintStart_toStartOf="@+id/guidelineAddRequestSummary"
+                    app:layout_constraintTop_toBottomOf="@+id/addRequestTitleDivider" />
+
+                <ImageView
+                    android:id="@+id/imageViewAddRequestSummaryTime"
+                    android:layout_width="13dp"
+                    android:layout_height="14dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="7dp"
+                    android:tint="@color/colorAccent"
+                    app:layout_constraintStart_toStartOf="@+id/guidelineAddRequestSummary"
+                    app:layout_constraintTop_toBottomOf="@+id/textViewAddRequestSummaryTimeTitle"
+                    app:srcCompat="@drawable/ic_clock_solid" />
+
+                <TextView
+                    android:id="@+id/textViewAddRequestSummaryTime"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="7dp"
+                    android:layout_marginTop="3dp"
+                    android:text="12:00 AM"
+                    android:textColor="@color/colorGrey3"
+                    android:textSize="14sp"
+                    app:layout_constraintStart_toEndOf="@+id/imageViewAddRequestSummaryTime"
+                    app:layout_constraintTop_toBottomOf="@+id/textViewAddRequestSummaryTimeTitle" />
+
+                <TextView
+                    android:id="@+id/textViewAddRequestSummaryDurationTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="75dp"
+                    android:text="Duration"
+                    android:textColor="@color/mainTextLighterBlack"
+                    android:textSize="16sp"
+                    app:layout_constraintStart_toStartOf="@+id/guidelineAddRequestSummary"
+                    app:layout_constraintTop_toBottomOf="@+id/addRequestTitleDivider" />
+
+                <ImageView
+                    android:id="@+id/imageViewAddRequestSummaryDuration"
+                    android:layout_width="13dp"
+                    android:layout_height="14dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="7dp"
+                    android:tint="@color/colorAccent"
+                    app:layout_constraintStart_toStartOf="@+id/guidelineAddRequestSummary"
+                    app:layout_constraintTop_toBottomOf="@+id/textViewAddRequestSummaryDurationTitle"
+                    app:srcCompat="@drawable/ic_stopwatch_solid" />
+
+                <TextView
+                    android:id="@+id/textViewAddRequestSummaryDuration"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:layout_marginStart="7dp"
+                    android:layout_marginTop="3dp"
+                    android:text="1 hr 45 mins"
+                    android:textColor="@color/colorGrey3"
+                    android:textSize="14sp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/imageViewAddRequestSummaryDuration"
+                    app:layout_constraintTop_toBottomOf="@+id/textViewAddRequestSummaryDurationTitle" />
+
+                <android.support.constraint.Guideline
+                    android:id="@+id/guidelineAddRequestSummary"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    app:layout_constraintGuide_percent="0.6" />
+
+
+            </android.support.constraint.ConstraintLayout>
+
+        </android.support.design.card.MaterialCardView>
+
+        <android.support.design.card.MaterialCardView xmlns:card_view="http://schemas.android.com/apk/res-auto"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            card_view:cardElevation="4dp"
+            card_view:cardUseCompatPadding="true">
+
+            <android.support.constraint.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/textViewAddRequestSummaryLocationTitle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="8dp"
+                    android:text="Task Location"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Headline"
+                    android:textColor="@color/mainTextLighterBlack"
+                    android:textSize="16sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintVertical_chainStyle="packed" />
+
+                <TextView
+                    android:id="@+id/textViewAddRequestSummaryLocationName"
+                    android:layout_width="0dp"
+                    android:layout_height="18dp"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginStart="16dp"
+                    android:text="Location Name Placeholder"
+                    android:textColor="@color/colorGrey3"
+                    android:textSize="14sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/textViewAddRequestSummaryLocationTitle" />
+
+
+                <com.caltruism.assist.utils.CustomMapView
+                    android:id="@+id/mapViewAddRequestSummary"
+                    android:layout_width="0dp"
+                    android:layout_height="200dp"
+                    android:layout_marginTop="8dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/textViewAddRequestSummaryLocationName" />
+
+                <View
+                    android:id="@+id/viewAddressBackground"
+                    android:layout_width="0dp"
+                    android:layout_height="35dp"
+                    android:background="@color/colorGrey7"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/mapViewAddRequestSummary" />
+
+                <TextView
+                    android:id="@+id/textViewAddRequestSummaryLocationAddress"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:layout_marginEnd="8dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="8dp"
+                    android:text="Location Address Placeholder"
+                    android:textColor="@color/colorGrey3"
+                    android:textSize="14sp"
+                    app:layout_constraintBottom_toBottomOf="@+id/viewAddressBackground"
+                    app:layout_constraintEnd_toEndOf="@+id/viewAddressBackground"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/viewAddressBackground" />
+
+
+            </android.support.constraint.ConstraintLayout>
+
+        </android.support.design.card.MaterialCardView>
+
+        <android.support.design.card.MaterialCardView xmlns:card_view="http://schemas.android.com/apk/res-auto"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            card_view:cardElevation="4dp"
+            card_view:cardUseCompatPadding="true">
+
+            <android.support.constraint.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/textViewAddRequestSummaryDescriptionTitle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="8dp"
+                    android:text="Description"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Headline"
+                    android:textColor="@color/mainTextLighterBlack"
+                    android:textSize="16sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintVertical_chainStyle="packed" />
+
+                <TextView
+                    android:id="@+id/textViewAddRequestSummaryDescription"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginStart="16dp"
+                    android:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptat"
+                    android:textColor="@color/colorGrey3"
+                    android:textSize="14sp"
+                    app:layout_constraintTop_toBottomOf="@+id/textViewAddRequestSummaryDescriptionTitle"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent" />
+
+            </android.support.constraint.ConstraintLayout>
+
+        </android.support.design.card.MaterialCardView>
+
+    </LinearLayout>
+</ScrollView>
