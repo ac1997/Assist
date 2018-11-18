@@ -71,14 +71,14 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/linearLayoutInputDateTimeRequestType" >
 
-        <EditText
+        <android.support.design.widget.TextInputEditText
             android:id="@+id/editTextInputDate"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:ems="10"
             android:focusable="false"
-            android:hint="Date"
             android:inputType="none"
+            android:hint="Date"
             android:text="Today" />
     </android.support.design.widget.TextInputLayout>
 
@@ -94,14 +94,14 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textInputDate" >
 
-        <EditText
+        <android.support.design.widget.TextInputEditText
             android:id="@+id/editTextInputTime"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:ems="10"
             android:focusable="false"
-            android:hint="Time"
             android:inputType="none"
+            android:hint="Time"
             android:text="Now" />
 
     </android.support.design.widget.TextInputLayout>
@@ -118,7 +118,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textInputTime">
 
-        <EditText
+        <android.support.design.widget.TextInputEditText
             android:id="@+id/editTextInputDuration"
             android:layout_width="match_parent"
             android:layout_height="match_parent"

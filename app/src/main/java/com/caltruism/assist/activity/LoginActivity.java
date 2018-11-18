@@ -2,6 +2,7 @@ package com.caltruism.assist.activity;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
@@ -12,6 +13,7 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import com.caltruism.assist.R;
+import com.caltruism.assist.utils.Constants;
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
@@ -28,6 +30,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.Timestamp;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FacebookAuthProvider;
@@ -42,6 +45,8 @@ import org.json.JSONObject;
 
 import java.util.Arrays;
 import java.util.HashMap;
+
+import static java.lang.Float.NaN;
 
 
 public class LoginActivity extends AppCompatActivity {
@@ -212,7 +217,25 @@ public class LoginActivity extends AppCompatActivity {
                     if (document.exists()) {
                         Intent activityIntent;
                         Context mainContext = LoginActivity.this;
+
+                        SharedPreferences sharedPreferences = getSharedPreferences(Constants.USER_DATA_SHARED_PREFERENCE, Context.MODE_PRIVATE);
+                        SharedPreferences.Editor editor = sharedPreferences.edit();
+
+                        Object memberNameObject = document.get("name");
+                        Object memberPictureURLObject = document.get("pictureURL");
+                        Object memberRatingsObject = document.get("ratings");
                         Object memberTypeObject = document.get("memberType");
+
+                        if (memberNameObject != null)
+                            editor.putString("name", memberNameObject.toString());
+
+                        if (memberPictureURLObject != null)
+                            editor.putString("pictureURL", memberPictureURLObject.toString());
+
+                        if (memberRatingsObject != null)
+                            editor.putFloat("ratings", Float.parseFloat(memberRatingsObject.toString()));
+
+                        // TODO: Get joinedOn timestamp
 
                         if (memberTypeObject == null) {
                             Log.d(TAG, document.getData().toString());
@@ -226,7 +249,10 @@ public class LoginActivity extends AppCompatActivity {
                                 activityIntent = new Intent(mainContext, RequestListDisabledActivity.class);
                             else
                                 activityIntent = new Intent(mainContext, GetMemberTypeActivity.class);
+
+                            editor.putString("memberType", memberTypeString);
                         }
+                        editor.apply();
                         startActivity(activityIntent);
                         finish();
                     } else {
@@ -291,6 +317,7 @@ public class LoginActivity extends AppCompatActivity {
         userData.put("email", email);
         userData.put("firstName", firstName);
         userData.put("lastName", lastName);
+        userData.put("name", firstName + " " + lastName);
         userData.put("pictureURL", pictureURL);
 
         if (gender != null)

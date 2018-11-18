@@ -19,31 +19,27 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.TimePicker;
+import android.widget.Toast;
 
 import com.caltruism.assist.R;
-import com.caltruism.assist.utils.AddRequestDataListener;
+import com.caltruism.assist.utils.AddRequestActivityDataListener;
+import com.caltruism.assist.utils.AddRequestFragmentDataListener;
+import com.caltruism.assist.utils.Constants;
+import com.caltruism.assist.utils.CustomDateTimeUtil;
 
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 
-public class AddRequestInputDateTimeFragment extends Fragment {
+public class AddRequestInputDateTimeFragment extends Fragment implements AddRequestFragmentDataListener {
 
+    private static final String IS_NOW_KEY = "isNow";
     private static final String DATE_TIME_KEY = "dateTime";
     private static final String DURATION_KEY = "duration";
 
-    private static final int TEN_MINUTES = 1000 * 10 * 60;
-    private static final int TWO_WEEKS = 1000 * 60 * 60 * 24 * 14;
-
-    private AddRequestDataListener listener;
-
-    private HashMap<String, String> data = new HashMap<>();
-    private int requestType;
-    private String requestTitle;
-
-    Calendar requestDateAndTime;
-    boolean isToday;
+    private AddRequestActivityDataListener listener;
+    private DatePickerDialog.OnDateSetListener dateSetListener;
+    private TimePickerDialog.OnTimeSetListener timeSetListener;
 
     private ImageView imageViewType;
     private TextView textViewType;
@@ -52,14 +48,21 @@ public class AddRequestInputDateTimeFragment extends Fragment {
     private EditText editTextTime;
     private EditText editTextDuration;
 
+    private HashMap<String, Object> dataMap = new HashMap<>();
+    private int requestType;
+    private String requestTitle;
+
+    Calendar requestDateAndTime;
+    boolean isNow = true;
+
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
 
-        if (context instanceof AddRequestDataListener) {
-            listener = (AddRequestDataListener) context;
+        if (context instanceof AddRequestActivityDataListener) {
+            listener = (AddRequestActivityDataListener) context;
         } else {
-            throw new RuntimeException(context.toString() + " must implement AddRequestDataListener!");
+            throw new RuntimeException(context.toString() + " must implement AddRequestActivityDataListener!");
         }
     }
 
@@ -85,24 +88,22 @@ public class AddRequestInputDateTimeFragment extends Fragment {
         editTextDuration = getView().findViewById(R.id.editTextInputDuration);
 
         requestDateAndTime = Calendar.getInstance();
-        final DatePickerDialog.OnDateSetListener date = new DatePickerDialog.OnDateSetListener() {
+        dateSetListener = new DatePickerDialog.OnDateSetListener() {
             @Override
             public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
                 requestDateAndTime.set(Calendar.YEAR, year);
                 requestDateAndTime.set(Calendar.MONTH, month);
                 requestDateAndTime.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-                handleDataChange(DATE_TIME_KEY, null);
-                updateDateEditText();
+                updateDate();
             }
         };
 
-        final TimePickerDialog.OnTimeSetListener time = new TimePickerDialog.OnTimeSetListener() {
+        timeSetListener = new TimePickerDialog.OnTimeSetListener() {
             @Override
             public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
                 requestDateAndTime.set(Calendar.HOUR_OF_DAY, hourOfDay);
                 requestDateAndTime.set(Calendar.MINUTE, minute);
-                handleDataChange(DATE_TIME_KEY, null);
-                updateTimeEditText();
+                updateTime();
             }
         };
 
@@ -110,13 +111,12 @@ public class AddRequestInputDateTimeFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 long now = System.currentTimeMillis() - 1000;
-                DatePickerDialog datePickerDialog = new DatePickerDialog(getContext(), date,
+                DatePickerDialog datePickerDialog = new DatePickerDialog(getContext(), dateSetListener,
                         requestDateAndTime.get(Calendar.YEAR),
                         requestDateAndTime.get(Calendar.MONTH),
                         requestDateAndTime.get(Calendar.DAY_OF_MONTH));
                 datePickerDialog.getDatePicker().setMinDate(now);
-                datePickerDialog.getDatePicker().setMaxDate(now + TWO_WEEKS);
-                datePickerDialog.setTitle("Select Date");
+                datePickerDialog.getDatePicker().setMaxDate(now + 2 * DateUtils.WEEK_IN_MILLIS);
                 datePickerDialog.show();
             }
         });
@@ -124,10 +124,9 @@ public class AddRequestInputDateTimeFragment extends Fragment {
         editTextTime.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                TimePickerDialog timePickerDialog = new TimePickerDialog(getContext(), time,
+                TimePickerDialog timePickerDialog = new TimePickerDialog(getContext(), timeSetListener,
                         requestDateAndTime.get(Calendar.HOUR_OF_DAY),
                         requestDateAndTime.get(Calendar.MINUTE), false);
-                timePickerDialog.setTitle("Select Time");
                 timePickerDialog.show();
             }
         });
@@ -153,24 +152,31 @@ public class AddRequestInputDateTimeFragment extends Fragment {
         handleDataChange(DATE_TIME_KEY, null);
     }
 
+    @Override
+    public void onDataChange(Object... data) {
+        requestType = (int) data[0];
+        requestTitle = (String) data[1];
+        setRequestType();
+    }
+
     private void setRequestType() {
         switch (requestType) {
-            case 0:
+            case Constants.GROCERY_TYPE:
                 imageViewType.setImageResource(R.drawable.ic_add_request_grocery);
                 textViewType.setText("Grocery");
                 break;
 
-            case 1:
+            case Constants.LAUNDRY_TYPE:
                 imageViewType.setImageResource(R.drawable.ic_add_request_laundry);
                 textViewType.setText("Laundry");
                 break;
 
-            case 2:
+            case Constants.WALKING_TYPE:
                 imageViewType.setImageResource(R.drawable.ic_add_request_walking);
                 textViewType.setText("Walking");
                 break;
 
-            case 3:
+            case Constants.OTHER_TYPE:
                 imageViewType.setImageResource(R.drawable.ic_add_request_other);
                 textViewType.setText("Other Request");
                 break;
@@ -178,56 +184,53 @@ public class AddRequestInputDateTimeFragment extends Fragment {
         textViewTitle.setText(requestTitle);
     }
 
-    private void updateDateEditText() {
-        String date;
-        long requestTime = requestDateAndTime.getTimeInMillis();
-
-        isToday = false;
-        if (DateUtils.isToday(requestTime)) {
-            date = "Today";
-            isToday = true;
-        } else if (DateUtils.isToday(requestTime - DateUtils.DAY_IN_MILLIS)) {
-            date = "Tomorrow";
-        } else {
-            SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yy", Locale.US);
-            date = sdf.format(requestDateAndTime.getTime());
-        }
-
+    private void updateDate() {
+        String date = CustomDateTimeUtil.getDate(requestDateAndTime.getTimeInMillis());
         editTextDate.setText(date);
+        updateTime();
     }
 
-    private void updateTimeEditText() {
+    private void updateTime() {
         String time;
         long now = System.currentTimeMillis() - 1000;
-        long requestTime = requestDateAndTime.getTimeInMillis() + DateUtils.MINUTE_IN_MILLIS;
+        long requestTime = requestDateAndTime.getTimeInMillis() + 3 * DateUtils.MINUTE_IN_MILLIS;
 
         if (requestTime < now) {
-            // TODO: Show snackbar error
-//            SimpleDateFormat sdf = new SimpleDateFormat("hh:mm a", Locale.US);
-//            time = sdf.format(requestDateAndTime.getTime());
-            time = "ERROR";
-        } else if (requestTime - TEN_MINUTES <= now) {
+            // TODO: CHANGE PHRASE
+            Toast.makeText(getActivity(), "Time past. Please select again.", Toast.LENGTH_SHORT).show();
+            TimePickerDialog timePickerDialog = new TimePickerDialog(getContext(), timeSetListener,
+                    requestDateAndTime.get(Calendar.HOUR_OF_DAY),
+                    requestDateAndTime.get(Calendar.MINUTE), false);
+            timePickerDialog.show();
+            return;
+        } else if (requestTime - 10 * DateUtils.MINUTE_IN_MILLIS <= now) {
             time = "Now";
+            isNow = true;
         } else {
             SimpleDateFormat sdf = new SimpleDateFormat("hh:mm a", Locale.US);
             time = sdf.format(requestDateAndTime.getTime());
+            isNow = false;
         }
         editTextTime.setText(time);
+        handleDataChange(DATE_TIME_KEY, null);
     }
 
     public void handleDataChange(String key, CharSequence value) {
         switch (key) {
             case DATE_TIME_KEY:
-                data.put(DATE_TIME_KEY, String.valueOf(requestDateAndTime.getTimeInMillis()));
+                dataMap.put(IS_NOW_KEY, isNow);
+                dataMap.put(DATE_TIME_KEY, requestDateAndTime.getTimeInMillis());
                 break;
             case DURATION_KEY:
-                if (value.toString().length() != 0)
-                    data.put(DURATION_KEY, value.toString());
+                int duration = Integer.parseInt(value.toString());
+
+                if (duration != 0)
+                    dataMap.put(DURATION_KEY, duration);
                 else
-                    data.remove(key);
+                    dataMap.remove(key);
                 break;
         }
 
-        listener.onDataChange(2, data);
+        listener.onDataChange(2, dataMap);
     }
 }
