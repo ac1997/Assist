@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbarVolunteerMain"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="?attr/colorPrimary"
+        android:contentInsetEnd="0dp"
+        android:contentInsetStart="0dp"
+        android:minHeight="?attr/actionBarSize"
+        android:paddingBottom="5dp"
+        android:theme="?attr/actionBarTheme"
+        app:contentInsetEnd="0dp"
+        app:contentInsetStart="0dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <com.arlib.floatingsearchview.FloatingSearchView
+            android:id="@+id/searchViewVolunteer"
+            android:layout_width="match_parent"
+            android:layout_height="?android:attr/actionBarSize"
+            app:floatingSearch_close_search_on_keyboard_dismiss="true"
+            app:floatingSearch_leftActionMode="showHamburger"
+            app:floatingSearch_menu="@menu/menu_volunteer_main_request_list"
+            app:floatingSearch_searchBarMarginLeft="5dp"
+            app:floatingSearch_searchBarMarginRight="5dp"
+            app:floatingSearch_searchBarMarginTop="5dp"
+            app:floatingSearch_searchHint="Search"
+            app:floatingSearch_showSearchKey="false" />
+    </android.support.v7.widget.Toolbar>
+
+    <FrameLayout
+        android:id="@+id/fragmentVolunteerMain"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toolbarVolunteerMain">
+
+    </FrameLayout>
+</android.support.constraint.ConstraintLayout>

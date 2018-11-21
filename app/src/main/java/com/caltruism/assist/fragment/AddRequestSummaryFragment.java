@@ -1,16 +1,12 @@
 package com.caltruism.assist.fragment;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.text.Html;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,24 +14,25 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.caltruism.assist.R;
-import com.caltruism.assist.utils.AddRequestFragmentDataListener;
-import com.caltruism.assist.utils.Constants;
-import com.caltruism.assist.utils.CustomDateTimeUtil;
-import com.caltruism.assist.utils.CustomMapView;
-import com.google.android.gms.maps.CameraUpdate;
+import com.caltruism.assist.util.BitMapDescriptorFromVector;
+import com.caltruism.assist.util.Constants;
+import com.caltruism.assist.util.CustomDateTimeUtil;
+import com.caltruism.assist.util.CustomMapView;
+import com.caltruism.assist.util.DataListener;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import java.util.List;
-
-public class AddRequestSummaryFragment extends Fragment implements AddRequestFragmentDataListener, OnMapReadyCallback, ActivityCompat.OnRequestPermissionsResultCallback {
+public class AddRequestSummaryFragment extends Fragment implements
+        DataListener.AddRequestFragmentDataListener, OnMapReadyCallback,
+        ActivityCompat.OnRequestPermissionsResultCallback {
 
     public static final String TAG = "AddRequestSummaryFragment";
-    private static final float ZOOM_LEVEL = 18;
+    private static final float DEFAULT_ZOOM = 17;
 
     TextView textViewTitle;
     TextView textViewDate;
@@ -82,19 +79,19 @@ public class AddRequestSummaryFragment extends Fragment implements AddRequestFra
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        mapView = getView().findViewById(R.id.mapViewAddRequestSummary);
+        mapView = view.findViewById(R.id.mapViewAddRequestSummary);
         mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(this);
 
-        textViewTitle = getView().findViewById(R.id.textViewAddRequestSummaryTitle);
-        textViewDate = getView().findViewById(R.id.textViewAddRequestSummaryDate);
-        textViewType = getView().findViewById(R.id.textViewAddRequestSummaryType);
-        textViewTime = getView().findViewById(R.id.textViewAddRequestSummaryTime);
-        textViewDuration = getView().findViewById(R.id.textViewAddRequestSummaryDuration);
-        textViewLocationName = getView().findViewById(R.id.textViewAddRequestSummaryLocationName);
-        textViewLocationAddress = getView().findViewById(R.id.textViewAddRequestSummaryLocationAddress);
-        textViewDescription = getView().findViewById(R.id.textViewAddRequestSummaryDescription);
-        imageViewType = getView().findViewById(R.id.imageViewAddRequestSummaryType);
+        textViewTitle = view.findViewById(R.id.textViewAddRequestSummaryTitle);
+        textViewDate = view.findViewById(R.id.textViewAddRequestSummaryDate);
+        textViewType = view.findViewById(R.id.textViewAddRequestSummaryType);
+        textViewTime = view.findViewById(R.id.textViewAddRequestSummaryTime);
+        textViewDuration = view.findViewById(R.id.textViewAddRequestSummaryDuration);
+        textViewLocationName = view.findViewById(R.id.textViewAddRequestSummaryLocationName);
+        textViewLocationAddress = view.findViewById(R.id.textViewAddRequestSummaryLocationAddress);
+        textViewDescription = view.findViewById(R.id.textViewAddRequestSummaryDescription);
+        imageViewType = view.findViewById(R.id.imageViewAddRequestSummaryType);
 
         setUpViews();
     }
@@ -103,12 +100,14 @@ public class AddRequestSummaryFragment extends Fragment implements AddRequestFra
     @Override
     public void onMapReady(GoogleMap googleMap) {
         map = googleMap;
+        map.setMapStyle(MapStyleOptions.loadRawResourceStyle(getActivity(), R.raw.map_style_json));
         map.getUiSettings().setMyLocationButtonEnabled(false);
-        map.getUiSettings().setZoomGesturesEnabled(true);
+        map.getUiSettings().setMapToolbarEnabled(false);
         map.setMyLocationEnabled(true);
 
-        marker = googleMap.addMarker(new MarkerOptions().position(requestLocationLatLng).title(requestTitle));
-        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(requestLocationLatLng, ZOOM_LEVEL));
+        marker = googleMap.addMarker(new MarkerOptions().position(requestLocationLatLng).title(requestTitle)
+                .icon(BitMapDescriptorFromVector.requestTypeMarker(getActivity(), requestType)));
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(requestLocationLatLng, DEFAULT_ZOOM));
     }
 
     @Override
@@ -179,7 +178,7 @@ public class AddRequestSummaryFragment extends Fragment implements AddRequestFra
         if (map != null && marker != null) {
             marker.remove();
             marker = map.addMarker(new MarkerOptions().position(requestLocationLatLng).title(requestTitle));
-            map.animateCamera(CameraUpdateFactory.newLatLngZoom(requestLocationLatLng, ZOOM_LEVEL));
+            map.animateCamera(CameraUpdateFactory.newLatLngZoom(requestLocationLatLng, DEFAULT_ZOOM));
         }
 
         switch (requestType) {
