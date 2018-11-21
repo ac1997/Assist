@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/volunteerprofile"
+            android:checked="false"
+            android:icon="@drawable/ic_calendar_solid"
+            android:title="Profile"/>
+
+        <item
+            android:id="@+id/volunteerTaskList"
+            android:checked="false"
+            android:icon="@drawable/ic_add_request_other"
+            android:title="Task List"/>
+
+        <item
+            android:id="@+id/volunteerTaskHistory"
+            android:checked="false"
+            android:icon="@drawable/ic_add_request_laundry"
+            android:title="Task History"/>
+
+        <item
+            android:id="@+id/volunteerSocial"
+            android:checked="false"
+            android:icon="@drawable/ic_add_request_laundry"
+            android:title="Social"/>
+
+        <item
+            android:id="@+id/volunteerLeaderboard"
+            android:checked="false"
+            android:icon="@drawable/ic_add_request_laundry"
+            android:title="Leaderboard"/>
+
+        <item
+            android:id="@+id/volunteerLogout"
+            android:checked="false"
+            android:icon="@drawable/ic_add_request_laundry"
+            android:title="Logout"/>
+    </group>
+</menu>

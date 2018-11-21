@@ -39,9 +39,9 @@ import com.caltruism.assist.fragment.AddRequestInputDateTimeFragment;
 import com.caltruism.assist.fragment.AddRequestInputDetailsFragment;
 import com.caltruism.assist.fragment.AddRequestSelectTypeFragment;
 import com.caltruism.assist.fragment.AddRequestSummaryFragment;
-import com.caltruism.assist.utils.AddRequestActivityDataListener;
-import com.caltruism.assist.utils.Constants;
-import com.caltruism.assist.utils.CustomDateTimeUtil;
+import com.caltruism.assist.util.Constants;
+import com.caltruism.assist.util.CustomDateTimeUtil;
+import com.caltruism.assist.util.DataListener;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -59,6 +59,7 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
@@ -66,12 +67,15 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
 import com.shuhart.stepview.StepView;
 
+import org.imperiumlabs.geofirestore.GeoLocation;
+import org.imperiumlabs.geofirestore.core.GeoHash;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
-public class AddRequestActivity extends AppCompatActivity implements AddRequestActivityDataListener {
+public class AddRequestActivity extends AppCompatActivity implements DataListener.AddRequestActivityDataListener {
 
     private static final String TAG = "AddRequestActivity";
     private static final int REQUEST_PERMISSIONS_REQUEST_CODE = 0;
@@ -119,7 +123,7 @@ public class AddRequestActivity extends AppCompatActivity implements AddRequestA
     private AddRequestInputDateTimeFragment inputDateTimeFragment;
     private AddRequestSummaryFragment summaryFragment;
 
-    private static final long UPDATE_INTERVAL_IN_MILLISECONDS = 5000;
+    private static final long UPDATE_INTERVAL_IN_MILLISECONDS = 1000;
     private static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS = UPDATE_INTERVAL_IN_MILLISECONDS / 2;
 
     private FusedLocationProviderClient fusedLocationClient;
@@ -186,11 +190,23 @@ public class AddRequestActivity extends AppCompatActivity implements AddRequestA
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         settingsClient = LocationServices.getSettingsClient(this);
 
-        createLocationCallback();
-        createLocationRequest();
-        buildLocationSettingsRequest();
+        locationCallback = new LocationCallback() {
+            @Override
+            public void onLocationResult(LocationResult locationResult) {
+                super.onLocationResult(locationResult);
 
-        startLocationUpdates();
+                Log.d(TAG, "Location updated: " + locationResult.getLastLocation().getLongitude() + " " + locationResult.getLastLocation().getLatitude());
+                currentLocation = locationResult.getLastLocation();
+                locationNameAndAddressUpdated = false;
+            }
+        };
+
+        locationRequest = new LocationRequest().setInterval(UPDATE_INTERVAL_IN_MILLISECONDS)
+                .setFastestInterval(FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS)
+                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+
+        locationSettingsRequest = new LocationSettingsRequest.Builder()
+                .addLocationRequest(locationRequest).build();
 
         db = FirebaseFirestore.getInstance();
         auth = FirebaseAuth.getInstance();
@@ -203,10 +219,20 @@ public class AddRequestActivity extends AppCompatActivity implements AddRequestA
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+
+        if (!checkPermissions())
+            requestPermissions();
+        else
+            startLocationUpdates();
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
 
-        if (id == R.id.action_close) {
+        if (id == R.id.actionClose) {
             if (highestStepCompleted != -1)
                 showCloseAlertDialog();
             else
@@ -231,6 +257,13 @@ public class AddRequestActivity extends AppCompatActivity implements AddRequestA
             showCloseAlertDialog();
         else
             super.onBackPressed();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        fusedLocationClient.removeLocationUpdates(locationCallback);
     }
 
     @Override
@@ -340,31 +373,6 @@ public class AddRequestActivity extends AppCompatActivity implements AddRequestA
         });
     }
 
-    private void createLocationRequest() {
-        locationRequest = new LocationRequest();
-        locationRequest.setInterval(UPDATE_INTERVAL_IN_MILLISECONDS);
-        locationRequest.setFastestInterval(FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS);
-        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-    }
-
-    private void createLocationCallback() {
-        locationCallback = new LocationCallback() {
-            @Override
-            public void onLocationResult(LocationResult locationResult) {
-                super.onLocationResult(locationResult);
-
-                currentLocation = locationResult.getLastLocation();
-                locationNameAndAddressUpdated = false;
-            }
-        };
-    }
-
-    private void buildLocationSettingsRequest() {
-        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder();
-        builder.addLocationRequest(locationRequest);
-        locationSettingsRequest = builder.build();
-    }
-
     private void startLocationUpdates() {
         settingsClient.checkLocationSettings(locationSettingsRequest)
                 .addOnSuccessListener(this, new OnSuccessListener<LocationSettingsResponse>() {
@@ -412,7 +420,6 @@ public class AddRequestActivity extends AppCompatActivity implements AddRequestA
     private void updateUI(int nextStep) {
         updateCurrentStepAndStepView(nextStep);
         updateFragment();
-        updateButton();
     }
 
     private void updateCurrentStepAndStepView(int nextStep) {
@@ -466,6 +473,7 @@ public class AddRequestActivity extends AppCompatActivity implements AddRequestA
             fragmentTransaction.hide(summaryFragment);
 
         fragmentTransaction.setCustomAnimations(android.R.animator.fade_in, android.R.animator.fade_out).commit();
+        updateButton();
     }
 
     private void showFragmentDetails() {
@@ -494,6 +502,7 @@ public class AddRequestActivity extends AppCompatActivity implements AddRequestA
                 fragmentTransaction.hide(summaryFragment);
 
             fragmentTransaction.setCustomAnimations(android.R.animator.fade_in, android.R.animator.fade_out).commit();
+            updateButton();
         }
     }
 
@@ -521,15 +530,39 @@ public class AddRequestActivity extends AppCompatActivity implements AddRequestA
             fragmentTransaction.hide(summaryFragment);
 
         fragmentTransaction.commit();
+        updateButton();
     }
 
+    @SuppressLint("MissingPermission")
     private void showFragmentSummary() {
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
 
         if (!checkPermissions()) {
             requestPermissions();
         } else if (requestIsCurrentLocation && !locationNameAndAddressUpdated) {
-            getCurrentLocationNameAndAddress();
+            if (currentLocation == null) {
+                fusedLocationClient.getLastLocation().addOnSuccessListener(this, new OnSuccessListener<Location>() {
+                    @Override
+                    public void onSuccess(Location location) {
+                        if (location != null) {
+                            currentLocation = location;
+                            getCurrentLocationNameAndAddress();
+                        } else {
+                            // TODO: Rephrase
+                            new AlertDialog.Builder(AddRequestActivity.this).setTitle("Could not get current location")
+                                    .setMessage("Failed to get current location. Please input the address.")
+                                    .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            updateUI(1);
+                                        }
+                                    }).show();
+                        }
+                    }
+                });
+            } else {
+                getCurrentLocationNameAndAddress();
+            }
         } else {
             if (summaryFragment.isAdded()) {
                 summaryFragment.onDataChange(requestType, requestTitle, requestDescription, requestLocationName,
@@ -560,6 +593,7 @@ public class AddRequestActivity extends AppCompatActivity implements AddRequestA
                 fragmentTransaction.hide(inputDateTimeFragment);
 
             fragmentTransaction.commit();
+            updateButton();
         }
 
     }
@@ -657,6 +691,7 @@ public class AddRequestActivity extends AppCompatActivity implements AddRequestA
             if (grantResults.length <= 0) {
                 Log.i(TAG, "User interaction was cancelled.");
             } else if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                startLocationUpdates();
                 updateFragment();
             } else {
                 // TODO: Rephrase
@@ -722,12 +757,14 @@ public class AddRequestActivity extends AppCompatActivity implements AddRequestA
 
     private void commitData(String name) {
         int startTime = CustomDateTimeUtil.getStartTime(requestDateTime);
+        double latitude = requestLocationLatLng.latitude;
+        double longitude = requestLocationLatLng.longitude;
 
         HashMap<String, Object> requestData = new HashMap<>();
         HashMap<String, Object> location = new HashMap<>();
         HashMap<String, Object> postedBy = new HashMap<>();
 
-        location.put("latLng", new GeoPoint(requestLocationLatLng.latitude, requestLocationLatLng.longitude));
+        location.put("latLng", new GeoPoint(latitude, longitude));
         location.put("address", requestLocationAddress);
         location.put("name", requestLocationName);
 
@@ -735,7 +772,7 @@ public class AddRequestActivity extends AppCompatActivity implements AddRequestA
         postedBy.put("name", name);
 
         requestData.put("status", Constants.REQUEST_STATUS_ONGOING);
-        requestData.put("requestType", requestType);
+        requestData.put("type", requestType);
         requestData.put("title", requestTitle);
         requestData.put("description", requestDescription);
         requestData.put("isNow", requestIsNow);
@@ -747,7 +784,13 @@ public class AddRequestActivity extends AppCompatActivity implements AddRequestA
         requestData.put("postedBy", postedBy);
         requestData.put("postedOn", FieldValue.serverTimestamp());
 
-        db.collection("requests").add(requestData).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+        GeoHash geoHash = new GeoHash(new GeoLocation(latitude, longitude));
+        requestData.put("g", geoHash.getGeoHashString());
+        requestData.put("l", Arrays.asList(latitude, longitude));
+
+        final CollectionReference collectionRef = db.collection("requests");
+
+        collectionRef.add(requestData).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
             @Override
             public void onSuccess(DocumentReference documentReference) {
                 Log.d(TAG, "DocumentSnapshot written with ID: " + documentReference.getId());

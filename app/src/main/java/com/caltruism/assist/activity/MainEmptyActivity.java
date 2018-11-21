@@ -49,13 +49,12 @@ public class MainEmptyActivity extends AppCompatActivity {
                             } else {
                                 String memberTypeString = memberTypeObject.toString();
 
-                                if (memberTypeString.equals(getResources().getString(R.string.volunteer_type))) {
-                                    activityIntent = new Intent(mainContext, RequestListVolunteerActivity.class);
-                                } else if (memberTypeString.equals(getResources().getString(R.string.disabled_type))) {
-                                    activityIntent = new Intent(mainContext, RequestListDisabledActivity.class);
-                                } else {
+                                if (memberTypeString.equals(getResources().getString(R.string.volunteer_type)))
+                                    activityIntent = new Intent(mainContext, VolunteerMainActivity.class);
+                                else if (memberTypeString.equals(getResources().getString(R.string.disabled_type)))
+                                    activityIntent = new Intent(mainContext, DisabledMainActivity.class);
+                                else
                                     activityIntent = new Intent(mainContext, GetMemberTypeActivity.class);
-                                }
                             }
                         } else {
                             Log.d(TAG, "Users not exist.");

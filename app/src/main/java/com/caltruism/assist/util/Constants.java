@@ -1,4 +1,4 @@
-package com.caltruism.assist.utils;
+package com.caltruism.assist.util;
 
 public final class Constants {
     public static final String USER_DATA_SHARED_PREFERENCE = "userData";

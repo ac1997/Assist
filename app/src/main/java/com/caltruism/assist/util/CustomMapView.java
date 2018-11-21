@@ -1,4 +1,4 @@
-package com.caltruism.assist.utils;
+package com.caltruism.assist.util;
 
 import android.content.Context;
 import android.util.AttributeSet;

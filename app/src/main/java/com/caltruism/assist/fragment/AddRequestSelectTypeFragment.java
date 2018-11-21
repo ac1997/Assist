@@ -17,12 +17,12 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.caltruism.assist.R;
-import com.caltruism.assist.utils.AddRequestActivityDataListener;
-import com.caltruism.assist.utils.Constants;
+import com.caltruism.assist.util.Constants;
+import com.caltruism.assist.util.DataListener;
 
 public class AddRequestSelectTypeFragment extends Fragment {
 
-    private AddRequestActivityDataListener listener;
+    private DataListener.AddRequestActivityDataListener listener;
 
     private ConstraintLayout groceryConstraintLayout;
     private ImageView groceryImageView;
@@ -49,10 +49,10 @@ public class AddRequestSelectTypeFragment extends Fragment {
     public void onAttach(Context context) {
         super.onAttach(context);
 
-        if (context instanceof AddRequestActivityDataListener) {
-            listener = (AddRequestActivityDataListener) context;
+        if (context instanceof DataListener.AddRequestActivityDataListener) {
+            listener = (DataListener.AddRequestActivityDataListener) context;
         } else {
-            throw new RuntimeException(context.toString() + " must implement AddRequestActivityDataListener!");
+            throw new RuntimeException(context.toString() + " must implement DataListener.AddRequestActivityDataListener!");
         }
     }
 
@@ -70,9 +70,9 @@ public class AddRequestSelectTypeFragment extends Fragment {
         colorAccent = ResourcesCompat.getColor(getResources(), R.color.colorAccent, null);
         colorAccentLight = ResourcesCompat.getColor(getResources(), R.color.colorAccentLight, null);
 
-        groceryConstraintLayout = getView().findViewById(R.id.requestTypeGrocery);
-        groceryImageView = getView().findViewById(R.id.imageSelectTypeGrocery);
-        groceryTextView = getView().findViewById(R.id.textViewSelectTypeGrocery);
+        groceryConstraintLayout = view.findViewById(R.id.requestTypeGrocery);
+        groceryImageView = view.findViewById(R.id.imageSelectTypeGrocery);
+        groceryTextView = view.findViewById(R.id.textViewSelectTypeGrocery);
         groceryConstraintLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -80,9 +80,9 @@ public class AddRequestSelectTypeFragment extends Fragment {
             }
         });
 
-        laundryConstraintLayout = getView().findViewById(R.id.requestTypeLaundry);
-        laundryImageView = getView().findViewById(R.id.imageSelectTypeLaundry);
-        laundryTextView = getView().findViewById(R.id.textViewSelectTypeLaundry);
+        laundryConstraintLayout = view.findViewById(R.id.requestTypeLaundry);
+        laundryImageView = view.findViewById(R.id.imageSelectTypeLaundry);
+        laundryTextView = view.findViewById(R.id.textViewSelectTypeLaundry);
         laundryConstraintLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -90,9 +90,9 @@ public class AddRequestSelectTypeFragment extends Fragment {
             }
         });
 
-        walkingConstraintLayout = getView().findViewById(R.id.requestTypeWalking);
-        walkingImageView = getView().findViewById(R.id.imageSelectTypeWalking);
-        walkingTextView = getView().findViewById(R.id.textViewSelectTypeWalking);
+        walkingConstraintLayout = view.findViewById(R.id.requestTypeWalking);
+        walkingImageView = view.findViewById(R.id.imageSelectTypeWalking);
+        walkingTextView = view.findViewById(R.id.textViewSelectTypeWalking);
         walkingConstraintLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -100,9 +100,9 @@ public class AddRequestSelectTypeFragment extends Fragment {
             }
         });
 
-        otherConstraintLayout = getView().findViewById(R.id.requestTypeOther);
-        otherImageView = getView().findViewById(R.id.imageSelectTypeOther);
-        otherTextView = getView().findViewById(R.id.textViewSelectTypeOther);
+        otherConstraintLayout = view.findViewById(R.id.requestTypeOther);
+        otherImageView = view.findViewById(R.id.imageSelectTypeOther);
+        otherTextView = view.findViewById(R.id.textViewSelectTypeOther);
         otherConstraintLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
