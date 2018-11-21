@@ -13,7 +13,7 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import com.caltruism.assist.R;
-import com.caltruism.assist.utils.Constants;
+import com.caltruism.assist.util.Constants;
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
@@ -30,7 +30,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.Timestamp;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FacebookAuthProvider;
@@ -45,8 +44,6 @@ import org.json.JSONObject;
 
 import java.util.Arrays;
 import java.util.HashMap;
-
-import static java.lang.Float.NaN;
 
 
 public class LoginActivity extends AppCompatActivity {
@@ -245,9 +242,9 @@ public class LoginActivity extends AppCompatActivity {
                             String memberTypeString = memberTypeObject.toString();
 
                             if (memberTypeString.equals(getResources().getString(R.string.volunteer_type)))
-                                activityIntent = new Intent(mainContext, RequestListVolunteerActivity.class);
+                                activityIntent = new Intent(mainContext, VolunteerMainActivity.class);
                             else if (memberTypeString.equals(getResources().getString(R.string.disabled_type)))
-                                activityIntent = new Intent(mainContext, RequestListDisabledActivity.class);
+                                activityIntent = new Intent(mainContext, DisabledMainActivity.class);
                             else
                                 activityIntent = new Intent(mainContext, GetMemberTypeActivity.class);
 

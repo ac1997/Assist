@@ -13,7 +13,7 @@ import android.view.View;
 import android.widget.Button;
 
 import com.caltruism.assist.R;
-import com.caltruism.assist.utils.Constants;
+import com.caltruism.assist.util.Constants;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -77,10 +77,10 @@ public class GetMemberTypeActivity extends AppCompatActivity {
                 Context mainContext = GetMemberTypeActivity.this;
 
                 if (memberType.equals(getResources().getString(R.string.volunteer_type))) {
-                    startActivity(new Intent(mainContext, RequestListVolunteerActivity.class));
+                    startActivity(new Intent(mainContext, VolunteerMainActivity.class));
                     finish();
                 } else if (memberType.equals(getResources().getString(R.string.disabled_type))) {
-                    startActivity(new Intent(mainContext, RequestListDisabledActivity.class));
+                    startActivity(new Intent(mainContext, DisabledMainActivity.class));
                     finish();
                 } else {
                     Log.e(TAG, "Invalid member type: " + memberType);

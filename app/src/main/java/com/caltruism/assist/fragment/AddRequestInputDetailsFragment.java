@@ -11,7 +11,6 @@ import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -23,9 +22,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.caltruism.assist.R;
-import com.caltruism.assist.utils.AddRequestActivityDataListener;
-import com.caltruism.assist.utils.AddRequestFragmentDataListener;
-import com.caltruism.assist.utils.Constants;
+import com.caltruism.assist.util.Constants;
+import com.caltruism.assist.util.DataListener;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
@@ -36,10 +34,9 @@ import com.google.android.gms.location.places.ui.PlaceAutocomplete;
 
 import java.util.HashMap;
 
-import static android.app.Activity.RESULT_CANCELED;
 import static android.app.Activity.RESULT_OK;
 
-public class AddRequestInputDetailsFragment extends Fragment implements AddRequestFragmentDataListener {
+public class AddRequestInputDetailsFragment extends Fragment implements DataListener.AddRequestFragmentDataListener {
 
     private static final String TAG = "AddRequestInputDetailsFragment";
     private static final int REQUEST_CODE_AUTOCOMPLETE = 1;
@@ -53,7 +50,7 @@ public class AddRequestInputDetailsFragment extends Fragment implements AddReque
     private static final String LOCATION_ADDRESS_KEY = "locationAddress";
     private static final String LOCATION_LAT_LNG_KEY = "locationLatLng";
 
-    private AddRequestActivityDataListener listener;
+    private DataListener.AddRequestActivityDataListener listener;
 
     private ImageView imageViewType;
     private TextView textViewType;
@@ -68,10 +65,10 @@ public class AddRequestInputDetailsFragment extends Fragment implements AddReque
     public void onAttach(Context context) {
         super.onAttach(context);
 
-        if (context instanceof AddRequestActivityDataListener) {
-            listener = (AddRequestActivityDataListener) context;
+        if (context instanceof DataListener.AddRequestActivityDataListener) {
+            listener = (DataListener.AddRequestActivityDataListener) context;
         } else {
-            throw new RuntimeException(context.toString() + " must implement AddRequestActivityDataListener!");
+            throw new RuntimeException(context.toString() + " must implement DataListener.AddRequestActivityDataListener!");
         }
     }
 
@@ -91,11 +88,11 @@ public class AddRequestInputDetailsFragment extends Fragment implements AddReque
 
         dataMap.put(IS_CURRENT_LOCATION_KEY, true);
 
-        imageViewType = getView().findViewById(R.id.imageViewInputDetailsRequestType);
-        textViewType = getView().findViewById(R.id.textViewInputDetailsRequestType);
-        editTextTitle = getView().findViewById(R.id.editTextInputDetailsTitle);
-        editTextDescription = getView().findViewById(R.id.editTextInputDetailsDescription);
-        editTextLocation = getView().findViewById(R.id.editTextInputDetailsLocation);
+        imageViewType = view.findViewById(R.id.imageViewInputDetailsRequestType);
+        textViewType = view.findViewById(R.id.textViewInputDetailsRequestType);
+        editTextTitle = view.findViewById(R.id.editTextInputDetailsTitle);
+        editTextDescription = view.findViewById(R.id.editTextInputDetailsDescription);
+        editTextLocation = view.findViewById(R.id.editTextInputDetailsLocation);
 
         setRequestType();
 

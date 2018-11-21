@@ -22,22 +22,21 @@ import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.caltruism.assist.R;
-import com.caltruism.assist.utils.AddRequestActivityDataListener;
-import com.caltruism.assist.utils.AddRequestFragmentDataListener;
-import com.caltruism.assist.utils.Constants;
-import com.caltruism.assist.utils.CustomDateTimeUtil;
+import com.caltruism.assist.util.Constants;
+import com.caltruism.assist.util.CustomDateTimeUtil;
+import com.caltruism.assist.util.DataListener;
 
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Locale;
 
-public class AddRequestInputDateTimeFragment extends Fragment implements AddRequestFragmentDataListener {
+public class AddRequestInputDateTimeFragment extends Fragment implements DataListener.AddRequestFragmentDataListener {
 
     private static final String IS_NOW_KEY = "isNow";
     private static final String DATE_TIME_KEY = "dateTime";
     private static final String DURATION_KEY = "duration";
 
-    private AddRequestActivityDataListener listener;
+    private DataListener.AddRequestActivityDataListener listener;
     private DatePickerDialog.OnDateSetListener dateSetListener;
     private TimePickerDialog.OnTimeSetListener timeSetListener;
 
@@ -59,10 +58,10 @@ public class AddRequestInputDateTimeFragment extends Fragment implements AddRequ
     public void onAttach(Context context) {
         super.onAttach(context);
 
-        if (context instanceof AddRequestActivityDataListener) {
-            listener = (AddRequestActivityDataListener) context;
+        if (context instanceof DataListener.AddRequestActivityDataListener) {
+            listener = (DataListener.AddRequestActivityDataListener) context;
         } else {
-            throw new RuntimeException(context.toString() + " must implement AddRequestActivityDataListener!");
+            throw new RuntimeException(context.toString() + " must implement DataListener.AddRequestActivityDataListener!");
         }
     }
 
@@ -80,12 +79,12 @@ public class AddRequestInputDateTimeFragment extends Fragment implements AddRequ
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        imageViewType = getView().findViewById(R.id.imageViewInputDateTimeRequestType);
-        textViewType = getView().findViewById(R.id.textViewInputDateTimeRequestType);
-        textViewTitle = getView().findViewById(R.id.textViewInputDateTimeRequestTitle);
-        editTextDate = getView().findViewById(R.id.editTextInputDate);
-        editTextTime = getView().findViewById(R.id.editTextInputTime);
-        editTextDuration = getView().findViewById(R.id.editTextInputDuration);
+        imageViewType = view.findViewById(R.id.imageViewInputDateTimeRequestType);
+        textViewType = view.findViewById(R.id.textViewInputDateTimeRequestType);
+        textViewTitle = view.findViewById(R.id.textViewInputDateTimeRequestTitle);
+        editTextDate = view.findViewById(R.id.editTextInputDate);
+        editTextTime = view.findViewById(R.id.editTextInputTime);
+        editTextDuration = view.findViewById(R.id.editTextInputDuration);
 
         requestDateAndTime = Calendar.getInstance();
         dateSetListener = new DatePickerDialog.OnDateSetListener() {

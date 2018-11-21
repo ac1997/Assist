@@ -1,12 +1,9 @@
-package com.caltruism.assist.utils;
+package com.caltruism.assist.util;
 
 import android.icu.util.Calendar;
 import android.text.format.DateUtils;
-import android.util.Log;
 
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Locale;
 
 public class CustomDateTimeUtil {
@@ -19,6 +16,19 @@ public class CustomDateTimeUtil {
             return "Tomorrow";
         } else {
             SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yy", Locale.US);
+            return sdf.format(dateTimeMili);
+        }
+    }
+
+    public static String getDateWithTime (long dateTimeMili) {
+        SimpleDateFormat sdf = new SimpleDateFormat("h:mm a", Locale.US);
+
+        if (DateUtils.isToday(dateTimeMili)) {
+            return "Today, " + sdf.format(dateTimeMili);
+        } else if (DateUtils.isToday(dateTimeMili - DateUtils.DAY_IN_MILLIS)) {
+            return "Tomorrow, " + sdf.format(dateTimeMili);
+        } else {
+            sdf = new SimpleDateFormat("MM/dd/yy, h:mm a", Locale.US);
             return sdf.format(dateTimeMili);
         }
     }
