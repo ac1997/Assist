@@ -9,12 +9,14 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
 import com.caltruism.assist.R;
+import com.caltruism.assist.util.SharedPreferencesHelper;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreSettings;
 
 public class MainEmptyActivity extends AppCompatActivity {
 
@@ -23,9 +25,15 @@ public class MainEmptyActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.launch_screen);
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         FirebaseAuth auth = FirebaseAuth.getInstance();
+
+        FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
+                .setPersistenceEnabled(true)
+                .build();
+        db.setFirestoreSettings(settings);
 
         if (auth.getCurrentUser() != null) {
             DocumentReference docRef = db.collection("users").document(auth.getCurrentUser().getUid());
@@ -34,7 +42,7 @@ public class MainEmptyActivity extends AppCompatActivity {
                 @Override
                 public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                     Intent activityIntent;
-                    Context mainContext = MainEmptyActivity.this;
+                    Context context = MainEmptyActivity.this;
 
                     if (task.isSuccessful()) {
                         DocumentSnapshot document = task.getResult();
@@ -42,27 +50,29 @@ public class MainEmptyActivity extends AppCompatActivity {
                         assert document != null;
 
                         if (document.exists()) {
+
+                            SharedPreferencesHelper.setPreferences(context, document);
                             Object memberTypeObject = document.get("memberType");
+
                             if (memberTypeObject == null) {
-                                Log.d(TAG, document.getData().toString());
-                                activityIntent = new Intent(mainContext, GetMemberTypeActivity.class);
+                                activityIntent = new Intent(context, GetMemberTypeActivity.class);
                             } else {
                                 String memberTypeString = memberTypeObject.toString();
 
                                 if (memberTypeString.equals(getResources().getString(R.string.volunteer_type)))
-                                    activityIntent = new Intent(mainContext, VolunteerMainActivity.class);
+                                    activityIntent = new Intent(context, VolunteerMainActivity.class);
                                 else if (memberTypeString.equals(getResources().getString(R.string.disabled_type)))
-                                    activityIntent = new Intent(mainContext, DisabledMainActivity.class);
+                                    activityIntent = new Intent(context, DisabledMainActivity.class);
                                 else
-                                    activityIntent = new Intent(mainContext, GetMemberTypeActivity.class);
+                                    activityIntent = new Intent(context, GetMemberTypeActivity.class);
                             }
                         } else {
                             Log.d(TAG, "Users not exist.");
-                            activityIntent = new Intent(mainContext, LoginActivity.class);
+                            activityIntent = new Intent(context, SignInActivity.class);
                         }
                     } else {
                         Log.e(TAG, "Get failed with ", task.getException());
-                        activityIntent = new Intent(mainContext, LoginActivity.class);
+                        activityIntent = new Intent(context, SignInActivity.class);
                     }
 
                     startActivity(activityIntent);
@@ -70,7 +80,7 @@ public class MainEmptyActivity extends AppCompatActivity {
                 }
             });
         } else {
-            startActivity(new Intent(this, LoginActivity.class));
+            startActivity(new Intent(this, WelcomeActivity.class));
             finish();
         }
     }

@@ -9,8 +9,8 @@
         android:id="@+id/linearLayoutInputDateTimeRequestType"
         android:layout_width="0dp"
         android:layout_height="60dp"
-        android:layout_marginEnd="32dp"
-        android:layout_marginStart="32dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
         android:gravity="top|left"
         android:lines="8"
@@ -45,15 +45,15 @@
 
     <android.support.design.widget.TextInputLayout
         android:id="@+id/textInputDetailsTitle"
+        style="@style/TextInputLayoutStyle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        style="@style/TextInputLayoutStyle"
-        android:layout_marginEnd="32dp"
-        android:layout_marginStart="32dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="16dp"
         android:layout_marginTop="32dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/linearLayoutInputDateTimeRequestType" >
+        app:layout_constraintTop_toBottomOf="@+id/linearLayoutInputDateTimeRequestType">
 
         <android.support.design.widget.TextInputEditText
             android:id="@+id/editTextInputDetailsTitle"
@@ -66,15 +66,15 @@
 
     <android.support.design.widget.TextInputLayout
         android:id="@+id/textInputDetailsDescription"
+        style="@style/TextInputLayoutStyle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        style="@style/TextInputLayoutStyle"
-        android:layout_marginEnd="32dp"
-        android:layout_marginStart="32dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textInputDetailsTitle" >
+        app:layout_constraintTop_toBottomOf="@+id/textInputDetailsTitle">
 
         <android.support.design.widget.TextInputEditText
             android:id="@+id/editTextInputDetailsDescription"
@@ -95,8 +95,8 @@
         style="@style/TextInputLayoutStyle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="32dp"
-        android:layout_marginStart="32dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -107,13 +107,13 @@
             android:layout_width="match_parent"
             android:layout_height="60dp"
             android:ems="10"
+            android:focusable="false"
+            android:hint="Location"
+            android:inputType="none"
             android:paddingEnd="12dp"
             android:paddingStart="12dp"
             android:singleLine="true"
-            android:focusable="false"
-            android:inputType="none"
-            android:hint="Location"
-            android:text="Current Location"/>
+            android:text="Current Location" />
     </android.support.design.widget.TextInputLayout>
 
 </android.support.constraint.ConstraintLayout>

@@ -2,18 +2,20 @@ package com.caltruism.assist.activity;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Html;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import com.caltruism.assist.R;
-import com.caltruism.assist.util.Constants;
+import com.caltruism.assist.util.CustomLoadingDialog;
+import com.caltruism.assist.util.SharedPreferencesHelper;
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
@@ -35,7 +37,6 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.GoogleAuthProvider;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -46,29 +47,33 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 
-public class LoginActivity extends AppCompatActivity {
+public class SignInActivity extends AppCompatActivity {
 
-    private static final String TAG ="LoginActivity";
+    private static final String TAG ="SignInActivity";
     private static final int RC_SIGN_IN = 9001;
 
-    private static final String EMAIL = "Email";
-    private static final String FACEBOOK = "Facebook";
-    private static final String GOOGLE = "Google";
-    private static final String EMAIL_LOGIN_ERROR = "Login failed. Please try agian.";
-    private static final String FACEBOOK_LOGIN_ERROR = "Facebook login failed. Please try again.";
-    private static final String GOOGLE_LOGIN_ERROR = "Google login failed. Please try again.";
+    private static final int EMAIL = 0;
+    private static final int FACEBOOK = 1;
+    private static final int GOOGLE = 2;
+    private static final int OTHER = 3;
 
-    private FirebaseFirestore db;
+    private EditText editTextEmail;
+    private EditText editTextPassword;
+
     private FirebaseAuth auth;
     private GoogleSignInClient GoogleSignInClient;
     private CallbackManager callbackManager;
 
+    private CustomLoadingDialog customLoadingDialog;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
+        setContentView(R.layout.activity_sign_in);
 
-        db = FirebaseFirestore.getInstance();
+        editTextEmail = findViewById(R.id.editTextEmail);
+        editTextPassword = findViewById(R.id.editTextPassword);
+
         auth = FirebaseAuth.getInstance();
 
         callbackManager = CallbackManager.Factory.create();
@@ -87,80 +92,115 @@ public class LoginActivity extends AppCompatActivity {
 
             @Override
             public void onCancel() {
-                Log.d(TAG, "Facebook login canceled");
+                customLoadingDialog.hideDialog();
+                Log.d(TAG, "Facebook sign in canceled");
             }
 
             @Override
             public void onError(FacebookException exception) {
-                Log.e(TAG, "Facebook login error", exception);
+                customLoadingDialog.hideDialog();
+                Log.e(TAG, "Facebook sign in error", exception);
+                showSnackbar(FACEBOOK);
             }
         });
 
-        Button loginButtonEmail = findViewById(R.id.buttonLoginEmail);
-        loginButtonEmail.setOnClickListener(new View.OnClickListener() {
+        Button signInButtonEmail = findViewById(R.id.buttonSignInEmail);
+        signInButtonEmail.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                EditText editTextEmail = findViewById(R.id.editTextEmail);
-                EditText editTextPassword = findViewById(R.id.editTextPassword);
+                customLoadingDialog.showDialog();
                 String email = editTextEmail.getText().toString();
                 String password = editTextPassword.getText().toString();
 
-                // TODO: Verify format
+                // TODO: Rephrase and reinforce password validation
+                if (password.length() == 0) {
+                    showSnackbar("Password cannot be empty.");
+                    return;
+                } else if (password.length() <= 6) {
+                    showSnackbar("Password needs to be at least 6 characters.");
+                    return;
+                }
 
-                handleEmailPasswordLogin(email, password);
+                if (email.length() == 0) {
+                    showSnackbar("Email cannot be empty.");
+                    return;
+                } else if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                    showSnackbar("Invalid email address.");
+                    return;
+                }
+
+                handleEmailPasswordSignIn(email, password);
             }
         });
 
-        Button loginButtonFacebook = findViewById(R.id.buttonLoginFacebook);
-        loginButtonFacebook.setOnClickListener(new View.OnClickListener() {
+        Button signInButtonFacebook = findViewById(R.id.buttonSignInFacebook);
+        signInButtonFacebook.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                LoginManager.getInstance().logInWithReadPermissions(LoginActivity.this, Arrays.asList("email", "public_profile", "user_gender", "user_age_range"));
+                LoginManager.getInstance().logInWithReadPermissions(SignInActivity.this, Arrays.asList("email", "public_profile"));
             }
         });
 
-        Button loginButtonGoogle = findViewById(R.id.buttonLoginGoogle);
-        loginButtonGoogle.setOnClickListener(new View.OnClickListener() {
+        Button signInButtonGoogle = findViewById(R.id.buttonSignInGoogle);
+        signInButtonGoogle.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent signInIntent = GoogleSignInClient.getSignInIntent();
                 startActivityForResult(signInIntent, RC_SIGN_IN);
             }
         });
+
+        TextView signUp = findViewById(R.id.textViewSignInActivitySignUp);
+        signUp.setText(Html.fromHtml("Don't have an account?&nbsp;&nbsp;<font color='#ffb88e'>Sign Up</font>", Html.FROM_HTML_MODE_LEGACY));
+        signUp.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(SignInActivity.this, SignUpActivity.class));
+                finish();
+            }
+        });
+
+        customLoadingDialog = new CustomLoadingDialog(this);
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        customLoadingDialog.hideDialog();
+    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        customLoadingDialog.showDialog();
 
         if (requestCode == RC_SIGN_IN) {
+
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
             try {
                 GoogleSignInAccount account = task.getResult(ApiException.class);
                 assert account != null;
-                handleGoogleLogin(account);
+                handleGoogleSignIn(account);
             } catch (ApiException e) {
                 Log.e(TAG, "Google sign in failed", e);
-                Snackbar snackbar = Snackbar.make(LoginActivity.this.findViewById(R.id.loginConstraintLayout), GOOGLE_LOGIN_ERROR, Snackbar.LENGTH_LONG);
-                snackbar.show();
+                customLoadingDialog.hideDialog();
+                showSnackbar(GOOGLE);
             }
         } else {
             callbackManager.onActivityResult(requestCode, resultCode, data);
         }
     }
 
-    private void handleEmailPasswordLogin(String email, String password) {
+    private void handleEmailPasswordSignIn(String email, String password) {
         auth.signInWithEmailAndPassword(email, password).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
                 if (task.isSuccessful()) {
-                    Log.d(TAG, "Email login success");
                     checkUserInDatabase(EMAIL, null, null);
                 } else {
                     Log.e(TAG, "Email authentication failed", task.getException());
-                    Snackbar snackbar = Snackbar.make(LoginActivity.this.findViewById(R.id.loginConstraintLayout), EMAIL_LOGIN_ERROR, Snackbar.LENGTH_LONG);
-                    snackbar.show();
+                    customLoadingDialog.hideDialog();
+                    showSnackbar(EMAIL);
                 }
             }
         });
@@ -172,39 +212,36 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
                 if (task.isSuccessful()) {
-                    Log.d(TAG, "Facebook login success");
                     checkUserInDatabase(FACEBOOK, token, null);
                 } else {
                     Log.e(TAG, "Facebook authentication failed", task.getException());
-                    Snackbar snackbar = Snackbar.make(LoginActivity.this.findViewById(R.id.loginConstraintLayout), FACEBOOK_LOGIN_ERROR, Snackbar.LENGTH_LONG);
-                    snackbar.show();
+                    customLoadingDialog.hideDialog();
+                    showSnackbar(FACEBOOK);
                 }
             }
         });
     }
 
-    private void handleGoogleLogin(final GoogleSignInAccount acct) {
+    private void handleGoogleSignIn(final GoogleSignInAccount acct) {
         AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
         auth.signInWithCredential(credential).addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
                 if (task.isSuccessful()) {
-                    Log.d(TAG, "Google login success");
                     checkUserInDatabase(GOOGLE, null, acct);
                 } else {
                     Log.e(TAG, "Google authentication failed", task.getException());
-                    Snackbar snackbar = Snackbar.make(LoginActivity.this.findViewById(R.id.loginConstraintLayout), GOOGLE_LOGIN_ERROR, Snackbar.LENGTH_LONG);
-                    snackbar.show();
+                    customLoadingDialog.hideDialog();
+                    showSnackbar(GOOGLE);
                 }
             }
         });
     }
 
-    private void checkUserInDatabase(final String method, final AccessToken token, final GoogleSignInAccount acct)
+    private void checkUserInDatabase(final int method, final AccessToken token, final GoogleSignInAccount acct)
     {
-        DocumentReference docRef = db.collection("users").document(auth.getCurrentUser().getUid());
-
-        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+        FirebaseFirestore.getInstance().collection("users").document(auth.getCurrentUser().getUid())
+                .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                 if (task.isSuccessful()) {
@@ -214,60 +251,45 @@ public class LoginActivity extends AppCompatActivity {
 
                     if (document.exists()) {
                         Intent activityIntent;
-                        Context mainContext = LoginActivity.this;
+                        Context context = SignInActivity.this;
 
-                        SharedPreferences sharedPreferences = getSharedPreferences(Constants.USER_DATA_SHARED_PREFERENCE, Context.MODE_PRIVATE);
-                        SharedPreferences.Editor editor = sharedPreferences.edit();
-
-                        Object memberNameObject = document.get("name");
-                        Object memberPictureURLObject = document.get("pictureURL");
-                        Object memberRatingsObject = document.get("ratings");
+                        SharedPreferencesHelper.setPreferences(context, document);
                         Object memberTypeObject = document.get("memberType");
 
-                        if (memberNameObject != null)
-                            editor.putString("name", memberNameObject.toString());
-
-                        if (memberPictureURLObject != null)
-                            editor.putString("pictureURL", memberPictureURLObject.toString());
-
-                        if (memberRatingsObject != null)
-                            editor.putFloat("ratings", Float.parseFloat(memberRatingsObject.toString()));
-
-                        // TODO: Get joinedOn timestamp
-
                         if (memberTypeObject == null) {
-                            Log.d(TAG, document.getData().toString());
-                            activityIntent = new Intent(mainContext, GetMemberTypeActivity.class);
+                            activityIntent = new Intent(context, GetMemberTypeActivity.class);
                         } else {
                             String memberTypeString = memberTypeObject.toString();
 
                             if (memberTypeString.equals(getResources().getString(R.string.volunteer_type)))
-                                activityIntent = new Intent(mainContext, VolunteerMainActivity.class);
+                                activityIntent = new Intent(context, VolunteerMainActivity.class);
                             else if (memberTypeString.equals(getResources().getString(R.string.disabled_type)))
-                                activityIntent = new Intent(mainContext, DisabledMainActivity.class);
+                                activityIntent = new Intent(context, DisabledMainActivity.class);
                             else
-                                activityIntent = new Intent(mainContext, GetMemberTypeActivity.class);
-
-                            editor.putString("memberType", memberTypeString);
+                                activityIntent = new Intent(context, GetMemberTypeActivity.class);
                         }
-                        editor.apply();
                         startActivity(activityIntent);
                         finish();
                     } else {
-                        if (method.equals(EMAIL)) {
-                            Log.e(TAG, "Email sign in with user data not exist in database");
-                            Snackbar snackbar = Snackbar.make(LoginActivity.this.findViewById(R.id.loginConstraintLayout), "Please contact use.", Snackbar.LENGTH_LONG);
-                            snackbar.show();
+                        Log.e(TAG, "DOCUMENT NOT EXIST");
+                        switch (method) {
+                            case EMAIL:
+                                customLoadingDialog.hideDialog();
+                                Log.e(TAG, "Email sign in with user data not exist in database");
+                                showSnackbar(OTHER);
+                                break;
+                            case FACEBOOK:
+                                setFacebookData(token);
+                                break;
+                            case GOOGLE:
+                                setGoogleData(acct);
+                                break;
                         }
-                        else if (method.equals(FACEBOOK))
-                            setFacebookData(token);
-                        else if (method.equals(GOOGLE))
-                            setGoogleData(acct);
                     }
                 } else {
                     Log.e(TAG, "Get failed with ", task.getException());
-                    Snackbar snackbar = Snackbar.make(LoginActivity.this.findViewById(R.id.loginConstraintLayout), FACEBOOK_LOGIN_ERROR, Snackbar.LENGTH_LONG);
-                    snackbar.show();
+                    customLoadingDialog.hideDialog();
+                    showSnackbar(EMAIL);
                 }
             }
         });
@@ -282,21 +304,19 @@ public class LoginActivity extends AppCompatActivity {
                     String email = response.getJSONObject().getString("email");
                     String firstName = response.getJSONObject().getString("first_name");
                     String lastName = response.getJSONObject().getString("last_name");
-                    String gender = response.getJSONObject().getString("gender");
-                    String ageRange = response.getJSONObject().getString("age_range");
                     String pictureURL = Profile.getCurrentProfile().getProfilePictureUri(200, 200).toString();
 
-                    initUser(email, firstName, lastName, pictureURL, gender, ageRange);
+                    initUser(email, firstName, lastName, pictureURL);
                 } catch (JSONException e) {
+                    customLoadingDialog.hideDialog();
                     Log.e(TAG, "Facebook sign in failed", e);
-                    Snackbar snackbar = Snackbar.make(LoginActivity.this.findViewById(R.id.loginConstraintLayout), FACEBOOK_LOGIN_ERROR, Snackbar.LENGTH_LONG);
-                    snackbar.show();
+                    showSnackbar(FACEBOOK);
                 }
             }
         });
 
         Bundle parameters = new Bundle();
-        parameters.putString("fields", "id, email, first_name, last_name, gender, age_range");
+        parameters.putString("fields", "id, email, first_name, last_name");
         request.setParameters(parameters);
         request.executeAsync();
     }
@@ -307,21 +327,15 @@ public class LoginActivity extends AppCompatActivity {
         String lastName = acct.getFamilyName();
         String pictureURL = acct.getPhotoUrl().toString();
 
-        initUser(email, firstName, lastName, pictureURL, null, null);
+        initUser(email, firstName, lastName, pictureURL);
     }
 
-    private void initUser(String email, String firstName, String lastName, String pictureURL, String gender, String ageRange) {
+    private void initUser(String email, String firstName, String lastName, String pictureURL) {
         HashMap<String, Object> userData = new HashMap<>();
         userData.put("email", email);
         userData.put("firstName", firstName);
         userData.put("lastName", lastName);
-        userData.put("name", firstName + " " + lastName);
         userData.put("pictureURL", pictureURL);
-
-        if (gender != null)
-            userData.put("gender", gender);
-        if (ageRange != null)
-            userData.put("ageRange", ageRange);
 
         userData.put("ratings", 0.0);
 
@@ -335,5 +349,29 @@ public class LoginActivity extends AppCompatActivity {
         intent.putExtra("userData", userData);
         startActivity(intent);
         finish();
+    }
+
+    private void showSnackbar(int method) {
+        String message = "";
+        switch (method) {
+            case EMAIL:
+                message = "Sign in failed. Please try again later.";
+                break;
+            case FACEBOOK:
+                message = "Facebook sign in failed. Please try again later.";
+                break;
+            case GOOGLE:
+                message = "Google sign in failed. Please try again later.";
+                break;
+            case OTHER:
+                message = "Sign in failed. Please contact us.";
+        }
+        Snackbar snackbar = Snackbar.make(SignInActivity.this.findViewById(R.id.SignInConstraintLayout), message, Snackbar.LENGTH_LONG);
+        snackbar.show();
+    }
+
+    private void showSnackbar(String message) {
+        Snackbar snackbar = Snackbar.make(SignInActivity.this.findViewById(R.id.SignUpConstraintLayout), message, Snackbar.LENGTH_LONG);
+        snackbar.show();
     }
 }

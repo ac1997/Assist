@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/disabledProfile"
+            android:checked="false"
+            android:icon="@drawable/ic_calendar_solid"
+            android:title="Profile"/>
+
+        <item
+            android:id="@+id/disabledRequestList"
+            android:checked="false"
+            android:icon="@drawable/ic_add_request_other"
+            android:title="Current Request"/>
+
+        <item
+            android:id="@+id/disabledRequestHistory"
+            android:checked="false"
+            android:icon="@drawable/ic_add_request_laundry"
+            android:title="Request History"/>
+
+        <item
+            android:id="@+id/disabledSocial"
+            android:checked="false"
+            android:icon="@drawable/ic_add_request_laundry"
+            android:title="Social"/>
+
+        <item
+            android:id="@+id/disabledLeaderboard"
+            android:checked="false"
+            android:icon="@drawable/ic_add_request_laundry"
+            android:title="Leaderboard"/>
+
+        <item
+            android:id="@+id/disabledLogout"
+            android:checked="false"
+            android:icon="@drawable/ic_add_request_laundry"
+            android:title="Logout"/>
+    </group>
+</menu>

@@ -11,9 +11,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 
 import com.caltruism.assist.R;
 import com.caltruism.assist.util.Constants;
+import com.caltruism.assist.util.SharedPreferencesHelper;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -44,9 +46,18 @@ public class GetMemberTypeActivity extends AppCompatActivity {
         Intent intent = getIntent();
         userData = (HashMap<String, Object>)intent.getSerializableExtra("userData");
 
-        Button buttonVolunteer = findViewById(R.id.buttonVolunteer);
-        Button buttonDisabled = findViewById(R.id.buttonDisabled);
+        SharedPreferences sharedPreferences = getSharedPreferences(Constants.USER_DATA_SHARED_PREFERENCE, Context.MODE_PRIVATE);
+        String firstName = "";
 
+        if (userData == null && sharedPreferences.contains("firstName"))
+            firstName = sharedPreferences.getString("firstName", null);
+        else if (userData != null)
+            firstName = (String) userData.get("firstName");
+
+        TextView name = findViewById(R.id.textViewGetMemberTypeName);
+        name.setText(String.format("Hello %s!", firstName));
+
+        Button buttonVolunteer = findViewById(R.id.buttonVolunteer);
         buttonVolunteer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -54,6 +65,7 @@ public class GetMemberTypeActivity extends AppCompatActivity {
             }
         });
 
+        Button buttonDisabled = findViewById(R.id.buttonDisabled);
         buttonDisabled.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -61,6 +73,8 @@ public class GetMemberTypeActivity extends AppCompatActivity {
             }
         });
     }
+
+
 
     private void addUserData(final String memberType) {
         if (userData == null)
@@ -97,9 +111,6 @@ public class GetMemberTypeActivity extends AppCompatActivity {
             }
         });
 
-        SharedPreferences sharedPreferences = getSharedPreferences(Constants.USER_DATA_SHARED_PREFERENCE, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString("memberType", memberType);
-        editor.apply();
+        SharedPreferencesHelper.setPreferencesMemberType(GetMemberTypeActivity.this, memberType);
     }
 }

@@ -9,8 +9,8 @@
         android:id="@+id/linearLayoutInputDateTimeRequestType"
         android:layout_width="0dp"
         android:layout_height="60dp"
-        android:layout_marginEnd="32dp"
-        android:layout_marginStart="32dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
         android:gravity="top|left"
         android:lines="8"
@@ -61,15 +61,15 @@
 
     <android.support.design.widget.TextInputLayout
         android:id="@+id/textInputDate"
+        style="@style/TextInputLayoutStyle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        style="@style/TextInputLayoutStyle"
-        android:layout_marginEnd="32dp"
-        android:layout_marginStart="32dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="16dp"
         android:layout_marginTop="32dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/linearLayoutInputDateTimeRequestType" >
+        app:layout_constraintTop_toBottomOf="@+id/linearLayoutInputDateTimeRequestType">
 
         <android.support.design.widget.TextInputEditText
             android:id="@+id/editTextInputDate"
@@ -77,22 +77,22 @@
             android:layout_height="match_parent"
             android:ems="10"
             android:focusable="false"
-            android:inputType="none"
             android:hint="Date"
+            android:inputType="none"
             android:text="Today" />
     </android.support.design.widget.TextInputLayout>
 
     <android.support.design.widget.TextInputLayout
         android:id="@+id/textInputTime"
+        style="@style/TextInputLayoutStyle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        style="@style/TextInputLayoutStyle"
-        android:layout_marginEnd="32dp"
-        android:layout_marginStart="32dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textInputDate" >
+        app:layout_constraintTop_toBottomOf="@+id/textInputDate">
 
         <android.support.design.widget.TextInputEditText
             android:id="@+id/editTextInputTime"
@@ -100,8 +100,8 @@
             android:layout_height="match_parent"
             android:ems="10"
             android:focusable="false"
-            android:inputType="none"
             android:hint="Time"
+            android:inputType="none"
             android:text="Now" />
 
     </android.support.design.widget.TextInputLayout>
@@ -111,8 +111,8 @@
         style="@style/TextInputLayoutStyle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="32dp"
-        android:layout_marginStart="32dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

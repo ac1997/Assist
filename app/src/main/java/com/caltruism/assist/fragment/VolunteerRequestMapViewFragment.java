@@ -8,7 +8,6 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,7 +16,7 @@ import com.caltruism.assist.R;
 import com.caltruism.assist.data.AssistRequest;
 import com.caltruism.assist.util.BitMapDescriptorFromVector;
 import com.caltruism.assist.util.CustomDateTimeUtil;
-import com.caltruism.assist.util.DataListener;
+import com.caltruism.assist.util.CustomCallbackListener;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
@@ -28,10 +27,8 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.firestore.DocumentSnapshot;
 
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
 
-public class VolunteerRequestMapViewFragment extends Fragment implements DataListener.VolunteerRequestMapViewDataListener,
+public class VolunteerRequestMapViewFragment extends Fragment implements CustomCallbackListener.VolunteerRequestListChildFragmentCallbackListener,
         OnMapReadyCallback, ActivityCompat.OnRequestPermissionsResultCallback {
 
     private static final String TAG = "VolunteerRequestMapViewFragment";
@@ -40,25 +37,14 @@ public class VolunteerRequestMapViewFragment extends Fragment implements DataLis
     private MapView mapView;
 
     private GoogleMap map;
-    private boolean isMapReady = false;
+    private boolean isFirstUpdate = true;
 
     private Location currentLocation;
-    private LatLng cameraLocation;
     private HashMap<String, AssistRequest> assistRequests = new HashMap<>();
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        Bundle arguments = getArguments();
-        cameraLocation = arguments.getParcelable("location");
-        assistRequests = (HashMap<String, AssistRequest>) ((HashMap<String, AssistRequest>) arguments.getSerializable("requests")).clone();
-
-        for (String key : assistRequests.keySet()) {
-
-            Log.e(TAG, "Initial data: " + key);
-        }
-
         return inflater.inflate(R.layout.fragment_volunteer_request_map_view, container, false);
     }
 
@@ -79,8 +65,6 @@ public class VolunteerRequestMapViewFragment extends Fragment implements DataLis
         map.getUiSettings().setMyLocationButtonEnabled(false);
         map.getUiSettings().setMapToolbarEnabled(false);
         map.setMyLocationEnabled(true);
-        map.moveCamera(CameraUpdateFactory.newLatLngZoom(cameraLocation, DEFAULT_ZOOM));
-        isMapReady = true;
 
         FloatingActionButton fab = getView().findViewById(R.id.fabVolunteerMapViewCurrentLocation);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -93,11 +77,6 @@ public class VolunteerRequestMapViewFragment extends Fragment implements DataLis
                 }
             }
         });
-
-        for (String key : assistRequests.keySet()) {
-            // TODO: Set onclick listener
-            assistRequests.get(key).setNewMarker(getActivity(), map);
-        }
     }
 
     @Override
@@ -126,48 +105,37 @@ public class VolunteerRequestMapViewFragment extends Fragment implements DataLis
     }
 
     @Override
-    public void onNewLocations(Location newCurrentLocation, LatLng newCameraLocation) {
+    public void onNewLocations(Location newCurrentLocation, LatLng newCameraLocation, boolean isUsingCurrentLocation, boolean isNewSearch) {
         if (newCurrentLocation != null)
             currentLocation = newCurrentLocation;
 
-        if (newCameraLocation != null) {
-            cameraLocation = newCameraLocation;
-            if (isMapReady)
-                map.animateCamera(CameraUpdateFactory.newLatLngZoom(cameraLocation, DEFAULT_ZOOM));
+        if (isUsingCurrentLocation || isNewSearch) {
+            if (map != null && (isFirstUpdate || isNewSearch)) {
+                isFirstUpdate = false;
+                map.animateCamera(CameraUpdateFactory.newLatLngZoom(newCameraLocation, DEFAULT_ZOOM));
+            }
         }
     }
 
     @Override
     public void onNewDataSet(HashMap<String, AssistRequest> data) {
-        if (isMapReady && data != null) {
-            Iterator<Map.Entry<String, AssistRequest>> iter = assistRequests.entrySet().iterator();
-            while (iter.hasNext()) {
-                Map.Entry<String, AssistRequest> entry = iter.next();
+        if (map != null && data != null) {
+            for (AssistRequest request : assistRequests.values())
+                request.getMarker().remove();
 
-                if (!data.containsKey(entry.getKey())) {
-                    entry.getValue().getMarker().remove();
-                    iter.remove();
-                }
-            }
+            assistRequests.clear();
+            assistRequests.putAll(data);
 
-            HashMap<String, AssistRequest> toBeAdded = new HashMap<>();
-
-            for (String key : data.keySet()) {
-                if (!assistRequests.containsKey(key))
-                    toBeAdded.put(key, data.get(key));
-            }
-            assistRequests.putAll(toBeAdded);
-
-            for (String key : toBeAdded.keySet()) {
+            for (AssistRequest request : assistRequests.values()) {
                 // TODO: Set onclick listener
-                assistRequests.get(key).setNewMarker(getActivity(), map);
+                request.setNewMarker(getActivity(), map);
             }
         }
     }
 
     @Override
     public void onDataAdded(DocumentSnapshot documentSnapshot) {
-        AssistRequest assistRequest = new AssistRequest(documentSnapshot);
+        AssistRequest assistRequest = new AssistRequest(documentSnapshot, currentLocation);
         assistRequest.setMarker(map.addMarker(new MarkerOptions().position(assistRequest.getLocationLatLng())
                 .title(assistRequest.getTitle()).snippet(CustomDateTimeUtil.getDateWithTime(assistRequest.getDateTime()))
                 .icon(BitMapDescriptorFromVector.requestTypeMarker(getActivity(), assistRequest.getType()))));
@@ -176,9 +144,9 @@ public class VolunteerRequestMapViewFragment extends Fragment implements DataLis
     }
 
     @Override
-    public void onDataRemoved(DocumentSnapshot documentSnapshot) {
-        assistRequests.get(documentSnapshot.getId()).getMarker().remove();
-        assistRequests.remove(documentSnapshot.getId());
+    public void onDataRemoved(String documentId) {
+        assistRequests.get(documentId).getMarker().remove();
+        assistRequests.remove(documentId);
     }
 
     @Override
