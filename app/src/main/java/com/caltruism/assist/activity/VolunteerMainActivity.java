@@ -15,11 +15,12 @@ import android.view.MenuItem;
 import com.arlib.floatingsearchview.FloatingSearchView;
 import com.caltruism.assist.R;
 import com.caltruism.assist.fragment.VolunteerRequestListFragment;
-import com.caltruism.assist.util.VolunteerBaseFragment;
+import com.caltruism.assist.util.CustomCallbackListener;
+import com.caltruism.assist.util.SharedPreferencesHelper;
 import com.google.firebase.auth.FirebaseAuth;
 
 public class VolunteerMainActivity extends AppCompatActivity implements
-        VolunteerBaseFragment.VolunteerBaseFragmentCallback, NavigationView.OnNavigationItemSelectedListener {
+        CustomCallbackListener.VolunteerRequestListFragmentCallbackListener, NavigationView.OnNavigationItemSelectedListener {
 
     private DrawerLayout drawerLayout;
 
@@ -28,8 +29,8 @@ public class VolunteerMainActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_volunteer);
 
-        drawerLayout = findViewById(R.id.volunteerDrawerLayout);
-        NavigationView navigationView = findViewById(R.id.volunteerNavView);
+        drawerLayout = findViewById(R.id.drawerLayoutVolunteer);
+        NavigationView navigationView = findViewById(R.id.navViewVolunteer);
         navigationView.setNavigationItemSelectedListener(this);
         navigationView.getMenu().getItem(1).setChecked(true);
 
@@ -41,7 +42,7 @@ public class VolunteerMainActivity extends AppCompatActivity implements
     public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
         drawerLayout.closeDrawer(GravityCompat.START);
         switch (menuItem.getItemId()) {
-            case R.id.volunteerprofile:
+            case R.id.volunteerProfile:
                 return true;
 
             case R.id.volunteerTaskList:
@@ -66,7 +67,8 @@ public class VolunteerMainActivity extends AppCompatActivity implements
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 FirebaseAuth.getInstance().signOut();
-                                startActivity(new Intent(VolunteerMainActivity.this, LoginActivity.class));
+                                SharedPreferencesHelper.clearPreferences(VolunteerMainActivity.this);
+                                startActivity(new Intent(VolunteerMainActivity.this, SignInActivity.class));
                                 finish();
                             }
                         }).setNegativeButton("No", null).show();
@@ -84,6 +86,6 @@ public class VolunteerMainActivity extends AppCompatActivity implements
     private void showFragment(Fragment fragment) {
         getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.volunteerMainFragmentContainer, fragment).commit();
+                .replace(R.id.frameLayoutVolunteerMain, fragment).commit();
     }
 }

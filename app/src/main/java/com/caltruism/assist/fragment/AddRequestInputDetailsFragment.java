@@ -22,8 +22,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.caltruism.assist.R;
+import com.caltruism.assist.util.CustomCallbackListener;
 import com.caltruism.assist.util.Constants;
-import com.caltruism.assist.util.DataListener;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
@@ -36,7 +36,7 @@ import java.util.HashMap;
 
 import static android.app.Activity.RESULT_OK;
 
-public class AddRequestInputDetailsFragment extends Fragment implements DataListener.AddRequestFragmentDataListener {
+public class AddRequestInputDetailsFragment extends Fragment implements CustomCallbackListener.AddRequestFragmentCallbackListener {
 
     private static final String TAG = "AddRequestInputDetailsFragment";
     private static final int REQUEST_CODE_AUTOCOMPLETE = 1;
@@ -50,12 +50,10 @@ public class AddRequestInputDetailsFragment extends Fragment implements DataList
     private static final String LOCATION_ADDRESS_KEY = "locationAddress";
     private static final String LOCATION_LAT_LNG_KEY = "locationLatLng";
 
-    private DataListener.AddRequestActivityDataListener listener;
+    private CustomCallbackListener.AddRequestActivityCallbackListener callbackListener;
 
     private ImageView imageViewType;
     private TextView textViewType;
-    private EditText editTextTitle;
-    private EditText editTextDescription;
     private EditText editTextLocation;
 
     private HashMap<String, Object> dataMap = new HashMap<>();
@@ -65,10 +63,10 @@ public class AddRequestInputDetailsFragment extends Fragment implements DataList
     public void onAttach(Context context) {
         super.onAttach(context);
 
-        if (context instanceof DataListener.AddRequestActivityDataListener) {
-            listener = (DataListener.AddRequestActivityDataListener) context;
+        if (context instanceof CustomCallbackListener.AddRequestActivityCallbackListener) {
+            callbackListener = (CustomCallbackListener.AddRequestActivityCallbackListener) context;
         } else {
-            throw new RuntimeException(context.toString() + " must implement DataListener.AddRequestActivityDataListener!");
+            throw new RuntimeException(context.toString() + " must implement CustomCallbackListener.AddRequestActivityCallbackListener!");
         }
     }
 
@@ -90,12 +88,11 @@ public class AddRequestInputDetailsFragment extends Fragment implements DataList
 
         imageViewType = view.findViewById(R.id.imageViewInputDetailsRequestType);
         textViewType = view.findViewById(R.id.textViewInputDetailsRequestType);
-        editTextTitle = view.findViewById(R.id.editTextInputDetailsTitle);
-        editTextDescription = view.findViewById(R.id.editTextInputDetailsDescription);
         editTextLocation = view.findViewById(R.id.editTextInputDetailsLocation);
-
         setRequestType();
 
+        EditText editTextTitle = view.findViewById(R.id.editTextInputDetailsTitle);
+        EditText editTextDescription = view.findViewById(R.id.editTextInputDetailsDescription);
         editTextDescription.setImeOptions(EditorInfo.IME_ACTION_DONE);
         editTextDescription.setRawInputType(InputType.TYPE_CLASS_TEXT);
 
@@ -170,7 +167,7 @@ public class AddRequestInputDetailsFragment extends Fragment implements DataList
     private void openAutocompleteActivity() {
         try {
             AutocompleteFilter typeFilter = new AutocompleteFilter.Builder().setCountry("US").build();
-            Intent intent = new PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_FULLSCREEN).setFilter(typeFilter).build(getActivity());
+            Intent intent = new PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_OVERLAY).setFilter(typeFilter).build(getActivity());
             startActivityForResult(intent, REQUEST_CODE_AUTOCOMPLETE);
         } catch (GooglePlayServicesRepairableException e) {
             GoogleApiAvailability.getInstance().getErrorDialog(getActivity(), e.getConnectionStatusCode(), 0).show();
@@ -217,6 +214,6 @@ public class AddRequestInputDetailsFragment extends Fragment implements DataList
         }
 
         if (signal)
-            listener.onDataChange(1, dataMap);
+            callbackListener.onDataChange(1, dataMap);
     }
 }

@@ -20,17 +20,28 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".activity.MainEmptyActivity">
+        <activity
+            android:name=".activity.MainEmptyActivity"
+            android:theme="@style/AppTheme.Launcher" >
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".activity.LoginActivity" />
-        <activity android:name=".activity.GetMemberTypeActivity" />
+
+        <activity
+            android:name=".activity.SignInActivity"
+            android:theme="@style/SignInSignUpTheme" />
+
+        <activity
+            android:name=".activity.GetMemberTypeActivity"
+            android:theme="@style/SignInSignUpTheme"/>
+
         <activity android:name=".activity.VolunteerMainActivity" />
         <activity android:name=".activity.DisabledMainActivity" />
+        <activity android:name=".activity.RequestDetailsActivity" />
 
         <activity
             android:name=".activity.AddRequestActivity"

@@ -29,6 +29,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -39,9 +40,9 @@ import com.caltruism.assist.fragment.AddRequestInputDateTimeFragment;
 import com.caltruism.assist.fragment.AddRequestInputDetailsFragment;
 import com.caltruism.assist.fragment.AddRequestSelectTypeFragment;
 import com.caltruism.assist.fragment.AddRequestSummaryFragment;
+import com.caltruism.assist.util.CustomCallbackListener;
 import com.caltruism.assist.util.Constants;
 import com.caltruism.assist.util.CustomDateTimeUtil;
-import com.caltruism.assist.util.DataListener;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -70,12 +71,13 @@ import com.shuhart.stepview.StepView;
 import org.imperiumlabs.geofirestore.GeoLocation;
 import org.imperiumlabs.geofirestore.core.GeoHash;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
-public class AddRequestActivity extends AppCompatActivity implements DataListener.AddRequestActivityDataListener {
+public class AddRequestActivity extends AppCompatActivity implements CustomCallbackListener.AddRequestActivityCallbackListener {
 
     private static final String TAG = "AddRequestActivity";
     private static final int REQUEST_PERMISSIONS_REQUEST_CODE = 0;
@@ -182,7 +184,7 @@ public class AddRequestActivity extends AppCompatActivity implements DataListene
         requestButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                addRequestData();
+                commitData();
             }
         });
 
@@ -251,12 +253,14 @@ public class AddRequestActivity extends AppCompatActivity implements DataListene
 
     @Override
     public void onBackPressed() {
-        if (currentStep > 0)
+        if (currentStep > 0) {
             updateUI(currentStep - 1);
-        else if (highestStepCompleted != -1)
-            showCloseAlertDialog();
-        else
+        } else if (highestStepCompleted != -1) {
+                showCloseAlertDialog();
+        } else {
             super.onBackPressed();
+            finish();
+        }
     }
 
     @Override
@@ -327,15 +331,12 @@ public class AddRequestActivity extends AppCompatActivity implements DataListene
 
     public void setupToolbar() {
         toolbar = findViewById(R.id.toolbarAddRequest);
-        title = findViewById(R.id.textViewAddRequestTitle);
+        title = findViewById(R.id.textViewAddRequestToolbarTitle);
         setSupportActionBar(toolbar);
         title.setText(TITLE_STEP0);
 
-        if (getSupportActionBar() != null){
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setDisplayShowHomeEnabled(true);
-            getSupportActionBar().setDisplayShowTitleEnabled(false);
-        }
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
 
         toolbar.postDelayed(new Runnable()
         {
@@ -411,7 +412,6 @@ public class AddRequestActivity extends AppCompatActivity implements DataListene
                 .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        setResult(Activity.RESULT_CANCELED);
                         finish();
                     }
                 }).setNegativeButton("No", null).show();
@@ -710,52 +710,10 @@ public class AddRequestActivity extends AppCompatActivity implements DataListene
         }
     }
 
-    private void addRequestData() {
+    private void commitData() {
         SharedPreferences sharedPreferences = getSharedPreferences(Constants.USER_DATA_SHARED_PREFERENCE, Context.MODE_PRIVATE);
+        String name = sharedPreferences.getString("name", null);
 
-        if (sharedPreferences.contains("name"))
-            commitData(sharedPreferences.getString("name", null));
-        else
-            getNameFromDatabaseAndCommitData();
-    }
-
-    private void getNameFromDatabaseAndCommitData() {
-        DocumentReference docRef = db.collection("users").document(auth.getCurrentUser().getUid());
-
-        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                if (task.isSuccessful()) {
-                    DocumentSnapshot document = task.getResult();
-
-                    assert document != null;
-
-                    if (document.exists()) {
-                        Object nameObject = document.get("name");
-
-                        if (nameObject == null) {
-                            Log.e(TAG, "User has no name field: " + document.getData().toString());
-                        } else {
-                            SharedPreferences sharedPreferences = getSharedPreferences(Constants.USER_DATA_SHARED_PREFERENCE, Context.MODE_PRIVATE);
-                            SharedPreferences.Editor editor = sharedPreferences.edit();
-                            editor.putString("name", nameObject.toString());
-                            editor.apply();
-
-                            commitData(nameObject.toString());
-                        }
-                    } else {
-                        Log.e(TAG, "User does not exist in database.");
-                    }
-                } else {
-                    Log.e(TAG, "Get failed with ", task.getException());
-                    Snackbar snackbar = Snackbar.make(AddRequestActivity.this.findViewById(R.id.addRequestConstraintLayout), "Please try again later.", Snackbar.LENGTH_LONG);
-                    snackbar.show();
-                }
-            }
-        });
-    }
-
-    private void commitData(String name) {
         int startTime = CustomDateTimeUtil.getStartTime(requestDateTime);
         double latitude = requestLocationLatLng.latitude;
         double longitude = requestLocationLatLng.longitude;
@@ -771,7 +729,7 @@ public class AddRequestActivity extends AppCompatActivity implements DataListene
         postedBy.put("uid", auth.getCurrentUser().getUid());
         postedBy.put("name", name);
 
-        requestData.put("status", Constants.REQUEST_STATUS_ONGOING);
+        requestData.put("status", Constants.REQUEST_STATUS_WAITING);
         requestData.put("type", requestType);
         requestData.put("title", requestTitle);
         requestData.put("description", requestDescription);
@@ -783,6 +741,7 @@ public class AddRequestActivity extends AppCompatActivity implements DataListene
         requestData.put("location", location);
         requestData.put("postedBy", postedBy);
         requestData.put("postedOn", FieldValue.serverTimestamp());
+        requestData.put("acceptedBy", new ArrayList<HashMap<String, Object>>());
 
         GeoHash geoHash = new GeoHash(new GeoLocation(latitude, longitude));
         requestData.put("g", geoHash.getGeoHashString());

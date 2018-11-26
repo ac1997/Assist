@@ -13,8 +13,8 @@
         <android.support.design.card.MaterialCardView xmlns:card_view="http://schemas.android.com/apk/res-auto"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
-            android:layout_marginStart="16dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
             android:layout_marginTop="4dp"
             card_view:cardElevation="4dp"
             card_view:cardUseCompatPadding="true">
@@ -65,7 +65,7 @@
                     app:layout_constraintTop_toBottomOf="@+id/addRequestTitleDivider" />
 
                 <ImageView
-                    android:id="@+id/imageViewAddRequsetSummaryDate"
+                    android:id="@+id/imageViewAddRequestSummaryDate"
                     android:layout_width="13dp"
                     android:layout_height="14dp"
                     android:layout_marginStart="16dp"
@@ -84,7 +84,7 @@
                     android:text="Sun, January 1st"
                     android:textColor="@color/colorGrey3"
                     android:textSize="14sp"
-                    app:layout_constraintStart_toEndOf="@+id/imageViewAddRequsetSummaryDate"
+                    app:layout_constraintStart_toEndOf="@+id/imageViewAddRequestSummaryDate"
                     app:layout_constraintTop_toBottomOf="@+id/textViewAddRequestSummaryDateTitle" />
 
                 <TextView
@@ -92,12 +92,12 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="16dp"
-                    android:layout_marginTop="76dp"
+                    android:layout_marginTop="40dp"
                     android:text="Type"
                     android:textColor="@color/mainTextLighterBlack"
                     android:textSize="16sp"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/addRequestTitleDivider" />
+                    card_view:layout_constraintTop_toBottomOf="@+id/textViewAddRequestSummaryDateTitle" />
 
                 <ImageView
                     android:id="@+id/imageViewAddRequestSummaryType"
@@ -164,12 +164,12 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="16dp"
-                    android:layout_marginTop="76dp"
+                    android:layout_marginTop="40dp"
                     android:text="Duration"
                     android:textColor="@color/mainTextLighterBlack"
                     android:textSize="16sp"
                     app:layout_constraintStart_toStartOf="@+id/guidelineAddRequestSummary"
-                    app:layout_constraintTop_toBottomOf="@+id/addRequestTitleDivider" />
+                    card_view:layout_constraintTop_toBottomOf="@+id/textViewAddRequestSummaryTimeTitle" />
 
                 <ImageView
                     android:id="@+id/imageViewAddRequestSummaryDuration"
@@ -211,8 +211,8 @@
         <android.support.design.card.MaterialCardView xmlns:card_view="http://schemas.android.com/apk/res-auto"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
-            android:layout_marginStart="16dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
             card_view:cardElevation="4dp"
             card_view:cardUseCompatPadding="true">
@@ -294,8 +294,8 @@
         <android.support.design.card.MaterialCardView xmlns:card_view="http://schemas.android.com/apk/res-auto"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
-            android:layout_marginStart="16dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
             card_view:cardElevation="4dp"
             card_view:cardUseCompatPadding="true">
@@ -330,10 +330,10 @@
                     android:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptat"
                     android:textColor="@color/colorGrey3"
                     android:textSize="14sp"
-                    app:layout_constraintTop_toBottomOf="@+id/textViewAddRequestSummaryDescriptionTitle"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent" />
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/textViewAddRequestSummaryDescriptionTitle" />
 
             </android.support.constraint.ConstraintLayout>
 

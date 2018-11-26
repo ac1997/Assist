@@ -2,6 +2,7 @@ package com.caltruism.assist.fragment;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
@@ -14,6 +15,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -27,7 +29,7 @@ import com.caltruism.assist.BuildConfig;
 import com.caltruism.assist.R;
 import com.caltruism.assist.data.AssistRequest;
 import com.caltruism.assist.util.Constants;
-import com.caltruism.assist.util.VolunteerBaseFragment;
+import com.caltruism.assist.util.CustomCallbackListener;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
@@ -48,7 +50,6 @@ import com.google.android.gms.location.places.ui.PlaceAutocomplete;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -65,7 +66,7 @@ import java.util.Set;
 import static android.app.Activity.RESULT_OK;
 import static com.google.android.gms.location.places.AutocompleteFilter.TYPE_FILTER_CITIES;
 
-public class VolunteerRequestListFragment extends VolunteerBaseFragment {
+public class VolunteerRequestListFragment extends Fragment {
 
     public static final String TAG = "VolunteerRequestListFragment";
     private static final int REQUEST_PERMISSIONS_REQUEST_CODE = 0;
@@ -73,7 +74,9 @@ public class VolunteerRequestListFragment extends VolunteerBaseFragment {
     private static final int REQUEST_CODE_AUTOCOMPLETE = 1;
 
     private static final double DEFAULT_QUERY_RANGE_MILES = 5;
-    private static final double DEFAULT_QUERY_RANGE_KM = DEFAULT_QUERY_RANGE_MILES * 1.609344;
+    private static final double DEFAULT_QUERY_RANGE_KM = DEFAULT_QUERY_RANGE_MILES * Constants.MILES_TO_KM;
+
+    private CustomCallbackListener.VolunteerRequestListFragmentCallbackListener callbackListener;
 
     private FloatingSearchView searchView;
 
@@ -89,8 +92,6 @@ public class VolunteerRequestListFragment extends VolunteerBaseFragment {
     private LocationSettingsRequest locationSettingsRequest;
     private LocationCallback locationCallback;
 
-    private FirebaseFirestore db;
-    private FirebaseAuth auth;
     private CollectionReference collectionReference;
     private GeoQuery geoQuery;
     private GeoQueryDataEventListener geoQueryDataEventListener;
@@ -103,6 +104,16 @@ public class VolunteerRequestListFragment extends VolunteerBaseFragment {
     private Location currentLocation;
     private Location lastUpdatedLocation;
     private LatLng cameraLocation;
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+
+        if (context instanceof CustomCallbackListener.VolunteerRequestListFragmentCallbackListener)
+            callbackListener = (CustomCallbackListener.VolunteerRequestListFragmentCallbackListener) context;
+        else
+            throw new RuntimeException(context.toString() + " must implement CustomCallbackListener.VolunteerRequestListFragmentCallbackListener");
+    }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -119,9 +130,12 @@ public class VolunteerRequestListFragment extends VolunteerBaseFragment {
         searchView = view.findViewById(R.id.searchViewVolunteer);
 
         setupSearchView();
-        attachSearchViewActivityDrawer(searchView);
 
-        showListViewFragment();
+        if(callbackListener != null){
+            callbackListener.onAttachSearchViewToDrawer(searchView);
+        }
+
+        initializeFragments();
         currentFragment = R.id.actionListView;
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(getActivity());
@@ -158,9 +172,7 @@ public class VolunteerRequestListFragment extends VolunteerBaseFragment {
         locationSettingsRequest = new LocationSettingsRequest.Builder()
                 .addLocationRequest(locationRequest).build();
 
-        db = FirebaseFirestore.getInstance();
-        auth = FirebaseAuth.getInstance();
-        collectionReference = db.collection("requests");
+        collectionReference = FirebaseFirestore.getInstance().collection("requests");
 
         setupGeoQueryDataEventListener();
     }
@@ -185,6 +197,7 @@ public class VolunteerRequestListFragment extends VolunteerBaseFragment {
                 searchView.setSearchText(place.getAddress());
                 cameraLocation = place.getLatLng();
                 isUsingCurrentLocation = false;
+                mapViewFragment.onNewLocations(currentLocation, cameraLocation, false, true);
                 getNearByRequests();
             } else if (resultCode == PlaceAutocomplete.RESULT_ERROR) {
                 Log.e(TAG, "Error: Status = " + PlaceAutocomplete.getStatus(getActivity(), data).toString());
@@ -198,6 +211,14 @@ public class VolunteerRequestListFragment extends VolunteerBaseFragment {
         super.onStop();
 
         fusedLocationClient.removeLocationUpdates(locationCallback);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        if (geoQuery != null)
+            geoQuery.removeAllListeners();
     }
 
     private void setupSearchView() {
@@ -229,6 +250,14 @@ public class VolunteerRequestListFragment extends VolunteerBaseFragment {
                 }
             }
         });
+    }
+
+    private void initializeFragments() {
+        FragmentTransaction fragmentTransaction = getChildFragmentManager().beginTransaction();
+        fragmentTransaction.add(R.id.fragmentVolunteerMain, listViewFragment);
+        fragmentTransaction.add(R.id.fragmentVolunteerMain, mapViewFragment);
+        fragmentTransaction.hide(mapViewFragment);
+        fragmentTransaction.commit();
     }
 
     private void startLocationUpdates() {
@@ -270,7 +299,7 @@ public class VolunteerRequestListFragment extends VolunteerBaseFragment {
                 if (isInitialQueryCompleted)
                     notifyDataAdded(documentSnapshot);
                 else
-                    assistRequests.put(documentSnapshot.getId(), new AssistRequest(documentSnapshot));
+                    assistRequests.put(documentSnapshot.getId(), new AssistRequest(documentSnapshot, currentLocation));
             }
 
             @Override
@@ -278,7 +307,7 @@ public class VolunteerRequestListFragment extends VolunteerBaseFragment {
                 Log.e(TAG, "Document exited");
                 assistRequests.remove(documentSnapshot.getId());
                 if (isInitialQueryCompleted)
-                    notifyDataRemoved(documentSnapshot);
+                    notifyDataRemoved(documentSnapshot.getId());
             }
 
             @Override
@@ -300,7 +329,7 @@ public class VolunteerRequestListFragment extends VolunteerBaseFragment {
 
             @Override
             public void onGeoQueryError(Exception e) {
-                Log.e(TAG, "onGeoQueryError: ", e);
+                Log.e(TAG, "setupGeoQueryDataEventListener Error: ", e);
             }
         };
     }
@@ -322,39 +351,15 @@ public class VolunteerRequestListFragment extends VolunteerBaseFragment {
 
     private void showListViewFragment() {
         FragmentTransaction fragmentTransaction = getChildFragmentManager().beginTransaction();
-
-        if (listViewFragment.isAdded()) {
-            fragmentTransaction.show(listViewFragment);
-        } else {
-            Bundle arguments = new Bundle();
-//            arguments.putInt("requestType", requestType);
-//            arguments.putString("requestTitle", requestTitle);
-            listViewFragment.setArguments(arguments);
-            fragmentTransaction.add(R.id.fragmentVolunteerMain, listViewFragment);
-        }
-
-        if (mapViewFragment.isAdded())
-            fragmentTransaction.hide(mapViewFragment);
-
+        fragmentTransaction.show(listViewFragment);
+        fragmentTransaction.hide(mapViewFragment);
         fragmentTransaction.commit();
     }
 
     private void showMapViewFragment() {
         FragmentTransaction fragmentTransaction = getChildFragmentManager().beginTransaction();
-
-        if (mapViewFragment.isAdded()) {
-            fragmentTransaction.show(mapViewFragment);
-        } else {
-            Bundle arguments = new Bundle();
-            arguments.putParcelable("location", cameraLocation);
-            arguments.putSerializable("requests", assistRequests);
-            mapViewFragment.setArguments(arguments);
-            fragmentTransaction.add(R.id.fragmentVolunteerMain, mapViewFragment);
-        }
-
-        if (listViewFragment.isAdded())
-            fragmentTransaction.hide(listViewFragment);
-
+        fragmentTransaction.show(mapViewFragment);
+        fragmentTransaction.hide(listViewFragment);
         fragmentTransaction.commit();
     }
 
@@ -371,7 +376,7 @@ public class VolunteerRequestListFragment extends VolunteerBaseFragment {
         else
             queryLocation = new GeoPoint(cameraLocation.latitude, cameraLocation.longitude);
         geoQuery = new GeoFirestore(collectionReference).queryAtLocation(queryLocation, DEFAULT_QUERY_RANGE_KM);
-        geoQuery.addGeoQueryDataEventListener(geoQueryDataEventListener, Constants.REQUEST_STATUS_ONGOING);
+        geoQuery.addGeoQueryDataEventListener(geoQueryDataEventListener, Constants.REQUEST_STATUS_WAITING);
     }
 
     private void notifyNewDataSet() {
@@ -381,32 +386,33 @@ public class VolunteerRequestListFragment extends VolunteerBaseFragment {
             oldLocationKeySet.clear();
             oldLocationKeySet.addAll(assistRequests.keySet());
 
-//            listViewFragment.onDataChange(assistRequests);
+            listViewFragment.onNewDataSet(assistRequests);
             mapViewFragment.onNewDataSet(assistRequests);
         }
     }
 
     private void notifyDataAdded(DocumentSnapshot documentSnapshot) {
-        assistRequests.put(documentSnapshot.getId(), new AssistRequest(documentSnapshot));
+        assistRequests.put(documentSnapshot.getId(), new AssistRequest(documentSnapshot, currentLocation));
+        listViewFragment.onDataAdded(documentSnapshot);
         mapViewFragment.onDataAdded(documentSnapshot);
     }
 
-    private void notifyDataRemoved(DocumentSnapshot documentSnapshot) {
-        assistRequests.remove(documentSnapshot.getId());
-        mapViewFragment.onDataRemoved(documentSnapshot);
+    private void notifyDataRemoved(String documentId) {
+        assistRequests.remove(documentId);
+        listViewFragment.onDataRemoved(documentId);
+        mapViewFragment.onDataRemoved(documentId);
     }
 
     private void notifyDataModified(DocumentSnapshot documentSnapshot) {
         assistRequests.get(documentSnapshot.getId()).modifiedData(documentSnapshot);
+        listViewFragment.onDataModified(documentSnapshot);
         mapViewFragment.onDataModified(documentSnapshot);
     }
 
     private void notifyNewLocations() {
         if (currentLocation != null) {
-            if (isUsingCurrentLocation)
-                mapViewFragment.onNewLocations(currentLocation, null);
-            else
-                mapViewFragment.onNewLocations(currentLocation, cameraLocation);
+            listViewFragment.onNewLocations(currentLocation, null, isUsingCurrentLocation, false);
+            mapViewFragment.onNewLocations(currentLocation, cameraLocation, isUsingCurrentLocation, false);
         }
     }
 

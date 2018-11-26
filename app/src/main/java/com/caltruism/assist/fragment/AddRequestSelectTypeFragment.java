@@ -17,12 +17,12 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.caltruism.assist.R;
+import com.caltruism.assist.util.CustomCallbackListener;
 import com.caltruism.assist.util.Constants;
-import com.caltruism.assist.util.DataListener;
 
 public class AddRequestSelectTypeFragment extends Fragment {
 
-    private DataListener.AddRequestActivityDataListener listener;
+    private CustomCallbackListener.AddRequestActivityCallbackListener callbackListener;
 
     private ConstraintLayout groceryConstraintLayout;
     private ImageView groceryImageView;
@@ -49,10 +49,10 @@ public class AddRequestSelectTypeFragment extends Fragment {
     public void onAttach(Context context) {
         super.onAttach(context);
 
-        if (context instanceof DataListener.AddRequestActivityDataListener) {
-            listener = (DataListener.AddRequestActivityDataListener) context;
+        if (context instanceof CustomCallbackListener.AddRequestActivityCallbackListener) {
+            callbackListener = (CustomCallbackListener.AddRequestActivityCallbackListener) context;
         } else {
-            throw new RuntimeException(context.toString() + " must implement DataListener.AddRequestActivityDataListener!");
+            throw new RuntimeException(context.toString() + " must implement CustomCallbackListener.AddRequestActivityCallback!");
         }
     }
 
@@ -122,7 +122,7 @@ public class AddRequestSelectTypeFragment extends Fragment {
             previousSelected = -1;
         }
 
-        listener.onDataChange(0, previousSelected);
+        callbackListener.onDataChange(0, previousSelected);
     }
 
     public void updateUnselectedView() {

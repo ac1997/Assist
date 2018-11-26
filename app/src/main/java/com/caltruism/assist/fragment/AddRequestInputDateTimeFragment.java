@@ -22,21 +22,21 @@ import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.caltruism.assist.R;
+import com.caltruism.assist.util.CustomCallbackListener;
 import com.caltruism.assist.util.Constants;
 import com.caltruism.assist.util.CustomDateTimeUtil;
-import com.caltruism.assist.util.DataListener;
 
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Locale;
 
-public class AddRequestInputDateTimeFragment extends Fragment implements DataListener.AddRequestFragmentDataListener {
+public class AddRequestInputDateTimeFragment extends Fragment implements CustomCallbackListener.AddRequestFragmentCallbackListener {
 
     private static final String IS_NOW_KEY = "isNow";
     private static final String DATE_TIME_KEY = "dateTime";
     private static final String DURATION_KEY = "duration";
 
-    private DataListener.AddRequestActivityDataListener listener;
+    private CustomCallbackListener.AddRequestActivityCallbackListener callbackListener;
     private DatePickerDialog.OnDateSetListener dateSetListener;
     private TimePickerDialog.OnTimeSetListener timeSetListener;
 
@@ -58,10 +58,10 @@ public class AddRequestInputDateTimeFragment extends Fragment implements DataLis
     public void onAttach(Context context) {
         super.onAttach(context);
 
-        if (context instanceof DataListener.AddRequestActivityDataListener) {
-            listener = (DataListener.AddRequestActivityDataListener) context;
+        if (context instanceof CustomCallbackListener.AddRequestActivityCallbackListener) {
+            callbackListener = (CustomCallbackListener.AddRequestActivityCallbackListener) context;
         } else {
-            throw new RuntimeException(context.toString() + " must implement DataListener.AddRequestActivityDataListener!");
+            throw new RuntimeException(context.toString() + " must implement CustomCallbackListener.AddRequestActivityCallbackListener!");
         }
     }
 
@@ -217,7 +217,10 @@ public class AddRequestInputDateTimeFragment extends Fragment implements DataLis
                 dataMap.put(DATE_TIME_KEY, requestDateAndTime.getTimeInMillis());
                 break;
             case DURATION_KEY:
-                int duration = Integer.parseInt(value.toString());
+                int duration = 0;
+
+                if (!value.toString().equals(""))
+                    duration = Integer.parseInt(value.toString());
 
                 if (duration != 0)
                     dataMap.put(DURATION_KEY, duration);
@@ -226,6 +229,6 @@ public class AddRequestInputDateTimeFragment extends Fragment implements DataLis
                 break;
         }
 
-        listener.onDataChange(2, dataMap);
+        callbackListener.onDataChange(2, dataMap);
     }
 }

@@ -15,4 +15,6 @@
     <color name="colorGrey5">#E0E0E0</color>
     <color name="colorGrey6">#F2F2F2</color>
     <color name="colorGrey7">#F9F9F9</color>
+
+    <color name="googleBlue">#4285F4</color>
 </resources>
