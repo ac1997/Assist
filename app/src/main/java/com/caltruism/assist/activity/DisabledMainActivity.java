@@ -68,7 +68,7 @@ public class DisabledMainActivity extends AppCompatActivity implements Navigatio
                             public void onClick(DialogInterface dialog, int which) {
                                 FirebaseAuth.getInstance().signOut();
                                 SharedPreferencesHelper.clearPreferences(DisabledMainActivity.this);
-                                startActivity(new Intent(DisabledMainActivity.this, SignInActivity.class));
+                                startActivity(new Intent(DisabledMainActivity.this, WelcomeActivity.class));
                                 finish();
                             }
                         }).setNegativeButton("No", null).show();

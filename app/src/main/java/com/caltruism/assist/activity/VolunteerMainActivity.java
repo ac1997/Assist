@@ -68,7 +68,7 @@ public class VolunteerMainActivity extends AppCompatActivity implements
                             public void onClick(DialogInterface dialog, int which) {
                                 FirebaseAuth.getInstance().signOut();
                                 SharedPreferencesHelper.clearPreferences(VolunteerMainActivity.this);
-                                startActivity(new Intent(VolunteerMainActivity.this, SignInActivity.class));
+                                startActivity(new Intent(VolunteerMainActivity.this, WelcomeActivity.class));
                                 finish();
                             }
                         }).setNegativeButton("No", null).show();

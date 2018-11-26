@@ -58,8 +58,6 @@ public class GetMemberTypeActivity extends AppCompatActivity {
         name.setText(String.format("Hello %s!", firstName));
 
         Button buttonVolunteer = findViewById(R.id.buttonVolunteer);
-        Button buttonDisabled = findViewById(R.id.buttonDisabled);
-
         buttonVolunteer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -67,6 +65,7 @@ public class GetMemberTypeActivity extends AppCompatActivity {
             }
         });
 
+        Button buttonDisabled = findViewById(R.id.buttonDisabled);
         buttonDisabled.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

@@ -80,7 +80,7 @@ public class MainEmptyActivity extends AppCompatActivity {
                 }
             });
         } else {
-            startActivity(new Intent(this, SignInActivity.class));
+            startActivity(new Intent(this, WelcomeActivity.class));
             finish();
         }
     }

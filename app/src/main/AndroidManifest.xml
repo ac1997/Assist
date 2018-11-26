@@ -32,7 +32,14 @@
         </activity>
 
         <activity
+            android:name=".activity.WelcomeActivity"
+            android:theme="@style/SignInSignUpTheme"/>
+
+        <activity
             android:name=".activity.SignInActivity"
+            android:theme="@style/SignInSignUpTheme" />
+        <activity
+            android:name=".activity.SignUpActivity"
             android:theme="@style/SignInSignUpTheme" />
 
         <activity
