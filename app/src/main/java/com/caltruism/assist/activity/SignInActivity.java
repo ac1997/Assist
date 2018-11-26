@@ -57,6 +57,9 @@ public class SignInActivity extends AppCompatActivity {
     private static final int GOOGLE = 2;
     private static final int OTHER = 3;
 
+    private EditText editTextEmail;
+    private EditText editTextPassword;
+
     private FirebaseAuth auth;
     private GoogleSignInClient GoogleSignInClient;
     private CallbackManager callbackManager;
@@ -67,6 +70,9 @@ public class SignInActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_in);
+
+        editTextEmail = findViewById(R.id.editTextEmail);
+        editTextPassword = findViewById(R.id.editTextPassword);
 
         auth = FirebaseAuth.getInstance();
 
@@ -86,12 +92,15 @@ public class SignInActivity extends AppCompatActivity {
 
             @Override
             public void onCancel() {
+                customLoadingDialog.hideDialog();
                 Log.d(TAG, "Facebook sign in canceled");
             }
 
             @Override
             public void onError(FacebookException exception) {
+                customLoadingDialog.hideDialog();
                 Log.e(TAG, "Facebook sign in error", exception);
+                showSnackbar(FACEBOOK);
             }
         });
 
@@ -100,12 +109,25 @@ public class SignInActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 customLoadingDialog.showDialog();
-                EditText editTextEmail = findViewById(R.id.editTextEmail);
-                EditText editTextPassword = findViewById(R.id.editTextPassword);
                 String email = editTextEmail.getText().toString();
                 String password = editTextPassword.getText().toString();
 
-                // TODO: Verify format
+                // TODO: Rephrase and reinforce password validation
+                if (password.length() == 0) {
+                    showSnackbar("Password cannot be empty.");
+                    return;
+                } else if (password.length() <= 6) {
+                    showSnackbar("Password needs to be at least 6 characters.");
+                    return;
+                }
+
+                if (email.length() == 0) {
+                    showSnackbar("Email cannot be empty.");
+                    return;
+                } else if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                    showSnackbar("Invalid email address.");
+                    return;
+                }
 
                 handleEmailPasswordSignIn(email, password);
             }
@@ -115,7 +137,7 @@ public class SignInActivity extends AppCompatActivity {
         signInButtonFacebook.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                LoginManager.getInstance().logInWithReadPermissions(SignInActivity.this, Arrays.asList("email", "public_profile", "user_gender"));
+                LoginManager.getInstance().logInWithReadPermissions(SignInActivity.this, Arrays.asList("email", "public_profile"));
             }
         });
 
@@ -130,6 +152,13 @@ public class SignInActivity extends AppCompatActivity {
 
         TextView signUp = findViewById(R.id.textViewSignInActivitySignUp);
         signUp.setText(Html.fromHtml("Don't have an account?&nbsp;&nbsp;<font color='#ffb88e'>Sign Up</font>", Html.FROM_HTML_MODE_LEGACY));
+        signUp.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(SignInActivity.this, SignUpActivity.class));
+                finish();
+            }
+        });
 
         customLoadingDialog = new CustomLoadingDialog(this);
     }
@@ -275,10 +304,9 @@ public class SignInActivity extends AppCompatActivity {
                     String email = response.getJSONObject().getString("email");
                     String firstName = response.getJSONObject().getString("first_name");
                     String lastName = response.getJSONObject().getString("last_name");
-                    String gender = response.getJSONObject().getString("gender");
                     String pictureURL = Profile.getCurrentProfile().getProfilePictureUri(200, 200).toString();
 
-                    initUser(email, firstName, lastName, pictureURL, gender);
+                    initUser(email, firstName, lastName, pictureURL);
                 } catch (JSONException e) {
                     customLoadingDialog.hideDialog();
                     Log.e(TAG, "Facebook sign in failed", e);
@@ -288,7 +316,7 @@ public class SignInActivity extends AppCompatActivity {
         });
 
         Bundle parameters = new Bundle();
-        parameters.putString("fields", "id, email, first_name, last_name, gender");
+        parameters.putString("fields", "id, email, first_name, last_name");
         request.setParameters(parameters);
         request.executeAsync();
     }
@@ -299,19 +327,15 @@ public class SignInActivity extends AppCompatActivity {
         String lastName = acct.getFamilyName();
         String pictureURL = acct.getPhotoUrl().toString();
 
-        initUser(email, firstName, lastName, pictureURL, null);
+        initUser(email, firstName, lastName, pictureURL);
     }
 
-    private void initUser(String email, String firstName, String lastName, String pictureURL, String gender) {
+    private void initUser(String email, String firstName, String lastName, String pictureURL) {
         HashMap<String, Object> userData = new HashMap<>();
         userData.put("email", email);
         userData.put("firstName", firstName);
         userData.put("lastName", lastName);
-        userData.put("name", firstName + " " + lastName);
         userData.put("pictureURL", pictureURL);
-
-        if (gender != null)
-            userData.put("gender", gender);
 
         userData.put("ratings", 0.0);
 
@@ -331,18 +355,23 @@ public class SignInActivity extends AppCompatActivity {
         String message = "";
         switch (method) {
             case EMAIL:
-                message = "Sign in failed. Please try again.";
+                message = "Sign in failed. Please try again later.";
                 break;
             case FACEBOOK:
-                message = "Facebook sign in failed. Please try again.";
+                message = "Facebook sign in failed. Please try again later.";
                 break;
             case GOOGLE:
-                message = "Google sign in failed. Please try again.";
+                message = "Google sign in failed. Please try again later.";
                 break;
             case OTHER:
                 message = "Sign in failed. Please contact us.";
         }
         Snackbar snackbar = Snackbar.make(SignInActivity.this.findViewById(R.id.SignInConstraintLayout), message, Snackbar.LENGTH_LONG);
+        snackbar.show();
+    }
+
+    private void showSnackbar(String message) {
+        Snackbar snackbar = Snackbar.make(SignInActivity.this.findViewById(R.id.SignUpConstraintLayout), message, Snackbar.LENGTH_LONG);
         snackbar.show();
     }
 }

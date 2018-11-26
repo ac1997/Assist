@@ -12,7 +12,6 @@ public class SharedPreferencesHelper {
 
         Object memberFirstNameObject = ds.get("firstName");
         Object memberLastNameObject = ds.get("lastName");
-        Object memberNameObject = ds.get("name");
         Object memberPictureURLObject = ds.get("pictureURL");
         Object memberRatingsObject = ds.get("ratings");
         Object memberTypeObject = ds.get("memberType");
@@ -23,8 +22,8 @@ public class SharedPreferencesHelper {
         if (memberLastNameObject != null)
             editor.putString("lastName", memberLastNameObject.toString());
 
-        if (memberNameObject != null)
-            editor.putString("name", memberNameObject.toString());
+        if (memberFirstNameObject != null && memberLastNameObject != null)
+            editor.putString("name", String.format("%s %s", memberFirstNameObject.toString(), memberLastNameObject.toString()));
 
         if (memberPictureURLObject != null)
             editor.putString("pictureURL", memberPictureURLObject.toString());
