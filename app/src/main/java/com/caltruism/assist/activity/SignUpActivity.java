@@ -16,6 +16,7 @@ import android.widget.Toast;
 
 import com.caltruism.assist.R;
 import com.caltruism.assist.util.CustomLoadingDialog;
+import com.caltruism.assist.util.SharedPreferencesHelper;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -89,19 +90,19 @@ public class SignUpActivity extends AppCompatActivity {
             return;
         }
 
-        if (password.length() == 0) {
-            showSnackbar("Password cannot be empty.");
-            return;
-        } else if (password.length() < 6) {
-            showSnackbar("Password needs to be at least 6 characters.");
-            return;
-        }
-
         if (email.length() == 0) {
             showSnackbar("Email cannot be empty.");
             return;
         } else if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
             showSnackbar("Invalid email address.");
+            return;
+        }
+
+        if (password.length() == 0) {
+            showSnackbar("Password cannot be empty.");
+            return;
+        } else if (password.length() < 6) {
+            showSnackbar("Password needs to be at least 6 characters.");
             return;
         }
 
@@ -134,6 +135,8 @@ public class SignUpActivity extends AppCompatActivity {
         stats.put("requestCompleted", 0);
 
         userData.put("stats", stats);
+
+        SharedPreferencesHelper.setPreferences(this, userData);
 
         Intent intent = new Intent(this, GetMemberTypeActivity.class);
         intent.putExtra("userData", userData);
