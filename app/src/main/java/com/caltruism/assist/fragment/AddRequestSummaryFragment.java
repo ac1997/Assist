@@ -1,6 +1,8 @@
 package com.caltruism.assist.fragment;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -15,10 +17,10 @@ import android.widget.TextView;
 
 import com.caltruism.assist.R;
 import com.caltruism.assist.util.BitMapDescriptorFromVector;
+import com.caltruism.assist.util.CustomCallbackListener;
 import com.caltruism.assist.util.Constants;
 import com.caltruism.assist.util.CustomDateTimeUtil;
 import com.caltruism.assist.util.CustomMapView;
-import com.caltruism.assist.util.DataListener;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -28,25 +30,25 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 public class AddRequestSummaryFragment extends Fragment implements
-        DataListener.AddRequestFragmentDataListener, OnMapReadyCallback,
-        ActivityCompat.OnRequestPermissionsResultCallback {
+        OnMapReadyCallback, ActivityCompat.OnRequestPermissionsResultCallback,
+        CustomCallbackListener.AddRequestFragmentCallbackListener {
 
     public static final String TAG = "AddRequestSummaryFragment";
-    private static final float DEFAULT_ZOOM = 17;
+    private static final float DEFAULT_ZOOM = 15;
 
-    TextView textViewTitle;
-    TextView textViewDate;
-    TextView textViewType;
-    TextView textViewTime;
-    TextView textViewDuration;
-    TextView textViewLocationName;
-    TextView textViewLocationAddress;
-    TextView textViewDescription;
-    ImageView imageViewType;
-    CustomMapView mapView;
+    private TextView textViewTitle;
+    private TextView textViewDate;
+    private TextView textViewType;
+    private TextView textViewTime;
+    private TextView textViewDuration;
+    private TextView textViewLocationName;
+    private TextView textViewLocationAddress;
+    private TextView textViewDescription;
+    private ImageView imageViewType;
+    private CustomMapView mapView;
 
-    GoogleMap map;
-    Marker marker;
+    private GoogleMap map;
+    private Marker marker;
 
     private int requestType;
     private String requestTitle;
@@ -93,20 +95,21 @@ public class AddRequestSummaryFragment extends Fragment implements
         textViewDescription = view.findViewById(R.id.textViewAddRequestSummaryDescription);
         imageViewType = view.findViewById(R.id.imageViewAddRequestSummaryType);
 
-        setUpViews();
+        setUpViews(false);
     }
 
-    @SuppressLint("MissingPermission")
     @Override
     public void onMapReady(GoogleMap googleMap) {
         map = googleMap;
         map.setMapStyle(MapStyleOptions.loadRawResourceStyle(getActivity(), R.raw.map_style_json));
         map.getUiSettings().setMyLocationButtonEnabled(false);
         map.getUiSettings().setMapToolbarEnabled(false);
-        map.setMyLocationEnabled(true);
+        if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            map.setMyLocationEnabled(true);
+        }
 
         marker = googleMap.addMarker(new MarkerOptions().position(requestLocationLatLng).title(requestTitle)
-                .icon(BitMapDescriptorFromVector.requestTypeMarker(getActivity(), requestType)));
+                .icon(BitMapDescriptorFromVector.regularMarker(getActivity())));
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(requestLocationLatLng, DEFAULT_ZOOM));
     }
 
@@ -147,10 +150,10 @@ public class AddRequestSummaryFragment extends Fragment implements
         requestDateTime = (long) data[7];
         requestDuration = (int) data[8];
 
-        setUpViews();
+        setUpViews(true);
     }
 
-    private void setUpViews() {
+    private void setUpViews(boolean isNew) {
         textViewTitle.setText(requestTitle);
         textViewLocationAddress.setText(requestLocationAddress);
         textViewDescription.setText(requestDescription);
@@ -175,9 +178,10 @@ public class AddRequestSummaryFragment extends Fragment implements
             textViewLocationName.setVisibility(View.GONE);
         }
 
-        if (map != null && marker != null) {
+        if (map != null && marker != null && isNew) {
             marker.remove();
-            marker = map.addMarker(new MarkerOptions().position(requestLocationLatLng).title(requestTitle));
+            marker = map.addMarker(new MarkerOptions().position(requestLocationLatLng).title(requestTitle)
+                    .icon(BitMapDescriptorFromVector.regularMarker(getActivity())));
             map.animateCamera(CameraUpdateFactory.newLatLngZoom(requestLocationLatLng, DEFAULT_ZOOM));
         }
 

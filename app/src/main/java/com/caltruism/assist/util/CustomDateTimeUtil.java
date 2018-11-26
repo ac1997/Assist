@@ -2,6 +2,7 @@ package com.caltruism.assist.util;
 
 import android.icu.util.Calendar;
 import android.text.format.DateUtils;
+import android.util.Log;
 
 import java.text.SimpleDateFormat;
 import java.util.Locale;

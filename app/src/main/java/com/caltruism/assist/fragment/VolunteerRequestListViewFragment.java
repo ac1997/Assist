@@ -1,16 +1,89 @@
 package com.caltruism.assist.fragment;
 
+import android.location.Location;
+import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
+import com.caltruism.assist.R;
+import com.caltruism.assist.adapter.RequestAdapter;
 import com.caltruism.assist.data.AssistRequest;
-import com.caltruism.assist.util.DataListener;
+import com.caltruism.assist.util.CustomCallbackListener;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.firebase.firestore.DocumentSnapshot;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
-public class VolunteerRequestListViewFragment extends Fragment implements DataListener.VolunteerRequestListViewDataListener {
+public class VolunteerRequestListViewFragment extends Fragment implements CustomCallbackListener.VolunteerRequestListChildFragmentCallbackListener {
+
+    private RequestAdapter adapter;
+
+    private Location currentLocation;
+    private HashMap<String, AssistRequest> assistRequests = new HashMap<>();
+    private ArrayList<AssistRequest> dataSet = new ArrayList<>();
 
     @Override
-    public void onDataChange(HashMap<String, AssistRequest> data) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_volunteer_request_list_view, container, false);
+    }
 
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        adapter = new RequestAdapter(getActivity(), dataSet, true);
+
+        RecyclerView recyclerView = view.findViewById(R.id.recyclerViewVolunteerRequestList);
+        recyclerView.setAdapter(adapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+    }
+
+
+    @Override
+    public void onNewLocations(Location newCurrentLocation, LatLng newCameraLocation, boolean isUsingCurrentLocation, boolean isNewSearch) {
+        if (newCurrentLocation != null)
+            currentLocation = newCurrentLocation;
+    }
+
+    @Override
+    public void onNewDataSet(HashMap<String, AssistRequest> data) {
+        if (data != null) {
+            assistRequests.clear();
+            assistRequests.putAll(data);
+
+            dataSet.clear();
+            dataSet.addAll(data.values());
+            adapter.notifyDataSetChanged();
+        }
+    }
+
+    @Override
+    public void onDataAdded(DocumentSnapshot documentSnapshot) {
+        AssistRequest request = new AssistRequest(documentSnapshot, currentLocation);
+        assistRequests.put(documentSnapshot.getId(), request);
+        int insertIndex = dataSet.size();
+        dataSet.add(insertIndex, request);
+        adapter.notifyItemInserted(insertIndex);
+    }
+
+    @Override
+    public void onDataRemoved(String documentId) {
+        int removeIndex = dataSet.indexOf(assistRequests.get(documentId));
+        assistRequests.remove(documentId);
+        dataSet.remove(removeIndex);
+        adapter.notifyItemRemoved(removeIndex);
+    }
+
+    @Override
+    public void onDataModified(DocumentSnapshot documentSnapshot) {
+        assistRequests.get(documentSnapshot.getId()).modifiedData(documentSnapshot);
+        adapter.notifyItemChanged(dataSet.indexOf(assistRequests.get(documentSnapshot.getId())));
     }
 }

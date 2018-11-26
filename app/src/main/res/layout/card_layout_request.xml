@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="-4dp"
+    android:layout_marginEnd="8dp"
+    android:layout_marginStart="8dp"
+    card_view:cardElevation="4dp"
+    card_view:cardUseCompatPadding="true">
+
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/constraintLayoutCardLayoutRequest"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:foreground="?android:attr/selectableItemBackground">
+
+        <ImageView
+            android:id="@+id/imageViewCardLayoutRequestType"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_marginBottom="8dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            card_view:srcCompat="@drawable/ic_add_request_icon_placeholder" />
+
+        <TextView
+            android:id="@+id/textViewCardLayoutRequestTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:text="Description"
+            android:textAppearance="@style/TextAppearance.AppCompat.Headline"
+            android:textColor="@color/mainTextLighterBlack"
+            android:textSize="16sp"
+            app:layout_constraintEnd_toStartOf="@+id/textViewCardLayoutRequestDistance"
+            app:layout_constraintStart_toEndOf="@+id/imageViewCardLayoutRequestType"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_chainStyle="packed" />
+
+        <TextView
+            android:id="@+id/textViewCardLayoutRequestDistance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="12dp"
+            android:layout_marginTop="10dp"
+            android:text="0.1 mi"
+            android:textColor="@color/colorGrey4"
+            android:textSize="12sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/imageViewCardLayoutRequestDate"
+            android:layout_width="11dp"
+            android:layout_height="12dp"
+            android:layout_marginStart="17dp"
+            android:layout_marginTop="11dp"
+            android:tint="@color/colorGrey4"
+            app:layout_constraintStart_toEndOf="@+id/imageViewCardLayoutRequestType"
+            app:layout_constraintTop_toBottomOf="@+id/textViewCardLayoutRequestTitle"
+            card_view:srcCompat="@drawable/ic_calendar_solid" />
+
+        <TextView
+            android:id="@+id/textViewCardLayoutRequestDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="9dp"
+            android:layout_marginTop="8dp"
+            android:text="Sun, November 1st"
+            android:textColor="@color/colorGrey3"
+            android:textSize="12sp"
+            app:layout_constraintStart_toEndOf="@+id/imageViewCardLayoutRequestDate"
+            app:layout_constraintTop_toBottomOf="@+id/textViewCardLayoutRequestTitle" />
+
+        <ImageView
+            android:id="@+id/imageViewCardLayoutRequestUser"
+            android:layout_width="13dp"
+            android:layout_height="13dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="34dp"
+            android:tint="@color/colorGrey4"
+            app:layout_constraintStart_toEndOf="@+id/imageViewCardLayoutRequestType"
+            app:layout_constraintTop_toBottomOf="@+id/textViewCardLayoutRequestTitle"
+            app:srcCompat="@drawable/ic_user_solid" />
+
+        <TextView
+            android:id="@+id/textViewCardLayoutRequestUser"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="32dp"
+            android:text="Sun, November 1st"
+            android:textColor="@color/colorGrey3"
+            android:textSize="12sp"
+            app:layout_constraintStart_toEndOf="@+id/imageViewCardLayoutRequestUser"
+            app:layout_constraintTop_toBottomOf="@+id/textViewCardLayoutRequestTitle" />
+
+
+        <ImageView
+            android:id="@+id/imageViewCardLayoutRequestTime"
+            android:layout_width="11dp"
+            android:layout_height="11dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="10dp"
+            android:tint="@color/colorGrey4"
+            app:layout_constraintStart_toStartOf="@+id/guidelineCardLayoutRequest"
+            app:layout_constraintTop_toBottomOf="@+id/textViewCardLayoutRequestTitle"
+            app:srcCompat="@drawable/ic_clock_solid" />
+
+        <TextView
+            android:id="@+id/textViewCardLayoutRequestTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:text="12:00 AM"
+            android:textColor="@color/colorGrey3"
+            android:textSize="12sp"
+            app:layout_constraintStart_toEndOf="@+id/imageViewCardLayoutRequestTime"
+            app:layout_constraintTop_toBottomOf="@+id/textViewCardLayoutRequestTitle" />
+
+
+        <ImageView
+            android:id="@+id/imageViewCardLayoutRequestDuration"
+            android:layout_width="11dp"
+            android:layout_height="13dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="34dp"
+            android:tint="@color/colorGrey4"
+            app:layout_constraintStart_toStartOf="@+id/guidelineCardLayoutRequest"
+            app:layout_constraintTop_toBottomOf="@+id/textViewCardLayoutRequestTitle"
+            app:srcCompat="@drawable/ic_stopwatch_solid" />
+
+        <TextView
+            android:id="@+id/textViewCardLayoutRequestDuration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="32dp"
+            android:text="1 hr 45 mins"
+            android:textColor="@color/colorGrey3"
+            android:textSize="12sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/imageViewCardLayoutRequestDuration"
+            app:layout_constraintTop_toBottomOf="@+id/textViewCardLayoutRequestTitle" />
+
+
+        <android.support.constraint.Guideline
+            android:id="@+id/guidelineCardLayoutRequest"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.675" />
+
+
+    </android.support.constraint.ConstraintLayout>
+
+</android.support.design.card.MaterialCardView>
