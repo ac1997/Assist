@@ -108,19 +108,10 @@ public class SignInActivity extends AppCompatActivity {
         signInButtonEmail.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                customLoadingDialog.showDialog();
                 String email = editTextEmail.getText().toString();
                 String password = editTextPassword.getText().toString();
 
                 // TODO: Rephrase and reinforce password validation
-                if (password.length() == 0) {
-                    showSnackbar("Password cannot be empty.");
-                    return;
-                } else if (password.length() <= 6) {
-                    showSnackbar("Password needs to be at least 6 characters.");
-                    return;
-                }
-
                 if (email.length() == 0) {
                     showSnackbar("Email cannot be empty.");
                     return;
@@ -129,6 +120,15 @@ public class SignInActivity extends AppCompatActivity {
                     return;
                 }
 
+                if (password.length() == 0) {
+                    showSnackbar("Password cannot be empty.");
+                    return;
+                } else if (password.length() < 6) {
+                    showSnackbar("Password needs to be at least 6 characters.");
+                    return;
+                }
+
+                customLoadingDialog.showDialog();
                 handleEmailPasswordSignIn(email, password);
             }
         });
@@ -345,6 +345,8 @@ public class SignInActivity extends AppCompatActivity {
 
         userData.put("stats", stats);
 
+        SharedPreferencesHelper.setPreferences(this, userData);
+
         Intent intent = new Intent(this, GetMemberTypeActivity.class);
         intent.putExtra("userData", userData);
         startActivity(intent);
@@ -371,7 +373,7 @@ public class SignInActivity extends AppCompatActivity {
     }
 
     private void showSnackbar(String message) {
-        Snackbar snackbar = Snackbar.make(SignInActivity.this.findViewById(R.id.SignUpConstraintLayout), message, Snackbar.LENGTH_LONG);
+        Snackbar snackbar = Snackbar.make(SignInActivity.this.findViewById(R.id.SignInConstraintLayout), message, Snackbar.LENGTH_LONG);
         snackbar.show();
     }
 }
