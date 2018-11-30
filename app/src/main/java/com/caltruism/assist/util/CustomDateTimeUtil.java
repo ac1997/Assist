@@ -89,4 +89,9 @@ public class CustomDateTimeUtil {
 
         return calendar.get(Calendar.HOUR_OF_DAY) * 60 + calendar.get(Calendar.MINUTE);
     }
+
+    public static boolean isValidCurrent(long dataTimeMili, int duration, int rangeInMin) {
+        return (System.currentTimeMillis() - 1000) >= (dataTimeMili - rangeInMin * DateUtils.MINUTE_IN_MILLIS) &&
+                (System.currentTimeMillis() - 1000) < (dataTimeMili + duration * DateUtils.MINUTE_IN_MILLIS);
+    }
 }

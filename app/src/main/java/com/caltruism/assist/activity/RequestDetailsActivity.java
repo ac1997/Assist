@@ -48,7 +48,6 @@ import java.util.HashMap;
 public class RequestDetailsActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     public static final String TAG = "RequestDetailsActivity";
-    private static final float DEFAULT_ZOOM = 15;
 
     private Toolbar toolbar;
     private TextView title;
@@ -114,13 +113,15 @@ public class RequestDetailsActivity extends AppCompatActivity implements OnMapRe
         map.setMapStyle(MapStyleOptions.loadRawResourceStyle(this, R.raw.map_style_json));
         map.getUiSettings().setMyLocationButtonEnabled(false);
         map.getUiSettings().setMapToolbarEnabled(false);
+        map.setMinZoomPreference(Constants.MIN_ZOOM);
+        map.setMaxZoomPreference(Constants.MAX_ZOOM);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             map.setMyLocationEnabled(true);
         }
 
         googleMap.addMarker(new MarkerOptions().position(assistRequest.getLocationLatLng()).title(assistRequest.getTitle())
                  .icon(BitMapDescriptorFromVector.regularMarker(this)));
-        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(assistRequest.getLocationLatLng(), DEFAULT_ZOOM));
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(assistRequest.getLocationLatLng(), Constants.DEFAULT_ZOOM));
     }
 
     @Override
@@ -304,7 +305,7 @@ public class RequestDetailsActivity extends AppCompatActivity implements OnMapRe
                     @Override
                     public void onFailure(@NonNull Exception e) {
                         Log.w(TAG, "Error updating document", e);
-                        Snackbar snackbar = Snackbar.make(RequestDetailsActivity.this.findViewById(R.id.requestDetailsConstraintLayout), "Error accepting request, please try again.", Snackbar.LENGTH_LONG);
+                        Snackbar snackbar = Snackbar.make(RequestDetailsActivity.this.findViewById(R.id.requestDetailsConstraintLayout), "Error accepting request, please try again.", Snackbar.LENGTH_SHORT);
                         snackbar.show();
                     }
                 });
@@ -323,7 +324,7 @@ public class RequestDetailsActivity extends AppCompatActivity implements OnMapRe
                     @Override
                     public void onFailure(@NonNull Exception e) {
                         Log.w(TAG, "Error updating document", e);
-                        Snackbar snackbar = Snackbar.make(RequestDetailsActivity.this.findViewById(R.id.requestDetailsConstraintLayout), "Error cancelling request, please try again.", Snackbar.LENGTH_LONG);
+                        Snackbar snackbar = Snackbar.make(RequestDetailsActivity.this.findViewById(R.id.requestDetailsConstraintLayout), "Error cancelling request, please try again.", Snackbar.LENGTH_SHORT);
                         snackbar.show();
                     }
                 });
@@ -346,7 +347,7 @@ public class RequestDetailsActivity extends AppCompatActivity implements OnMapRe
                         if (profileImageUrl != null) {
                             String url = profileImageUrl.toString();
 
-                            RequestOptions requestOptions = new RequestOptions().placeholder(R.drawable.ic_profile_image_placeholder).centerCrop();
+                            RequestOptions requestOptions = new RequestOptions().placeholder(R.drawable.ic_user_solid).centerCrop();
                             Glide.with(context).setDefaultRequestOptions(requestOptions).load(url).into(imageViewProfile);
                         }
                     } else {

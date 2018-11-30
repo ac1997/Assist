@@ -40,6 +40,10 @@ public class BitMapDescriptorFromVector {
         return bitmapDescriptorFromVector(context, R.drawable.ic_marker_other);
     }
 
+    public static BitmapDescriptor otherUserCap(Context context) {
+        return bitmapDescriptorFromVector(context, R.drawable.ic_cap_other_user);
+    }
+
     public static BitmapDescriptor requestTypeMarker(Context context, int requestType) {
         switch (requestType) {
             case Constants.GROCERY_TYPE:

@@ -5,6 +5,7 @@ import android.location.Location;
 import com.arlib.floatingsearchview.FloatingSearchView;
 import com.caltruism.assist.data.AssistRequest;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.firebase.firestore.DocumentSnapshot;
 
 import java.util.ArrayList;
@@ -12,15 +13,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 public class CustomCallbackListener {
-
-    public interface DisabledMainActivityCallbackListener {
-        void onDisabledRequestListChildFragmentDataSetEmpty(boolean isWaitingView);
-    }
-
-    public interface DisabledRequestListFragmentCallbackListener {
-        void onDataSetEmpty(boolean isWaitingView);
-    }
-
     public interface DisabledRequestListChildFragmentCallbackListener {
         void onNewDataSet(ArrayList<AssistRequest> dataSet);
         void onDataAdded(ArrayList<AssistRequest> dataSet);
@@ -46,5 +38,25 @@ public class CustomCallbackListener {
 
     public interface AddRequestActivityCallbackListener {
         void onDataChange(int step, Object data);
+    }
+
+    public interface CurrentRequestActivityCallbackListener {
+        void onSharingLocationPermissionChange(boolean isSharing);
+        void onNewDurationData(int durationInMins);
+    }
+
+    public interface CurrentRequestMapViewFragmentCallbackListener {
+        void onNewCurrentLocation(Location newCurrentLocation);
+        void onNewOriginLocation(Location newOriginLocation);
+    }
+
+    public interface CurrentRequestWaitingViewFragmentCallbackListener {
+        void onNewDuration(String durationInMins);
+        void onVolunteerOffline();
+    }
+
+    public interface RouteParserCallbackListener {
+        void onLatLngAndDurationCompleted(ArrayList<Object> data);
+        void onTaskCompleted(PolylineOptions polylineOptions);
     }
 }

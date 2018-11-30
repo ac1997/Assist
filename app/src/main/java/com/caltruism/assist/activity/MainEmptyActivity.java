@@ -41,7 +41,7 @@ public class MainEmptyActivity extends AppCompatActivity {
             docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                 @Override
                 public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                    Intent activityIntent;
+                    Intent intent;
                     Context context = MainEmptyActivity.this;
 
                     if (task.isSuccessful()) {
@@ -52,30 +52,37 @@ public class MainEmptyActivity extends AppCompatActivity {
                         if (document.exists()) {
 
                             SharedPreferencesHelper.setPreferences(context, document);
+                            Object memberPhoneNumber = document.get("phoneNumber");
                             Object memberTypeObject = document.get("memberType");
 
-                            if (memberTypeObject == null) {
-                                activityIntent = new Intent(context, GetMemberTypeActivity.class);
+                            if (memberPhoneNumber == null) {
+                                intent = new Intent(context, GetMemberPhoneNumberActivity.class);
+                                if (memberTypeObject != null)
+                                    intent.putExtra("memberType", memberTypeObject.toString());
+                            } else if (memberTypeObject == null) {
+                                intent = new Intent(context, GetMemberTypeActivity.class);
                             } else {
                                 String memberTypeString = memberTypeObject.toString();
 
-                                if (memberTypeString.equals(getResources().getString(R.string.volunteer_type)))
-                                    activityIntent = new Intent(context, VolunteerMainActivity.class);
-                                else if (memberTypeString.equals(getResources().getString(R.string.disabled_type)))
-                                    activityIntent = new Intent(context, DisabledMainActivity.class);
-                                else
-                                    activityIntent = new Intent(context, GetMemberTypeActivity.class);
+                                if (memberTypeString.equals(getResources().getString(R.string.volunteer_type))) {
+                                    intent = new Intent(context, VolunteerMainActivity.class);
+                                } else if (memberTypeString.equals(getResources().getString(R.string.disabled_type))) {
+                                    intent = new Intent(context, DisabledMainActivity.class);
+                                } else {
+                                    Log.e(TAG, "Invalid memberTypeString " + memberTypeString);
+                                    intent = new Intent(context, GetMemberTypeActivity.class);
+                                }
                             }
                         } else {
                             Log.d(TAG, "Users not exist.");
-                            activityIntent = new Intent(context, SignInActivity.class);
+                            intent = new Intent(context, SignInActivity.class);
                         }
                     } else {
                         Log.e(TAG, "Get failed with ", task.getException());
-                        activityIntent = new Intent(context, SignInActivity.class);
+                        intent = new Intent(context, SignInActivity.class);
                     }
 
-                    startActivity(activityIntent);
+                    startActivity(intent);
                     finish();
                 }
             });

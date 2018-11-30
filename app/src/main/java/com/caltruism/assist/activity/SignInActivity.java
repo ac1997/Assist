@@ -13,6 +13,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.bumptech.glide.signature.ObjectKey;
 import com.caltruism.assist.R;
 import com.caltruism.assist.util.CustomLoadingDialog;
 import com.caltruism.assist.util.SharedPreferencesHelper;
@@ -250,25 +251,32 @@ public class SignInActivity extends AppCompatActivity {
                     assert document != null;
 
                     if (document.exists()) {
-                        Intent activityIntent;
+                        Intent intent;
                         Context context = SignInActivity.this;
 
                         SharedPreferencesHelper.setPreferences(context, document);
+                        Object memberPhoneNumber = document.get("phoneNumber");
                         Object memberTypeObject = document.get("memberType");
 
-                        if (memberTypeObject == null) {
-                            activityIntent = new Intent(context, GetMemberTypeActivity.class);
+                        if (memberPhoneNumber == null) {
+                            intent = new Intent(context, GetMemberPhoneNumberActivity.class);
+                            if (memberTypeObject != null)
+                                intent.putExtra("memberType", memberTypeObject.toString());
+                        } else if (memberTypeObject == null) {
+                            intent = new Intent(context, GetMemberTypeActivity.class);
                         } else {
                             String memberTypeString = memberTypeObject.toString();
 
-                            if (memberTypeString.equals(getResources().getString(R.string.volunteer_type)))
-                                activityIntent = new Intent(context, VolunteerMainActivity.class);
-                            else if (memberTypeString.equals(getResources().getString(R.string.disabled_type)))
-                                activityIntent = new Intent(context, DisabledMainActivity.class);
-                            else
-                                activityIntent = new Intent(context, GetMemberTypeActivity.class);
+                            if (memberTypeString.equals(getResources().getString(R.string.volunteer_type))) {
+                                intent = new Intent(context, VolunteerMainActivity.class);
+                            } else if (memberTypeString.equals(getResources().getString(R.string.disabled_type))) {
+                                intent = new Intent(context, DisabledMainActivity.class);
+                            } else {
+                                Log.e(TAG, "Invalid memberTypeString " + memberTypeString);
+                                intent = new Intent(context, GetMemberTypeActivity.class);
+                            }
                         }
-                        startActivity(activityIntent);
+                        startActivity(intent);
                         finish();
                     } else {
                         Log.e(TAG, "DOCUMENT NOT EXIST");
@@ -347,7 +355,7 @@ public class SignInActivity extends AppCompatActivity {
 
         SharedPreferencesHelper.setPreferences(this, userData);
 
-        Intent intent = new Intent(this, GetMemberTypeActivity.class);
+        Intent intent = new Intent(this, GetMemberPhoneNumberActivity.class);
         intent.putExtra("userData", userData);
         startActivity(intent);
         finish();
@@ -368,12 +376,12 @@ public class SignInActivity extends AppCompatActivity {
             case OTHER:
                 message = "Sign in failed. Please contact us.";
         }
-        Snackbar snackbar = Snackbar.make(SignInActivity.this.findViewById(R.id.SignInConstraintLayout), message, Snackbar.LENGTH_LONG);
+        Snackbar snackbar = Snackbar.make(SignInActivity.this.findViewById(R.id.SignInConstraintLayout), message, Snackbar.LENGTH_SHORT);
         snackbar.show();
     }
 
     private void showSnackbar(String message) {
-        Snackbar snackbar = Snackbar.make(SignInActivity.this.findViewById(R.id.SignInConstraintLayout), message, Snackbar.LENGTH_LONG);
+        Snackbar snackbar = Snackbar.make(SignInActivity.this.findViewById(R.id.SignInConstraintLayout), message, Snackbar.LENGTH_SHORT);
         snackbar.show();
     }
 }

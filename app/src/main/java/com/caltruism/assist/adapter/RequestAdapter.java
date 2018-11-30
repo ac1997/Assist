@@ -16,10 +16,12 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.caltruism.assist.R;
+import com.caltruism.assist.activity.CurrentRequestActivity;
 import com.caltruism.assist.activity.GetMemberTypeActivity;
 import com.caltruism.assist.activity.RequestDetailsActivity;
 import com.caltruism.assist.data.AssistRequest;
 import com.caltruism.assist.util.Constants;
+import com.caltruism.assist.util.CustomDateTimeUtil;
 
 import org.w3c.dom.Text;
 
@@ -28,6 +30,8 @@ import java.util.ArrayList;
 public class RequestAdapter extends RecyclerView.Adapter<RequestAdapter.ViewHolder> {
 
     private final static String TAG = "RequestAdapter";
+
+    private static final int MINUTES_TO_CURRENT_REQUEST_VIEW = 10;
 
     private ColorStateList accentColorStateList;
     private ArrayList<AssistRequest> dataSet;
@@ -179,9 +183,14 @@ public class RequestAdapter extends RecyclerView.Adapter<RequestAdapter.ViewHold
         viewHolder.getConstraintLayout().setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // TODO: Rewrite
+                Intent intent;
 
-                Intent intent = new Intent(viewHolder.getContext(), RequestDetailsActivity.class);
+                if (CustomDateTimeUtil.isValidCurrent(dataSet.get(i).getDateTime(), dataSet.get(i).getDuration(), MINUTES_TO_CURRENT_REQUEST_VIEW) &&
+                        dataSet.get(i).getStatus() == Constants.REQUEST_STATUS_ACCEPTED)
+                    intent = new Intent(viewHolder.getContext(), CurrentRequestActivity.class);
+                else
+                    intent = new Intent(viewHolder.getContext(), RequestDetailsActivity.class);
+
                 intent.putExtra("isVolunteerView", isVolunteerView);
                 intent.putExtra("requestData", dataSet.get(i));
                 viewHolder.getContext().startActivity(intent);

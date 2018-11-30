@@ -29,10 +29,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.caltruism.assist.BuildConfig;
 import com.caltruism.assist.R;
@@ -40,8 +38,8 @@ import com.caltruism.assist.fragment.AddRequestInputDateTimeFragment;
 import com.caltruism.assist.fragment.AddRequestInputDetailsFragment;
 import com.caltruism.assist.fragment.AddRequestSelectTypeFragment;
 import com.caltruism.assist.fragment.AddRequestSummaryFragment;
-import com.caltruism.assist.util.CustomCallbackListener;
 import com.caltruism.assist.util.Constants;
+import com.caltruism.assist.util.CustomCallbackListener;
 import com.caltruism.assist.util.CustomDateTimeUtil;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.ResolvableApiException;
@@ -55,14 +53,10 @@ import com.google.android.gms.location.LocationSettingsResponse;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.location.SettingsClient;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
@@ -125,9 +119,6 @@ public class AddRequestActivity extends AppCompatActivity implements CustomCallb
     private AddRequestInputDateTimeFragment inputDateTimeFragment;
     private AddRequestSummaryFragment summaryFragment;
 
-    private static final long UPDATE_INTERVAL_IN_MILLISECONDS = 1000;
-    private static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS = UPDATE_INTERVAL_IN_MILLISECONDS / 2;
-
     private FusedLocationProviderClient fusedLocationClient;
     private SettingsClient settingsClient;
     private LocationRequest locationRequest;
@@ -160,7 +151,7 @@ public class AddRequestActivity extends AppCompatActivity implements CustomCallb
         setupStepView();
 
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-        fragmentTransaction.add(R.id.fragmentCreateRequest, selectTypeFragment);
+        fragmentTransaction.add(R.id.frameLayoutCreateRequest, selectTypeFragment);
         fragmentTransaction.commit();
 
         nextButton.setOnClickListener(new View.OnClickListener() {
@@ -203,8 +194,8 @@ public class AddRequestActivity extends AppCompatActivity implements CustomCallb
             }
         };
 
-        locationRequest = new LocationRequest().setInterval(UPDATE_INTERVAL_IN_MILLISECONDS)
-                .setFastestInterval(FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS)
+        locationRequest = new LocationRequest().setInterval(Constants.UPDATE_INTERVAL_IN_MILLISECONDS)
+                .setFastestInterval(Constants.FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS)
                 .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
         locationSettingsRequest = new LocationSettingsRequest.Builder()
@@ -368,7 +359,7 @@ public class AddRequestActivity extends AppCompatActivity implements CustomCallb
                     if (currentStep != step)
                         updateUI(step);
                 } else {
-                    Toast.makeText(AddRequestActivity.this, "Please complete this step first", Toast.LENGTH_SHORT).show();
+                    showSnackbar("Please complete this step first.");
                 }
             }
         });
@@ -399,7 +390,7 @@ public class AddRequestActivity extends AppCompatActivity implements CustomCallb
                             case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
                                 String errorMessage = "Location settings are inadequate, and cannot be fixed here. Fix in Settings.";
                                 Log.e(TAG, errorMessage);
-                                Toast.makeText(AddRequestActivity.this, errorMessage, Toast.LENGTH_LONG).show();
+                                showSnackbar(errorMessage);
                         }
                     }
                 });
@@ -461,7 +452,7 @@ public class AddRequestActivity extends AppCompatActivity implements CustomCallb
         if (selectTypeFragment.isAdded())
             fragmentTransaction.show(selectTypeFragment);
         else
-            fragmentTransaction.add(R.id.fragmentCreateRequest, selectTypeFragment);
+            fragmentTransaction.add(R.id.frameLayoutCreateRequest, selectTypeFragment);
 
         if (inputDetailsFragment.isAdded())
             fragmentTransaction.hide(inputDetailsFragment);
@@ -489,7 +480,7 @@ public class AddRequestActivity extends AppCompatActivity implements CustomCallb
                 Bundle arguments = new Bundle();
                 arguments.putInt("requestType", requestType);
                 inputDetailsFragment.setArguments(arguments);
-                fragmentTransaction.add(R.id.fragmentCreateRequest, inputDetailsFragment);
+                fragmentTransaction.add(R.id.frameLayoutCreateRequest, inputDetailsFragment);
             }
 
             if (selectTypeFragment.isAdded())
@@ -517,7 +508,7 @@ public class AddRequestActivity extends AppCompatActivity implements CustomCallb
             arguments.putInt("requestType", requestType);
             arguments.putString("requestTitle", requestTitle);
             inputDateTimeFragment.setArguments(arguments);
-            fragmentTransaction.add(R.id.fragmentCreateRequest, inputDateTimeFragment);
+            fragmentTransaction.add(R.id.frameLayoutCreateRequest, inputDateTimeFragment);
         }
 
         if (selectTypeFragment.isAdded())
@@ -569,7 +560,7 @@ public class AddRequestActivity extends AppCompatActivity implements CustomCallb
                         requestLocationAddress, requestLocationLatLng, requestIsNow, requestDateTime, requestDuration);
                 fragmentTransaction.show(summaryFragment);
             } else {
-                fragmentTransaction.add(R.id.fragmentCreateRequest, summaryFragment);
+                fragmentTransaction.add(R.id.frameLayoutCreateRequest, summaryFragment);
                 Bundle arguments = new Bundle();
                 arguments.putInt("requestType", requestType);
                 arguments.putString("requestTitle", requestTitle);
@@ -747,9 +738,7 @@ public class AddRequestActivity extends AppCompatActivity implements CustomCallb
         requestData.put("g", geoHash.getGeoHashString());
         requestData.put("l", Arrays.asList(latitude, longitude));
 
-        final CollectionReference collectionRef = db.collection("requests");
-
-        collectionRef.add(requestData).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+        db.collection("requests").add(requestData).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
             @Override
             public void onSuccess(DocumentReference documentReference) {
                 Log.d(TAG, "DocumentSnapshot written with ID: " + documentReference.getId());
@@ -760,9 +749,14 @@ public class AddRequestActivity extends AppCompatActivity implements CustomCallb
             @Override
             public void onFailure(@NonNull Exception e) {
                 Log.e(TAG, "Error adding document", e);
-                Snackbar snackbar = Snackbar.make(AddRequestActivity.this.findViewById(R.id.addRequestConstraintLayout), "Error adding request, please try again.", Snackbar.LENGTH_LONG);
+                Snackbar snackbar = Snackbar.make(AddRequestActivity.this.findViewById(R.id.addRequestConstraintLayout), "Error adding request, please try again.", Snackbar.LENGTH_SHORT);
                 snackbar.show();
             }
         });
+    }
+
+    private void showSnackbar(String message) {
+        Snackbar snackbar = Snackbar.make(AddRequestActivity.this.findViewById(R.id.addRequestConstraintLayout), message, Snackbar.LENGTH_SHORT);
+        snackbar.show();
     }
 }

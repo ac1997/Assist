@@ -26,10 +26,10 @@ public class CustomLoadingDialog {
         dialog.setCancelable(false);
         dialog.setContentView(R.layout.loading_layout);
 
-        ImageView gifImageView = dialog.findViewById(R.id.customLoadingView);
-        DrawableImageViewTarget imageViewTarget = new DrawableImageViewTarget(gifImageView);
-        RequestOptions requestOptions = new RequestOptions().placeholder(R.drawable.loading);
-        Glide.with(context).setDefaultRequestOptions(requestOptions).load(R.drawable.loading).into(imageViewTarget);
+        ImageView imageView = dialog.findViewById(R.id.customLoadingView);
+        DrawableImageViewTarget imageViewTarget = new DrawableImageViewTarget(imageView);
+        Glide.with(context).setDefaultRequestOptions(new RequestOptions().centerCrop())
+                .load(R.drawable.loading).into(imageViewTarget);
 
         dialog.show();
     }

@@ -34,7 +34,6 @@ public class AddRequestSummaryFragment extends Fragment implements
         CustomCallbackListener.AddRequestFragmentCallbackListener {
 
     public static final String TAG = "AddRequestSummaryFragment";
-    private static final float DEFAULT_ZOOM = 15;
 
     private TextView textViewTitle;
     private TextView textViewDate;
@@ -104,13 +103,15 @@ public class AddRequestSummaryFragment extends Fragment implements
         map.setMapStyle(MapStyleOptions.loadRawResourceStyle(getActivity(), R.raw.map_style_json));
         map.getUiSettings().setMyLocationButtonEnabled(false);
         map.getUiSettings().setMapToolbarEnabled(false);
+        map.setMinZoomPreference(Constants.MIN_ZOOM);
+        map.setMaxZoomPreference(Constants.MAX_ZOOM);
         if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             map.setMyLocationEnabled(true);
         }
 
         marker = googleMap.addMarker(new MarkerOptions().position(requestLocationLatLng).title(requestTitle)
                 .icon(BitMapDescriptorFromVector.regularMarker(getActivity())));
-        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(requestLocationLatLng, DEFAULT_ZOOM));
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(requestLocationLatLng, Constants.DEFAULT_ZOOM));
     }
 
     @Override
@@ -182,7 +183,7 @@ public class AddRequestSummaryFragment extends Fragment implements
             marker.remove();
             marker = map.addMarker(new MarkerOptions().position(requestLocationLatLng).title(requestTitle)
                     .icon(BitMapDescriptorFromVector.regularMarker(getActivity())));
-            map.animateCamera(CameraUpdateFactory.newLatLngZoom(requestLocationLatLng, DEFAULT_ZOOM));
+            map.animateCamera(CameraUpdateFactory.newLatLngZoom(requestLocationLatLng, Constants.DEFAULT_ZOOM));
         }
 
         switch (requestType) {

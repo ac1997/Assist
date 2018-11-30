@@ -7,6 +7,7 @@ import android.icu.util.Calendar;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -19,11 +20,10 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.TimePicker;
-import android.widget.Toast;
 
 import com.caltruism.assist.R;
-import com.caltruism.assist.util.CustomCallbackListener;
 import com.caltruism.assist.util.Constants;
+import com.caltruism.assist.util.CustomCallbackListener;
 import com.caltruism.assist.util.CustomDateTimeUtil;
 
 import java.text.SimpleDateFormat;
@@ -192,7 +192,7 @@ public class AddRequestInputDateTimeFragment extends Fragment implements CustomC
 
         if (requestTime < now) {
             // TODO: CHANGE PHRASE
-            Toast.makeText(getActivity(), "Time past. Please select again.", Toast.LENGTH_SHORT).show();
+            Snackbar.make(getView().findViewById(R.id.addRequestInputDateTimeConstraintLayout), "Time past. Please select again.", Snackbar.LENGTH_SHORT).show();
             TimePickerDialog timePickerDialog = new TimePickerDialog(getContext(), timeSetListener,
                     requestDateAndTime.get(Calendar.HOUR_OF_DAY),
                     requestDateAndTime.get(Calendar.MINUTE), false);
