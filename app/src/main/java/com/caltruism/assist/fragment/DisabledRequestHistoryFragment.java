@@ -112,7 +112,7 @@ public class DisabledRequestHistoryFragment extends Fragment {
         CollectionReference colRef = FirebaseFirestore.getInstance().collection("requests");
         listenerRegistration = colRef.whereEqualTo("postedBy.uid", FirebaseAuth.getInstance().getUid())
                 .whereGreaterThanOrEqualTo("status", Constants.REQUEST_STATUS_COMPLETED)
-                .whereLessThanOrEqualTo("status", Constants.REQUEST_STATUS_NO_SHOW)
+                .whereLessThanOrEqualTo("status", Constants.REQUEST_STATUS_EXPIRED)
                 .addSnapshotListener(new EventListener<QuerySnapshot>() {
                     @Override
                     public void onEvent(@javax.annotation.Nullable QuerySnapshot queryDocumentSnapshots, @javax.annotation.Nullable FirebaseFirestoreException e) {

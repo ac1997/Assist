@@ -33,8 +33,6 @@ public class DisabledMainActivity extends AppCompatActivity implements Navigatio
     private NavigationView navigationView;
     private DrawerLayout drawerLayout;
 
-    private DisabledRequestListFragment disabledRequestListFragment;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -58,8 +56,7 @@ public class DisabledMainActivity extends AppCompatActivity implements Navigatio
         textViewUsername.setText(sharedPreferences.getString("name", null));
         textViewPhoneNumber.setText(sharedPreferences.getString("phoneNumber", null));
 
-        disabledRequestListFragment = new DisabledRequestListFragment();
-        showFragment(disabledRequestListFragment);
+        showFragment(new DisabledRequestListFragment());
     }
 
     @Override

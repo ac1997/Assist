@@ -3,7 +3,6 @@ package com.caltruism.assist.fragment;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -25,7 +24,6 @@ import com.caltruism.assist.R;
 import com.caltruism.assist.activity.AddRequestActivity;
 import com.caltruism.assist.data.AssistRequest;
 import com.caltruism.assist.util.Constants;
-import com.caltruism.assist.util.CustomCallbackListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentChange;
@@ -37,7 +35,6 @@ import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -48,8 +45,8 @@ public class DisabledRequestListFragment extends Fragment {
     private ListenerRegistration listenerRegistration;
     private boolean isViewCreated = false;
 
-    private DisabledRequestListWaitingFragment disabledRequestListWaitingFragment;
-    private DisabledRequestListAcceptedFragment disabledRequestListAcceptedFragment;
+    private DisabledRequestListViewFragment disabledRequestListWaitingFragment;
+    private DisabledRequestListViewFragment disabledRequestListAcceptedFragment;
 
     private HashMap<String, Integer> assistRequestStatus = new HashMap<>();
     private ArrayList<AssistRequest> waitingDataSet = new ArrayList<>();
@@ -58,7 +55,6 @@ public class DisabledRequestListFragment extends Fragment {
     private HashSet<String> acceptedDataRemoved = new HashSet<>();
     private ArrayList<DocumentSnapshot> waitingDataModified = new ArrayList<>();
     private ArrayList<DocumentSnapshot> acceptedDataModified = new ArrayList<>();
-    private boolean isInitialQueryCompleted = false;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -79,8 +75,15 @@ public class DisabledRequestListFragment extends Fragment {
 
         setupToolbar();
 
-        disabledRequestListWaitingFragment = new DisabledRequestListWaitingFragment();
-        disabledRequestListAcceptedFragment = new DisabledRequestListAcceptedFragment();
+        disabledRequestListWaitingFragment = new DisabledRequestListViewFragment();
+        Bundle arguments = new Bundle();
+        arguments.putBoolean("isWaitingView", true);
+        disabledRequestListWaitingFragment.setArguments(arguments);
+
+        disabledRequestListAcceptedFragment = new DisabledRequestListViewFragment();
+        Bundle arguments1 = new Bundle();
+        arguments1.putBoolean("isWaitingView", false);
+        disabledRequestListAcceptedFragment.setArguments(arguments1);
 
         TabLayout tabLayout = view.findViewById(R.id.tabLayoutDisabledRequestList);
         ViewPager viewPager = view.findViewById(R.id.viewPagerDisabledRequestList);
@@ -152,31 +155,25 @@ public class DisabledRequestListFragment extends Fragment {
             @Override
             public void onEvent(@javax.annotation.Nullable QuerySnapshot queryDocumentSnapshots, @javax.annotation.Nullable FirebaseFirestoreException e) {
                 if (queryDocumentSnapshots != null && e == null) {
-                    if (!isInitialQueryCompleted) {
-                        isInitialQueryCompleted = true;
-                        if (queryDocumentSnapshots.size() > 0)
-                            onNewDataSet(queryDocumentSnapshots);
-                    } else {
-                        for (DocumentChange docChange : queryDocumentSnapshots.getDocumentChanges()) {
-                            switch (docChange.getType()) {
-                                case ADDED:
-                                    onDataAdded(docChange.getDocument());
-                                    break;
-                                case MODIFIED:
-                                    onDataModified(docChange.getDocument());
-                                    break;
-                                case REMOVED:
-                                    onDataRemoved(docChange.getDocument());
-                                    break;
-                            }
+                    for (DocumentChange docChange : queryDocumentSnapshots.getDocumentChanges()) {
+                        switch (docChange.getType()) {
+                            case ADDED:
+                                onDataAdded(docChange.getDocument());
+                                break;
+                            case MODIFIED:
+                                onDataModified(docChange.getDocument());
+                                break;
+                            case REMOVED:
+                                onDataRemoved(docChange.getDocument());
+                                break;
                         }
                     }
 
                     if (waitingDataSet.size() > 0)
-                        disabledRequestListWaitingFragment.onNewDataSet(waitingDataSet);
+                        disabledRequestListWaitingFragment.onDataAdded(waitingDataSet);
 
                     if (acceptedDataSet.size() > 0)
-                        disabledRequestListAcceptedFragment.onNewDataSet(acceptedDataSet);
+                        disabledRequestListAcceptedFragment.onDataAdded(acceptedDataSet);
 
                     if (waitingDataRemoved.size() > 0)
                         disabledRequestListWaitingFragment.onDataRemoved(waitingDataRemoved);
@@ -194,19 +191,6 @@ public class DisabledRequestListFragment extends Fragment {
                 }
             }
         });
-    }
-
-    private void onNewDataSet(QuerySnapshot queryDocumentSnapshots) {
-        Log.e(TAG, "on new dataset");
-        for (DocumentSnapshot documentSnapshot : queryDocumentSnapshots.getDocuments()) {
-            AssistRequest assistRequest = new AssistRequest(documentSnapshot);
-            assistRequestStatus.put(documentSnapshot.getId(), assistRequest.getStatus());
-
-            if (assistRequest.getStatus() == Constants.REQUEST_STATUS_WAITING)
-                waitingDataSet.add(assistRequest);
-            else if (assistRequest.getStatus() == Constants.REQUEST_STATUS_ACCEPTED)
-                acceptedDataSet.add(assistRequest);
-        }
     }
 
     private void onDataAdded(DocumentSnapshot documentSnapshot) {
@@ -262,7 +246,7 @@ public class DisabledRequestListFragment extends Fragment {
         }
     }
 
-    public class DisabledRequestListPageAdapter  extends FragmentStatePagerAdapter {
+    public class DisabledRequestListPageAdapter extends FragmentStatePagerAdapter {
         private static final String TAG = "DisabledRequestListPageAdapter";
 
         public DisabledRequestListPageAdapter(FragmentManager fm) {
