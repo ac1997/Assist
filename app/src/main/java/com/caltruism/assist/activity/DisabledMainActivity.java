@@ -1,7 +1,9 @@
 package com.caltruism.assist.activity;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
@@ -11,15 +13,24 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.caltruism.assist.R;
+import com.caltruism.assist.fragment.DisabledRequestHistoryFragment;
 import com.caltruism.assist.fragment.DisabledRequestListFragment;
+import com.caltruism.assist.fragment.VolunteerRequestListFragment;
+import com.caltruism.assist.util.Constants;
 import com.caltruism.assist.util.CustomCallbackListener;
 import com.caltruism.assist.util.SharedPreferencesHelper;
 import com.google.firebase.auth.FirebaseAuth;
 
-public class DisabledMainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, CustomCallbackListener.DisabledMainActivityCallbackListener {
+public class DisabledMainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
+    private NavigationView navigationView;
     private DrawerLayout drawerLayout;
 
     private DisabledRequestListFragment disabledRequestListFragment;
@@ -30,9 +41,22 @@ public class DisabledMainActivity extends AppCompatActivity implements Navigatio
         setContentView(R.layout.activity_main_disabled);
 
         drawerLayout = findViewById(R.id.drawerLayoutDisabled);
-        NavigationView navigationView = findViewById(R.id.navViewDisabled);
+        navigationView = findViewById(R.id.navViewDisabled);
         navigationView.setNavigationItemSelectedListener(this);
         navigationView.getMenu().getItem(1).setChecked(true);
+
+        View headerView = navigationView.getHeaderView(0);
+        ImageView imageViewProfile = headerView.findViewById(R.id.imageViewNavHeaderProfile);
+        TextView textViewUsername = headerView.findViewById(R.id.textViewNavHeaderUsername);
+        TextView textViewPhoneNumber = headerView.findViewById(R.id.textViewNavHeaderPhoneNumber);
+
+        SharedPreferences sharedPreferences = getSharedPreferences(Constants.USER_DATA_SHARED_PREFERENCE, Context.MODE_PRIVATE);
+
+        RequestOptions requestOptions = new RequestOptions().placeholder(R.drawable.ic_user_solid).centerCrop();
+        Glide.with(this).setDefaultRequestOptions(requestOptions).load(sharedPreferences.getString("pictureURL", null)).into(imageViewProfile);
+
+        textViewUsername.setText(sharedPreferences.getString("name", null));
+        textViewPhoneNumber.setText(sharedPreferences.getString("phoneNumber", null));
 
         disabledRequestListFragment = new DisabledRequestListFragment();
         showFragment(disabledRequestListFragment);
@@ -40,6 +64,7 @@ public class DisabledMainActivity extends AppCompatActivity implements Navigatio
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
+        navigationView.setCheckedItem(menuItem);
         drawerLayout.closeDrawer(GravityCompat.START);
         switch (menuItem.getItemId()) {
             case R.id.disabledProfile:
@@ -50,15 +75,18 @@ public class DisabledMainActivity extends AppCompatActivity implements Navigatio
                 return true;
 
             case R.id.disabledRequestHistory:
-//                showFragment(new ScrollingSearchExampleFragment());
+                showFragment(new DisabledRequestHistoryFragment());
                 return true;
 
             case R.id.disabledSocial:
-
                 return true;
+
             case R.id.disabledLeaderboard:
-
                 return true;
+
+            case R.id.disabledSettings:
+                return true;
+
             case R.id.disabledLogout:
                 // TODO: Rephrase
                 new AlertDialog.Builder(this).setTitle("Logout?")
@@ -73,6 +101,13 @@ public class DisabledMainActivity extends AppCompatActivity implements Navigatio
                             }
                         }).setNegativeButton("No", null).show();
                 return false;
+
+            case R.id.disabledHelpAndSupport:
+                return true;
+
+            case R.id.disabledAboutUs:
+                return true;
+
             default:
                 return true;
         }
@@ -91,10 +126,5 @@ public class DisabledMainActivity extends AppCompatActivity implements Navigatio
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.frameLayoutDisabledMain, fragment).commit();
-    }
-
-    @Override
-    public void onDisabledRequestListChildFragmentDataSetEmpty(boolean isWaitingView) {
-        disabledRequestListFragment.onDataSetEmpty(isWaitingView);
     }
 }

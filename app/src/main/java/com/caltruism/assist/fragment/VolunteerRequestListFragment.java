@@ -22,7 +22,6 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import com.arlib.floatingsearchview.FloatingSearchView;
 import com.caltruism.assist.BuildConfig;
@@ -82,9 +81,6 @@ public class VolunteerRequestListFragment extends Fragment {
 
     private VolunteerRequestListViewFragment listViewFragment;
     private VolunteerRequestMapViewFragment mapViewFragment;
-
-    private static final long UPDATE_INTERVAL_IN_MILLISECONDS = 1000;
-    private static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS = UPDATE_INTERVAL_IN_MILLISECONDS / 2;
 
     private FusedLocationProviderClient fusedLocationClient;
     private SettingsClient settingsClient;
@@ -165,8 +161,8 @@ public class VolunteerRequestListFragment extends Fragment {
             }
         };
 
-        locationRequest = new LocationRequest().setInterval(UPDATE_INTERVAL_IN_MILLISECONDS)
-                .setFastestInterval(FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS)
+        locationRequest = new LocationRequest().setInterval(Constants.UPDATE_INTERVAL_IN_MILLISECONDS)
+                .setFastestInterval(Constants.FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS)
                 .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
         locationSettingsRequest = new LocationSettingsRequest.Builder()
@@ -239,7 +235,6 @@ public class VolunteerRequestListFragment extends Fragment {
                 int itemId = item.getItemId();
                 if (itemId == R.id.actionFilter) {
                     // FILTER
-                    getNearByRequests();
                 } else if (currentFragment != itemId) {
                     currentFragment = itemId;
 
@@ -285,7 +280,7 @@ public class VolunteerRequestListFragment extends Fragment {
                             case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
                                 String errorMessage = "Location settings are inadequate, and cannot be fixed here. Fix in Settings.";
                                 Log.e(TAG, errorMessage);
-                                Toast.makeText(getActivity(), errorMessage, Toast.LENGTH_LONG).show();
+                                Snackbar.make(getView().findViewById(R.id.volunteerRequestListConstraintLayout), errorMessage, Snackbar.LENGTH_SHORT).show();
                         }
                     }
                 });
@@ -345,7 +340,7 @@ public class VolunteerRequestListFragment extends Fragment {
             String message = "Google Play Services is not available: " + GoogleApiAvailability.getInstance().getErrorString(e.errorCode);
 
             Log.e(TAG, message);
-            Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
+            Snackbar.make(getView().findViewById(R.id.volunteerRequestListConstraintLayout), message, Snackbar.LENGTH_SHORT).show();
         }
     }
 

@@ -15,6 +15,7 @@ import android.view.ViewGroup;
 import com.caltruism.assist.R;
 import com.caltruism.assist.data.AssistRequest;
 import com.caltruism.assist.util.BitMapDescriptorFromVector;
+import com.caltruism.assist.util.Constants;
 import com.caltruism.assist.util.CustomDateTimeUtil;
 import com.caltruism.assist.util.CustomCallbackListener;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -32,7 +33,6 @@ public class VolunteerRequestMapViewFragment extends Fragment implements CustomC
         OnMapReadyCallback, ActivityCompat.OnRequestPermissionsResultCallback {
 
     private static final String TAG = "VolunteerRequestMapViewFragment";
-    private static final float DEFAULT_ZOOM = 14;
 
     private MapView mapView;
 
@@ -112,7 +112,7 @@ public class VolunteerRequestMapViewFragment extends Fragment implements CustomC
         if (isUsingCurrentLocation || isNewSearch) {
             if (map != null && (isFirstUpdate || isNewSearch)) {
                 isFirstUpdate = false;
-                map.animateCamera(CameraUpdateFactory.newLatLngZoom(newCameraLocation, DEFAULT_ZOOM));
+                map.animateCamera(CameraUpdateFactory.newLatLngZoom(newCameraLocation, Constants.DEFAULT_ZOOM));
             }
         }
     }

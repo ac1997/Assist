@@ -14,6 +14,7 @@ public class SharedPreferencesHelper {
 
         Object memberFirstNameObject = ds.get("firstName");
         Object memberLastNameObject = ds.get("lastName");
+        Object memberPhoneNumber = ds.get("phoneNumber");
         Object memberPictureURLObject = ds.get("pictureURL");
         Object memberRatingsObject = ds.get("ratings");
         Object memberTypeObject = ds.get("memberType");
@@ -26,6 +27,9 @@ public class SharedPreferencesHelper {
 
         if (memberFirstNameObject != null && memberLastNameObject != null && !sharedPreferences.contains("name"))
             editor.putString("name", String.format("%s %s", memberFirstNameObject.toString(), memberLastNameObject.toString()));
+
+        if (memberPhoneNumber != null && !sharedPreferences.contains("phoneNumber"))
+            editor.putString("phoneNumber", memberPhoneNumber.toString());
 
         if (memberPictureURLObject != null && !sharedPreferences.contains("pictureURL"))
             editor.putString("pictureURL", memberPictureURLObject.toString());
@@ -45,6 +49,7 @@ public class SharedPreferencesHelper {
 
         Object memberFirstNameObject = userData.get("firstName");
         Object memberLastNameObject = userData.get("lastName");
+        Object memberPhoneNumber = userData.get("phoneNumber");
         Object memberPictureURLObject = userData.get("pictureURL");
         Object memberRatingsObject = userData.get("ratings");
         Object memberTypeObject = userData.get("memberType");
@@ -57,6 +62,9 @@ public class SharedPreferencesHelper {
 
         if (memberFirstNameObject != null && memberLastNameObject != null && !sharedPreferences.contains("name"))
             editor.putString("name", String.format("%s %s", memberFirstNameObject.toString(), memberLastNameObject.toString()));
+
+        if (memberPhoneNumber != null && !sharedPreferences.contains("phoneNumber"))
+            editor.putString("phoneNumber", memberPhoneNumber.toString());
 
         if (memberPictureURLObject != null && !sharedPreferences.contains("pictureURL"))
             editor.putString("pictureURL", memberPictureURLObject.toString());

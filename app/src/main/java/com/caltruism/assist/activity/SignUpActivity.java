@@ -12,18 +12,21 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.caltruism.assist.R;
 import com.caltruism.assist.util.CustomLoadingDialog;
 import com.caltruism.assist.util.SharedPreferencesHelper;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.SetOptions;
 
 import java.util.HashMap;
+import java.util.Objects;
 
 public class SignUpActivity extends AppCompatActivity {
 
@@ -33,8 +36,11 @@ public class SignUpActivity extends AppCompatActivity {
     private EditText editTextLastName;
     private EditText editTextEmail;
     private EditText editTextPassword;
-
     private CustomLoadingDialog customLoadingDialog;
+
+    private FirebaseAuth auth;
+
+    private HashMap<String, Object> userData;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -65,6 +71,7 @@ public class SignUpActivity extends AppCompatActivity {
         });
 
         customLoadingDialog = new CustomLoadingDialog(this);
+        auth = FirebaseAuth.getInstance();
     }
 
     @Override
@@ -112,7 +119,7 @@ public class SignUpActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
-                            initUser(firstName, lastName, email);
+                            addUserData(firstName, lastName, email);
                         } else {
                             customLoadingDialog.hideDialog();
                             Log.w(TAG, "Sign up failed:", task.getException());
@@ -122,8 +129,8 @@ public class SignUpActivity extends AppCompatActivity {
                 });
     }
 
-    private void initUser(String firstName, String lastName, String email) {
-        HashMap<String, Object> userData = new HashMap<>();
+    private void addUserData(String firstName, String lastName, String email) {
+        userData = new HashMap<>();
         userData.put("email", email);
         userData.put("firstName", firstName);
         userData.put("lastName", lastName);
@@ -135,17 +142,29 @@ public class SignUpActivity extends AppCompatActivity {
         stats.put("requestCompleted", 0);
 
         userData.put("stats", stats);
-
         SharedPreferencesHelper.setPreferences(this, userData);
 
-        Intent intent = new Intent(this, GetMemberTypeActivity.class);
-        intent.putExtra("userData", userData);
-        startActivity(intent);
-        finish();
+        FirebaseFirestore.getInstance().collection("users").document(Objects.requireNonNull(auth.getCurrentUser()).getUid()).set(userData, SetOptions.merge())
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d(TAG, "Document added/updated with ID: " + auth.getCurrentUser().getUid());
+                        Intent intent = new Intent(SignUpActivity.this, GetMemberPhoneNumberActivity.class);
+                        intent.putExtra("userData", userData);
+                        startActivity(intent);
+                        finish();
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e(TAG, "Error adding document", e);
+                        showSnackbar("Something went wrong. Please try again later.");
+                    }
+        });
     }
 
     private void showSnackbar(String message) {
-        Snackbar snackbar = Snackbar.make(SignUpActivity.this.findViewById(R.id.SignUpConstraintLayout), message, Snackbar.LENGTH_LONG);
+        Snackbar snackbar = Snackbar.make(SignUpActivity.this.findViewById(R.id.SignUpConstraintLayout), message, Snackbar.LENGTH_SHORT);
         snackbar.show();
     }
 }

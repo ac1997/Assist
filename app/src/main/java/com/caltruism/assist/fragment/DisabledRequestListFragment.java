@@ -41,16 +41,15 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 
-public class DisabledRequestListFragment extends Fragment implements CustomCallbackListener.DisabledRequestListFragmentCallbackListener {
+public class DisabledRequestListFragment extends Fragment {
     private static final String TAG = "DisabledRequestListFragment";
     private static final int REQUEST_CODE_ADD_REQUEST = 0;
 
-    private Toolbar toolbar;
-    private TextView title;
-
-    private DisabledRequestListPageAdapter pageAdapter;
     private ListenerRegistration listenerRegistration;
     private boolean isViewCreated = false;
+
+    private DisabledRequestListWaitingFragment disabledRequestListWaitingFragment;
+    private DisabledRequestListAcceptedFragment disabledRequestListAcceptedFragment;
 
     private HashMap<String, Integer> assistRequestStatus = new HashMap<>();
     private ArrayList<AssistRequest> waitingDataSet = new ArrayList<>();
@@ -60,8 +59,6 @@ public class DisabledRequestListFragment extends Fragment implements CustomCallb
     private ArrayList<DocumentSnapshot> waitingDataModified = new ArrayList<>();
     private ArrayList<DocumentSnapshot> acceptedDataModified = new ArrayList<>();
     private boolean isInitialQueryCompleted = false;
-    private boolean isDataListenersTriggered = false;
-    private Boolean isWaitingView = null;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -82,9 +79,12 @@ public class DisabledRequestListFragment extends Fragment implements CustomCallb
 
         setupToolbar();
 
+        disabledRequestListWaitingFragment = new DisabledRequestListWaitingFragment();
+        disabledRequestListAcceptedFragment = new DisabledRequestListAcceptedFragment();
+
         TabLayout tabLayout = view.findViewById(R.id.tabLayoutDisabledRequestList);
         ViewPager viewPager = view.findViewById(R.id.viewPagerDisabledRequestList);
-        pageAdapter = new DisabledRequestListPageAdapter(getFragmentManager());
+        DisabledRequestListPageAdapter pageAdapter = new DisabledRequestListPageAdapter(getFragmentManager());
         viewPager.setAdapter(pageAdapter);
         viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
         tabLayout.addOnTabSelectedListener(new TabLayout.ViewPagerOnTabSelectedListener(viewPager));
@@ -101,7 +101,7 @@ public class DisabledRequestListFragment extends Fragment implements CustomCallb
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == REQUEST_CODE_ADD_REQUEST && resultCode == Activity.RESULT_OK) {
-            // TODO: Redesign and rephrase
+            // TODO: Rephrase
             new AlertDialog.Builder(getActivity()).setTitle("Request Posted")
                     .setMessage("You will be notified when someone accepts your request.")
                     .setPositiveButton("OK", null).show();
@@ -112,12 +112,13 @@ public class DisabledRequestListFragment extends Fragment implements CustomCallb
     public void onDestroy() {
         super.onDestroy();
 
-        listenerRegistration.remove();
+        if (listenerRegistration != null)
+            listenerRegistration.remove();
     }
 
     private void setupToolbar() {
-        toolbar = getView().findViewById(R.id.toolbarDisabledRequestList);
-        title = getView().findViewById(R.id.textViewDisabledRequestListToolbarTitle);
+        final Toolbar toolbar = getView().findViewById(R.id.toolbarDisabledRequestList);
+        final TextView title = getView().findViewById(R.id.textViewDisabledRequestListToolbarTitle);
         ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
         title.setText("Current Requests");
 
@@ -144,21 +145,19 @@ public class DisabledRequestListFragment extends Fragment implements CustomCallb
     }
 
     private void queryData() {
-        CollectionReference docRef = FirebaseFirestore.getInstance().collection("requests");
-        listenerRegistration = docRef.whereEqualTo("postedBy.uid", FirebaseAuth.getInstance().getUid())
-                .whereLessThanOrEqualTo("status", 1)
+        CollectionReference colRef = FirebaseFirestore.getInstance().collection("requests");
+        listenerRegistration = colRef.whereEqualTo("postedBy.uid", FirebaseAuth.getInstance().getUid())
+                .whereLessThanOrEqualTo("status", Constants.REQUEST_STATUS_ACCEPTED)
                 .addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
             public void onEvent(@javax.annotation.Nullable QuerySnapshot queryDocumentSnapshots, @javax.annotation.Nullable FirebaseFirestoreException e) {
                 if (queryDocumentSnapshots != null && e == null) {
                     if (!isInitialQueryCompleted) {
                         isInitialQueryCompleted = true;
-                        isDataListenersTriggered = false;
                         if (queryDocumentSnapshots.size() > 0)
                             onNewDataSet(queryDocumentSnapshots);
                     } else {
                         for (DocumentChange docChange : queryDocumentSnapshots.getDocumentChanges()) {
-                            isDataListenersTriggered = true;
                             switch (docChange.getType()) {
                                 case ADDED:
                                     onDataAdded(docChange.getDocument());
@@ -166,14 +165,30 @@ public class DisabledRequestListFragment extends Fragment implements CustomCallb
                                 case MODIFIED:
                                     onDataModified(docChange.getDocument());
                                     break;
-
                                 case REMOVED:
                                     onDataRemoved(docChange.getDocument());
                                     break;
                             }
                         }
                     }
-                    pageAdapter.notifyDataSetChanged();
+
+                    if (waitingDataSet.size() > 0)
+                        disabledRequestListWaitingFragment.onNewDataSet(waitingDataSet);
+
+                    if (acceptedDataSet.size() > 0)
+                        disabledRequestListAcceptedFragment.onNewDataSet(acceptedDataSet);
+
+                    if (waitingDataRemoved.size() > 0)
+                        disabledRequestListWaitingFragment.onDataRemoved(waitingDataRemoved);
+
+                    if (acceptedDataRemoved.size() > 0)
+                        disabledRequestListAcceptedFragment.onDataRemoved(acceptedDataRemoved);
+
+                    if (waitingDataModified.size() > 0)
+                        disabledRequestListWaitingFragment.onDataModified(waitingDataModified);
+
+                    if (acceptedDataModified.size() > 0)
+                        disabledRequestListAcceptedFragment.onDataModified(acceptedDataModified);
                 } else if (e != null) {
                     Log.e(TAG, "queryData Error: ", e);
                 }
@@ -192,8 +207,6 @@ public class DisabledRequestListFragment extends Fragment implements CustomCallb
             else if (assistRequest.getStatus() == Constants.REQUEST_STATUS_ACCEPTED)
                 acceptedDataSet.add(assistRequest);
         }
-        Collections.sort(waitingDataSet);
-        Collections.sort(acceptedDataSet);
     }
 
     private void onDataAdded(DocumentSnapshot documentSnapshot) {
@@ -233,7 +246,6 @@ public class DisabledRequestListFragment extends Fragment implements CustomCallb
                 acceptedDataModified.add(documentSnapshot);
             else
                 Log.e(TAG, "onDataModified error: Unexpected status " + newStatus);
-
         } else {
             AssistRequest assistRequest = new AssistRequest(documentSnapshot);
             assistRequestStatus.put(documentSnapshot.getId(), newStatus);
@@ -250,14 +262,6 @@ public class DisabledRequestListFragment extends Fragment implements CustomCallb
         }
     }
 
-    @Override
-    public void onDataSetEmpty(boolean isWaitingView) {
-        isDataListenersTriggered = false;
-        this.isWaitingView = isWaitingView;
-        Log.e(TAG, "onDataSetEmpty: isWaitingView " + isWaitingView);
-        pageAdapter.notifyDataSetChanged();
-    }
-
     public class DisabledRequestListPageAdapter  extends FragmentStatePagerAdapter {
         private static final String TAG = "DisabledRequestListPageAdapter";
 
@@ -269,120 +273,13 @@ public class DisabledRequestListFragment extends Fragment implements CustomCallb
         public Fragment getItem(int i) {
             switch (i) {
                 case 0:
-                    if (!isInitialQueryCompleted || waitingDataSet.size() > 0 || isDataListenersTriggered || (isWaitingView != null && !isWaitingView)) {
-                        DisabledRequestListWaitingFragment fragment = new DisabledRequestListWaitingFragment();
-                        Bundle arguments = new Bundle();
-                        arguments.putParcelableArrayList("waitingDataSet", (ArrayList<? extends Parcelable>) waitingDataSet.clone());
-                        Log.e(TAG, "getItem size " + waitingDataSet.size());
-                        fragment.setArguments(arguments);
-                        waitingDataSet.clear();
-
-                        if (isWaitingView != null)
-                            isWaitingView = null;
-
-                        return fragment;
-                    } else {
-                        return new DisabledRequestListEmptyFragment();
-                    }
+                    return disabledRequestListWaitingFragment;
                 case 1:
-                    if (!isInitialQueryCompleted || acceptedDataSet.size() > 0 || isDataListenersTriggered || (isWaitingView != null && isWaitingView)) {
-                        DisabledRequestListAcceptedFragment fragment = new DisabledRequestListAcceptedFragment();
-                        Bundle arguments = new Bundle();
-                        arguments.putParcelableArrayList("acceptedDataSet", (ArrayList<? extends Parcelable>) acceptedDataSet.clone());
-                        fragment.setArguments(arguments);
-                        acceptedDataSet.clear();
-
-                        if (isWaitingView != null)
-                            isWaitingView = null;
-
-                        return fragment;
-                    } else {
-                        return new DisabledRequestListEmptyFragment();
-                    }
+                    return disabledRequestListAcceptedFragment;
                 default:
                     Log.e(TAG, "Invalid tab number: " + i);
                     return null;
             }
-        }
-
-        @Override
-        public int getItemPosition(@NonNull Object object) {
-            if (object instanceof DisabledRequestListEmptyFragment && waitingDataSet.size() + acceptedDataSet.size() > 0)
-                return POSITION_NONE;
-            else if (object instanceof DisabledRequestListWaitingFragment) {
-                if (waitingDataSet.size() == 0 && !isDataListenersTriggered) {
-                    if (isWaitingView != null) {
-                        if (isWaitingView) {
-                            return POSITION_NONE;
-                        } else {
-                            return POSITION_UNCHANGED;
-                        }
-                    } else {
-                        return POSITION_NONE;
-                    }
-                } else {
-                    if (isDataListenersTriggered) {
-                        if (waitingDataSet.size() > 0) {
-                            ((DisabledRequestListWaitingFragment) object).onDataAdded(waitingDataSet);
-                            waitingDataSet.clear();
-                        }
-
-                        if (waitingDataRemoved.size() > 0) {
-                            ((DisabledRequestListWaitingFragment) object).onDataRemoved(waitingDataRemoved);
-                            waitingDataRemoved.clear();
-                        }
-
-                        if (waitingDataModified.size() > 0) {
-                            ((DisabledRequestListWaitingFragment) object).onDataModified(waitingDataModified);
-                            waitingDataModified.clear();
-                        }
-                    } else {
-                        if (isWaitingView != null)
-                            ((DisabledRequestListWaitingFragment) object).onDataAdded(waitingDataSet);
-                        else
-                            ((DisabledRequestListWaitingFragment) object).onNewDataSet(waitingDataSet);
-                        waitingDataSet.clear();
-                    }
-                    return POSITION_UNCHANGED;
-                }
-            } else if (object instanceof DisabledRequestListAcceptedFragment) {
-                if (acceptedDataSet.size() == 0 && !isDataListenersTriggered) {
-                    if (isWaitingView != null) {
-                        if (!isWaitingView) {
-                            return POSITION_NONE;
-                        } else {
-                            return POSITION_UNCHANGED;
-                        }
-                    } else {
-                        return POSITION_NONE;
-                    }
-                } else {
-                    if (isDataListenersTriggered) {
-                        if (acceptedDataSet.size() > 0) {
-                            ((DisabledRequestListAcceptedFragment) object).onDataAdded(acceptedDataSet);
-                            acceptedDataSet.clear();
-                        }
-
-                        if (acceptedDataRemoved.size() > 0) {
-                            ((DisabledRequestListAcceptedFragment) object).onDataRemoved(acceptedDataRemoved);
-                            acceptedDataRemoved.clear();
-                        }
-
-                        if (acceptedDataModified.size() > 0) {
-                            ((DisabledRequestListAcceptedFragment) object).onDataModified(acceptedDataModified);
-                            acceptedDataModified.clear();
-                        }
-                    } else {
-                        if (isWaitingView != null)
-                            ((DisabledRequestListAcceptedFragment) object).onDataAdded(acceptedDataSet);
-                        else
-                            ((DisabledRequestListAcceptedFragment) object).onNewDataSet(acceptedDataSet);
-                        acceptedDataSet.clear();
-                    }
-                    return POSITION_UNCHANGED;
-                }
-            }
-            return super.getItemPosition(object);
         }
 
         @Override

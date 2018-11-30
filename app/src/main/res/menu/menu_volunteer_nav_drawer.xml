@@ -1,40 +1,66 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <group android:checkableBehavior="single">
+    <group
+        android:id="@+id/menu_top"
+        android:checkableBehavior="single" >
         <item
             android:id="@+id/volunteerProfile"
             android:checked="false"
-            android:icon="@drawable/ic_calendar_solid"
+            android:icon="@drawable/ic_menu_user"
             android:title="Profile"/>
 
         <item
             android:id="@+id/volunteerTaskList"
             android:checked="false"
-            android:icon="@drawable/ic_add_request_other"
+            android:icon="@drawable/ic_menu_request"
             android:title="Task List"/>
 
         <item
             android:id="@+id/volunteerTaskHistory"
             android:checked="false"
-            android:icon="@drawable/ic_add_request_laundry"
+            android:icon="@drawable/ic_menu_history"
             android:title="Task History"/>
 
         <item
             android:id="@+id/volunteerSocial"
             android:checked="false"
-            android:icon="@drawable/ic_add_request_laundry"
+            android:icon="@drawable/ic_menu_social"
             android:title="Social"/>
 
         <item
             android:id="@+id/volunteerLeaderboard"
             android:checked="false"
-            android:icon="@drawable/ic_add_request_laundry"
+            android:icon="@drawable/ic_menu_leaderboard"
             android:title="Leaderboard"/>
+    </group>
+
+    <group
+        android:id="@+id/menu_middle"
+        android:checkableBehavior="single" >
+        <item
+            android:id="@+id/volunteerSettings"
+            android:checked="false"
+            android:icon="@drawable/ic_menu_settings"
+            android:title="Settings"/>
 
         <item
             android:id="@+id/volunteerLogout"
             android:checked="false"
-            android:icon="@drawable/ic_add_request_laundry"
+            android:icon="@drawable/ic_menu_logout"
             android:title="Logout"/>
+    </group>
+
+    <group
+        android:id="@+id/menu_bottom"
+        android:checkableBehavior="single" >
+        <item
+            android:id="@+id/volunteerHelpAndSupport"
+            android:checked="false"
+            android:title="Help &amp; Support"/>
+
+        <item
+            android:id="@+id/volunteerAboutUs"
+            android:checked="false"
+            android:title="About Us"/>
     </group>
 </menu>

@@ -8,49 +8,47 @@
 
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/imageViewGetMemberTypeProfilePicture"
-        android:layout_width="128dp"
-        android:layout_height="128dp"
-        android:layout_marginBottom="80dp"
+        android:layout_width="192dp"
+        android:layout_height="192dp"
+        android:layout_marginBottom="64dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
+        android:src="@drawable/ic_user_solid"
         app:layout_constraintBottom_toTopOf="@+id/textViewGetMemberTypeName"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        android:src="@drawable/ic_profile_image_placeholder" />
+        app:layout_constraintStart_toStartOf="parent" />
 
-    <TextView
-        android:id="@+id/textViewGetMemberTypeUploadImage"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="16dp"
-        android:text="Upload Image"
-        android:textColor="@color/colorGrey6"
-        android:textSize="18sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageViewGetMemberTypeProfilePicture" />
+    <ImageView
+        android:id="@+id/imageViewGetMemberTypeEditProfileImage"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:clickable="true"
+        android:foreground="?attr/selectableItemBackground"
+        app:layout_constraintBottom_toBottomOf="@+id/imageViewGetMemberTypeProfilePicture"
+        app:layout_constraintEnd_toEndOf="@+id/imageViewGetMemberTypeProfilePicture"
+        app:srcCompat="@drawable/ic_edit_profile_image" />
 
     <TextView
         android:id="@+id/textViewGetMemberTypeName"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginStart="32dp"
         android:layout_marginTop="8dp"
-        android:text="Hello Aparna!"
+        android:gravity="center"
+        android:text="Hello User!"
         android:textColor="@android:color/white"
         android:textSize="36sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.55" />
 
     <TextView
-        android:id="@+id/textView5"
+        android:id="@+id/textViewGetMemberPhoneTermAndCondition"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
@@ -62,6 +60,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textViewGetMemberTypeName" />
+
     <android.support.design.button.MaterialButton
         android:id="@+id/buttonDisabled"
         android:layout_width="0dp"
@@ -70,12 +69,12 @@
         android:layout_marginEnd="16dp"
         android:layout_marginStart="16dp"
         android:text="I Need Help"
-        app:layout_constraintBottom_toTopOf="@+id/buttonVolunteer"
+        app:layout_constraintBottom_toTopOf="@+id/buttonGetMemberPhoneNumberNext"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
     <android.support.design.button.MaterialButton
-        android:id="@+id/buttonVolunteer"
+        android:id="@+id/buttonGetMemberPhoneNumberNext"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
@@ -85,6 +84,5 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
-
 
 </android.support.constraint.ConstraintLayout>

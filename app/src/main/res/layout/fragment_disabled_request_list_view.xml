@@ -13,4 +13,56 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/imageViewDisabledRequestList"
+        android:layout_width="128dp"
+        android:layout_height="128dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:tint="@color/colorGrey4"
+        app:layout_constraintBottom_toTopOf="@+id/textViewDisabledRequestListMainText"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/recyclerViewDisabledRequestList"
+        app:layout_constraintVertical_chainStyle="packed"
+        app:srcCompat="@drawable/ic_note_add_solid" />
+
+    <TextView
+        android:id="@+id/textViewDisabledRequestListMainText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:text="No current requests"
+        android:textColor="@color/colorGrey3"
+        android:textSize="24sp"
+        app:layout_constraintBottom_toTopOf="@+id/textViewDisabledRequestListSubText"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imageViewDisabledRequestList" />
+
+    <TextView
+        android:id="@+id/textViewDisabledRequestListSubText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="2dp"
+        android:text="Tap the '+' to start creating one"
+        android:textColor="@color/colorGrey4"
+        android:textSize="14sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textViewDisabledRequestListMainText" />
+
+    <android.support.constraint.Group
+        android:id="@+id/groupDisabledRequestListEmpty"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:constraint_referenced_ids="textViewDisabledRequestListMainText,textViewDisabledRequestListSubText,imageViewDisabledRequestList" />
+
 </android.support.constraint.ConstraintLayout>
