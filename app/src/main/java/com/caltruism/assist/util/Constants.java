@@ -14,9 +14,9 @@ public final class Constants {
     public static final int REQUEST_STATUS_WAITING = 0;
     public static final int REQUEST_STATUS_ACCEPTED = 1;
     public static final int REQUEST_STATUS_COMPLETED = 2;
-    public static final int REQUEST_STATUS_EXPIRED = 3;
-    public static final int REQUEST_STATUS_NO_SHOW = 4;
-    public static final int REQUEST_STATUS_CANCELLED = 5;
+    public static final int REQUEST_STATUS_NO_SHOW = 3;
+    public static final int REQUEST_STATUS_CANCELLED = 4;
+    public static final int REQUEST_STATUS_EXPIRED = 5;
 
     public static final long UPDATE_INTERVAL_IN_MILLISECONDS = 1000;
     public static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS = UPDATE_INTERVAL_IN_MILLISECONDS / 2;

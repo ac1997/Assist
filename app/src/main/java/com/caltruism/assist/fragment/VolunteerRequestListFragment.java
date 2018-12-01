@@ -290,7 +290,6 @@ public class VolunteerRequestListFragment extends Fragment {
         geoQueryDataEventListener = new GeoQueryDataEventListener() {
             @Override
             public void onDocumentEntered(DocumentSnapshot documentSnapshot, GeoPoint geoPoint) {
-                Log.e(TAG, "Document entered");
                 if (isInitialQueryCompleted)
                     notifyDataAdded(documentSnapshot);
                 else
@@ -299,7 +298,6 @@ public class VolunteerRequestListFragment extends Fragment {
 
             @Override
             public void onDocumentExited(DocumentSnapshot documentSnapshot) {
-                Log.e(TAG, "Document exited");
                 assistRequests.remove(documentSnapshot.getId());
                 if (isInitialQueryCompleted)
                     notifyDataRemoved(documentSnapshot.getId());
@@ -310,7 +308,6 @@ public class VolunteerRequestListFragment extends Fragment {
 
             @Override
             public void onDocumentChanged(DocumentSnapshot documentSnapshot, GeoPoint geoPoint) {
-                Log.e(TAG, "Document changed");
                 if (isInitialQueryCompleted)
                     notifyDataModified(documentSnapshot);
             }
@@ -319,7 +316,6 @@ public class VolunteerRequestListFragment extends Fragment {
             public void onGeoQueryReady() {
                 notifyNewDataSet();
                 notifyNewLocations();
-                Log.e(TAG, "Initial data completed");
             }
 
             @Override
@@ -399,7 +395,7 @@ public class VolunteerRequestListFragment extends Fragment {
     }
 
     private void notifyDataModified(DocumentSnapshot documentSnapshot) {
-        assistRequests.get(documentSnapshot.getId()).modifiedData(documentSnapshot);
+        assistRequests.get(documentSnapshot.getId()).modifiedData(documentSnapshot, currentLocation);
         listViewFragment.onDataModified(documentSnapshot);
         mapViewFragment.onDataModified(documentSnapshot);
     }

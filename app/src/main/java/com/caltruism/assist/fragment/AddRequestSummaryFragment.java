@@ -1,7 +1,6 @@
 package com.caltruism.assist.fragment;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -17,12 +16,12 @@ import android.widget.TextView;
 
 import com.caltruism.assist.R;
 import com.caltruism.assist.util.BitMapDescriptorFromVector;
-import com.caltruism.assist.util.CustomCallbackListener;
 import com.caltruism.assist.util.Constants;
+import com.caltruism.assist.util.CustomCallbackListener;
 import com.caltruism.assist.util.CustomDateTimeUtil;
-import com.caltruism.assist.util.CustomMapView;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
@@ -44,7 +43,7 @@ public class AddRequestSummaryFragment extends Fragment implements
     private TextView textViewLocationAddress;
     private TextView textViewDescription;
     private ImageView imageViewType;
-    private CustomMapView mapView;
+    private MapView mapView;
 
     private GoogleMap map;
     private Marker marker;
@@ -103,13 +102,14 @@ public class AddRequestSummaryFragment extends Fragment implements
         map.setMapStyle(MapStyleOptions.loadRawResourceStyle(getActivity(), R.raw.map_style_json));
         map.getUiSettings().setMyLocationButtonEnabled(false);
         map.getUiSettings().setMapToolbarEnabled(false);
+        googleMap.getUiSettings().setScrollGesturesEnabled(false);
         map.setMinZoomPreference(Constants.MIN_ZOOM);
         map.setMaxZoomPreference(Constants.MAX_ZOOM);
         if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             map.setMyLocationEnabled(true);
         }
 
-        marker = googleMap.addMarker(new MarkerOptions().position(requestLocationLatLng).title(requestTitle)
+        marker = googleMap.addMarker(new MarkerOptions().position(requestLocationLatLng)
                 .icon(BitMapDescriptorFromVector.regularMarker(getActivity())));
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(requestLocationLatLng, Constants.DEFAULT_ZOOM));
     }

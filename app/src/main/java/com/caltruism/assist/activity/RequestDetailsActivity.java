@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -28,9 +29,9 @@ import com.caltruism.assist.data.AssistRequest;
 import com.caltruism.assist.util.BitMapDescriptorFromVector;
 import com.caltruism.assist.util.Constants;
 import com.caltruism.assist.util.CustomDateTimeUtil;
-import com.caltruism.assist.util.CustomMapView;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -63,11 +64,9 @@ public class RequestDetailsActivity extends AppCompatActivity implements OnMapRe
     private TextView textViewDescription;
     private ImageView imageViewProfile;
     private ImageView imageViewType;
-    private CustomMapView mapView;
+    private MapView mapView;
     private Button buttonViewProfile;
     private Button buttonActionButton;
-
-    private GoogleMap map;
 
     private FirebaseFirestore db;
 
@@ -109,17 +108,17 @@ public class RequestDetailsActivity extends AppCompatActivity implements OnMapRe
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        map = googleMap;
-        map.setMapStyle(MapStyleOptions.loadRawResourceStyle(this, R.raw.map_style_json));
-        map.getUiSettings().setMyLocationButtonEnabled(false);
-        map.getUiSettings().setMapToolbarEnabled(false);
-        map.setMinZoomPreference(Constants.MIN_ZOOM);
-        map.setMaxZoomPreference(Constants.MAX_ZOOM);
+        googleMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(this, R.raw.map_style_json));
+        googleMap.getUiSettings().setMyLocationButtonEnabled(false);
+        googleMap.getUiSettings().setMapToolbarEnabled(false);
+        googleMap.getUiSettings().setScrollGesturesEnabled(false);
+        googleMap.setMinZoomPreference(Constants.MIN_ZOOM);
+        googleMap.setMaxZoomPreference(Constants.MAX_ZOOM);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            map.setMyLocationEnabled(true);
+            googleMap.setMyLocationEnabled(true);
         }
 
-        googleMap.addMarker(new MarkerOptions().position(assistRequest.getLocationLatLng()).title(assistRequest.getTitle())
+        googleMap.addMarker(new MarkerOptions().position(assistRequest.getLocationLatLng())
                  .icon(BitMapDescriptorFromVector.regularMarker(this)));
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(assistRequest.getLocationLatLng(), Constants.DEFAULT_ZOOM));
     }
@@ -199,7 +198,7 @@ public class RequestDetailsActivity extends AppCompatActivity implements OnMapRe
         textViewDuration.setText(assistRequest.getDurationString());
         textViewDate.setText(CustomDateTimeUtil.getDateWithDay(assistRequest.getDateTime()));
 
-        if (assistRequest.isNow()) {
+        if (assistRequest.isNow() && !CustomDateTimeUtil.isExpired(assistRequest.getDateTime(), assistRequest.getDuration())) {
             textViewTime.setText(Html.fromHtml("<font color='#f48760'>Now</font>", Html.FROM_HTML_MODE_LEGACY));
         } else {
             textViewTime.setText(assistRequest.getTimeString());
@@ -240,22 +239,25 @@ public class RequestDetailsActivity extends AppCompatActivity implements OnMapRe
             textViewUsername.setText(assistRequest.getPostedByName());
 
             // TODO: Set view profile button listener
-
-            buttonActionButton.setText("Accept Request");
-            buttonActionButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    // TODO: Rephrase
-                    new AlertDialog.Builder(RequestDetailsActivity.this).setTitle("Accept request?")
-                            .setMessage("The scheduled meeting time is " + assistRequest.getDateTimeString())
-                            .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    acceptRequest();
-                                }
-                            }).setNegativeButton("No", null).show();
-                }
-            });
+            if (assistRequest.isAccepted()) {
+                buttonActionButton.setVisibility(View.GONE);
+            } else {
+                buttonActionButton.setText("Accept Request");
+                buttonActionButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        // TODO: Rephrase
+                        new AlertDialog.Builder(RequestDetailsActivity.this).setTitle("Accept request?")
+                                .setMessage("The scheduled meeting time is " + assistRequest.getDateTimeString())
+                                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        acceptRequest();
+                                    }
+                                }).setNegativeButton("No", null).show();
+                    }
+                });
+            }
         } else {
             if (assistRequest.isAccepted()) {
                 setUpProfileImageView(assistRequest.getAcceptedByMainUid());
@@ -298,7 +300,10 @@ public class RequestDetailsActivity extends AppCompatActivity implements OnMapRe
                 @Override
                 public void onSuccess(Void aVoid) {
                     Log.d(TAG, "DocumentSnapshot updated with ID: " + assistRequest.getId());
-                    setResult(Activity.RESULT_OK);
+                    Intent intent = new Intent(RequestDetailsActivity.this, CurrentRequestActivity.class);
+                    intent.putExtra("isVolunteerView", isVolunteerView);
+                    intent.putExtra("requestData", assistRequest);
+                    startActivity(intent);
                     finish();
                 }
                 }).addOnFailureListener(new OnFailureListener() {

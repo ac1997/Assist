@@ -152,6 +152,23 @@ public class AssistRequest implements Comparable<AssistRequest>, Parcelable {
         }
     }
 
+    public void modifiedData(DocumentSnapshot ds, Location location) {
+        boolean updateMarker = false;
+
+        // TODO EDIT SNIPPET
+        if (!this.title.equals(ds.getString("title")))
+            updateMarker = true;
+
+        setDataFromDocumentSnapshot(ds);
+
+        if (marker != null && updateMarker) {
+            marker.setTitle(this.title);
+            marker.setSnippet(CustomDateTimeUtil.getDateWithTime(this.dateTime));
+        }
+
+        this.setDistance(location);
+    }
+
     private void setDataFromDocumentSnapshot(DocumentSnapshot ds) {
         this.id = ds.getId();
         this.status = ds.getLong("status").intValue();
@@ -196,16 +213,9 @@ public class AssistRequest implements Comparable<AssistRequest>, Parcelable {
         distance = (float) (requestLocation.distanceTo(location) * Constants.METER_TO_MILE);
     }
 
-    public void setNewMarker(Context context, GoogleMap map) {
-        this.marker = map.addMarker(new MarkerOptions().position(this.locationLatLng)
-                .title(this.title).snippet(this.dateTimeString)
-                .icon(BitMapDescriptorFromVector.requestTypeMarker(context, this.type)));
-    }
-
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof String) {
-            Log.e(TAG, "equals called with obj id " + obj);
             return this.id.equals(obj);}
         else
             return this == obj || obj instanceof AssistRequest && this.id.equals(((AssistRequest) obj).getId());

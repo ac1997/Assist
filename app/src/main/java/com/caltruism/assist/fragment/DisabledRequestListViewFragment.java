@@ -10,6 +10,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.caltruism.assist.R;
 import com.caltruism.assist.adapter.RequestAdapter;
@@ -20,16 +21,19 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import java.util.ArrayList;
 import java.util.HashSet;
 
-public class DisabledRequestListWaitingFragment extends Fragment implements CustomCallbackListener.DisabledRequestListChildFragmentCallbackListener {
+public class DisabledRequestListViewFragment extends Fragment implements CustomCallbackListener.ListViewChildFragmentCallbackListener {
 
     private RecyclerView recyclerView;
     private RequestAdapter adapter;
     private Group groupEmpty;
 
-    private ArrayList<AssistRequest> waitingDataSet = new ArrayList<>();
+    private ArrayList<AssistRequest> dataSet = new ArrayList<>();
+    private boolean isWaitingView;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        isWaitingView = getArguments().getBoolean("isWaitingView");
+
         return inflater.inflate(R.layout.fragment_disabled_request_list_view, container, false);
     }
 
@@ -37,47 +41,42 @@ public class DisabledRequestListWaitingFragment extends Fragment implements Cust
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        adapter = new RequestAdapter(getActivity(), waitingDataSet, false);
+        adapter = new RequestAdapter(getActivity(), dataSet, false);
 
         recyclerView = view.findViewById(R.id.recyclerViewDisabledRequestList);
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
+        TextView textViewEmptyMainText = view.findViewById(R.id.textViewDisabledRequestListMainText);
+        if (isWaitingView) {
+            textViewEmptyMainText.setText("No waiting request");
+        } else {
+            textViewEmptyMainText.setText("No accepted request");
+        }
+
         groupEmpty = view.findViewById(R.id.groupDisabledRequestListEmpty);
     }
 
     @Override
-    public void onNewDataSet(ArrayList<AssistRequest> dataSet) {
+    public void onDataAdded(ArrayList<AssistRequest> addedDataSet) {
         if (groupEmpty.getVisibility() == View.VISIBLE)
             groupEmpty.setVisibility(View.GONE);
 
-        waitingDataSet.clear();
-        waitingDataSet.addAll(dataSet);
-        adapter.notifyDataSetChanged();
+        for (AssistRequest assistRequest : addedDataSet)
+            adapter.notifyItemInserted(AssistRequest.insertInOrder(dataSet, assistRequest));
 
-        dataSet.clear();
-    }
-
-    @Override
-    public void onDataAdded(ArrayList<AssistRequest> dataSet) {
-        if (groupEmpty.getVisibility() == View.VISIBLE)
-            groupEmpty.setVisibility(View.GONE);
-
-        for (AssistRequest assistRequest : dataSet)
-            adapter.notifyItemInserted(AssistRequest.insertInOrder(waitingDataSet, assistRequest));
-
-        dataSet.clear();
+        addedDataSet.clear();
     }
 
     @Override
     public void onDataRemoved(HashSet<String> removedId) {
         for (String id : removedId) {
-            int removeIndex = waitingDataSet.indexOf(new AssistRequest(id));
-            waitingDataSet.remove(removeIndex);
+            int removeIndex = dataSet.indexOf(id);
+            dataSet.remove(removeIndex);
             adapter.notifyItemRemoved(removeIndex);
         }
 
-        if (waitingDataSet.size() == 0) {
+        if (dataSet.size() == 0) {
             removedId.clear();
             if (groupEmpty.getVisibility() != View.VISIBLE)
                 groupEmpty.setVisibility(View.VISIBLE);
@@ -87,14 +86,14 @@ public class DisabledRequestListWaitingFragment extends Fragment implements Cust
     }
 
     @Override
-    public void onDataModified(ArrayList<DocumentSnapshot> dataSet) {
+    public void onDataModified(ArrayList<DocumentSnapshot> modifiedDataSet) {
         int index;
-        for (DocumentSnapshot documentSnapshot : dataSet) {
-            index = waitingDataSet.indexOf(new AssistRequest(documentSnapshot.getId()));
-            waitingDataSet.get(index).modifiedData(documentSnapshot);
+        for (DocumentSnapshot documentSnapshot : modifiedDataSet) {
+            index = dataSet.indexOf(new AssistRequest(documentSnapshot.getId()));
+            dataSet.get(index).modifiedData(documentSnapshot);
             adapter.notifyItemChanged(index);
         }
 
-        dataSet.clear();
+        modifiedDataSet.clear();
     }
 }

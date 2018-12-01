@@ -37,6 +37,8 @@
             android:layout_marginEnd="8dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
+            android:ellipsize="end"
+            android:singleLine="true"
             android:text="Description"
             android:textAppearance="@style/TextAppearance.AppCompat.Headline"
             android:textColor="@color/mainTextLighterBlack"
@@ -71,13 +73,17 @@
 
         <TextView
             android:id="@+id/textViewCardLayoutRequestDate"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
             android:layout_marginStart="9dp"
             android:layout_marginTop="8dp"
+            android:ellipsize="end"
+            android:singleLine="true"
             android:text="Sun, November 1st"
             android:textColor="@color/colorGrey3"
             android:textSize="12sp"
+            app:layout_constraintEnd_toStartOf="@+id/guidelineCardLayoutRequest"
             app:layout_constraintStart_toEndOf="@+id/imageViewCardLayoutRequestDate"
             app:layout_constraintTop_toBottomOf="@+id/textViewCardLayoutRequestTitle" />
 
@@ -94,13 +100,17 @@
 
         <TextView
             android:id="@+id/textViewCardLayoutRequestUser"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
             android:layout_marginStart="8dp"
             android:layout_marginTop="32dp"
+            android:ellipsize="end"
+            android:singleLine="true"
             android:text="Sun, November 1st"
             android:textColor="@color/colorGrey3"
             android:textSize="12sp"
+            app:layout_constraintEnd_toStartOf="@+id/guidelineCardLayoutRequest"
             app:layout_constraintStart_toEndOf="@+id/imageViewCardLayoutRequestUser"
             app:layout_constraintTop_toBottomOf="@+id/textViewCardLayoutRequestTitle" />
 
@@ -118,13 +128,17 @@
 
         <TextView
             android:id="@+id/textViewCardLayoutRequestTime"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
+            android:ellipsize="end"
+            android:singleLine="true"
             android:text="12:00 AM"
             android:textColor="@color/colorGrey3"
             android:textSize="12sp"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/imageViewCardLayoutRequestTime"
             app:layout_constraintTop_toBottomOf="@+id/textViewCardLayoutRequestTitle" />
 
@@ -142,15 +156,19 @@
 
         <TextView
             android:id="@+id/textViewCardLayoutRequestDuration"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
+            android:layout_marginEnd="8dp"
             android:layout_marginStart="8dp"
             android:layout_marginTop="32dp"
+            android:ellipsize="end"
+            android:singleLine="true"
             android:text="1 hr 45 mins"
             android:textColor="@color/colorGrey3"
             android:textSize="12sp"
             app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/imageViewCardLayoutRequestDuration"
             app:layout_constraintTop_toBottomOf="@+id/textViewCardLayoutRequestTitle" />
 

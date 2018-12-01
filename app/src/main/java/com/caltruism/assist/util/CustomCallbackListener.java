@@ -13,8 +13,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 public class CustomCallbackListener {
-    public interface DisabledRequestListChildFragmentCallbackListener {
-        void onNewDataSet(ArrayList<AssistRequest> dataSet);
+    public interface ListViewChildFragmentCallbackListener {
         void onDataAdded(ArrayList<AssistRequest> dataSet);
         void onDataRemoved(HashSet<String> removedId);
         void onDataModified(ArrayList<DocumentSnapshot> dataSet);

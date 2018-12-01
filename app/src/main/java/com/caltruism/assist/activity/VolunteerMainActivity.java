@@ -22,6 +22,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.caltruism.assist.R;
 import com.caltruism.assist.fragment.VolunteerRequestListFragment;
+import com.caltruism.assist.fragment.VolunteerTaskListFragment;
 import com.caltruism.assist.util.Constants;
 import com.caltruism.assist.util.CustomCallbackListener;
 import com.caltruism.assist.util.SharedPreferencesHelper;
@@ -73,7 +74,7 @@ public class VolunteerMainActivity extends AppCompatActivity implements
                 return true;
 
             case R.id.volunteerTaskHistory:
-//                showFragment(new ScrollingSearchExampleFragment());
+                showFragment(new VolunteerTaskListFragment());
                 return true;
 
             case R.id.volunteerSocial:
@@ -114,6 +115,15 @@ public class VolunteerMainActivity extends AppCompatActivity implements
     @Override
     public void onAttachSearchViewToDrawer(FloatingSearchView searchView) {
         searchView.attachNavigationDrawerToMenuButton(drawerLayout);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            drawerLayout.openDrawer(GravityCompat.START, true);
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private void showFragment(Fragment fragment) {

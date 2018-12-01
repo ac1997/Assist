@@ -4,12 +4,14 @@ import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.constraint.Group;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.caltruism.assist.R;
 import com.caltruism.assist.adapter.RequestAdapter;
@@ -19,11 +21,13 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.firestore.DocumentSnapshot;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 
 public class VolunteerRequestListViewFragment extends Fragment implements CustomCallbackListener.VolunteerRequestListChildFragmentCallbackListener {
 
     private RequestAdapter adapter;
+    private Group groupEmpty;
 
     private Location currentLocation;
     private HashMap<String, AssistRequest> assistRequests = new HashMap<>();
@@ -43,6 +47,8 @@ public class VolunteerRequestListViewFragment extends Fragment implements Custom
         RecyclerView recyclerView = view.findViewById(R.id.recyclerViewVolunteerRequestList);
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+
+        groupEmpty = view.findViewById(R.id.groupVolunteerRequestListEmpty);
     }
 
 
@@ -54,23 +60,31 @@ public class VolunteerRequestListViewFragment extends Fragment implements Custom
 
     @Override
     public void onNewDataSet(HashMap<String, AssistRequest> data) {
+        TextView textView = getView().findViewById(R.id.textViewVolunteerRequestListEmpty);
+        textView.setText("No posted requests");
+
         if (data != null) {
+            if (groupEmpty.getVisibility() == View.VISIBLE)
+                groupEmpty.setVisibility(View.GONE);
+
             assistRequests.clear();
             assistRequests.putAll(data);
 
             dataSet.clear();
             dataSet.addAll(data.values());
+            Collections.sort(dataSet);
             adapter.notifyDataSetChanged();
         }
     }
 
     @Override
     public void onDataAdded(DocumentSnapshot documentSnapshot) {
+        if (groupEmpty.getVisibility() == View.VISIBLE)
+            groupEmpty.setVisibility(View.GONE);
+
         AssistRequest request = new AssistRequest(documentSnapshot, currentLocation);
         assistRequests.put(documentSnapshot.getId(), request);
-        int insertIndex = dataSet.size();
-        dataSet.add(insertIndex, request);
-        adapter.notifyItemInserted(insertIndex);
+        adapter.notifyItemInserted(AssistRequest.insertInOrder(dataSet, new AssistRequest(documentSnapshot)));
     }
 
     @Override
@@ -79,11 +93,16 @@ public class VolunteerRequestListViewFragment extends Fragment implements Custom
         assistRequests.remove(documentId);
         dataSet.remove(removeIndex);
         adapter.notifyItemRemoved(removeIndex);
+
+        if (dataSet.size() == 0) {
+            if (groupEmpty.getVisibility() != View.VISIBLE)
+                groupEmpty.setVisibility(View.VISIBLE);
+        }
     }
 
     @Override
     public void onDataModified(DocumentSnapshot documentSnapshot) {
-        assistRequests.get(documentSnapshot.getId()).modifiedData(documentSnapshot);
+        assistRequests.get(documentSnapshot.getId()).modifiedData(documentSnapshot, currentLocation);
         adapter.notifyItemChanged(dataSet.indexOf(assistRequests.get(documentSnapshot.getId())));
     }
 }
