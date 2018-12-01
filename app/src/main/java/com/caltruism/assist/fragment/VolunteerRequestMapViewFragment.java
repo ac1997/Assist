@@ -1,6 +1,7 @@
 package com.caltruism.assist.fragment;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -8,11 +9,13 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.caltruism.assist.R;
+import com.caltruism.assist.activity.RequestDetailsActivity;
 import com.caltruism.assist.data.AssistRequest;
 import com.caltruism.assist.util.BitMapDescriptorFromVector;
 import com.caltruism.assist.util.Constants;
@@ -24,6 +27,7 @@ import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.firestore.DocumentSnapshot;
 
@@ -65,6 +69,16 @@ public class VolunteerRequestMapViewFragment extends Fragment implements CustomC
         map.getUiSettings().setMyLocationButtonEnabled(false);
         map.getUiSettings().setMapToolbarEnabled(false);
         map.setMyLocationEnabled(true);
+
+        map.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
+            @Override
+            public void onInfoWindowClick(Marker marker) {
+                Intent intent = new Intent(getActivity(), RequestDetailsActivity.class);
+                intent.putExtra("isVolunteerView", true);
+                intent.putExtra("requestData", assistRequests.get(marker.getTag()));
+                startActivity(intent);
+            }
+        });
 
         FloatingActionButton fab = getView().findViewById(R.id.fabVolunteerMapViewCurrentLocation);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -126,9 +140,13 @@ public class VolunteerRequestMapViewFragment extends Fragment implements CustomC
             assistRequests.clear();
             assistRequests.putAll(data);
 
-            for (AssistRequest request : assistRequests.values()) {
-                // TODO: Set onclick listener
-                request.setNewMarker(getActivity(), map);
+            for (AssistRequest assistRequest : assistRequests.values()) {
+                Marker marker = map.addMarker(new MarkerOptions().position(assistRequest.getLocationLatLng())
+                        .title(assistRequest.getTitle()).snippet(CustomDateTimeUtil.getDateWithTime(assistRequest.getDateTime()))
+                        .icon(BitMapDescriptorFromVector.requestTypeMarker(getActivity(), assistRequest.getType())));
+
+                marker.setTag(assistRequest.getId());
+                assistRequest.setMarker(marker);
             }
         }
     }
@@ -136,9 +154,12 @@ public class VolunteerRequestMapViewFragment extends Fragment implements CustomC
     @Override
     public void onDataAdded(DocumentSnapshot documentSnapshot) {
         AssistRequest assistRequest = new AssistRequest(documentSnapshot, currentLocation);
-        assistRequest.setMarker(map.addMarker(new MarkerOptions().position(assistRequest.getLocationLatLng())
+        Marker marker = map.addMarker(new MarkerOptions().position(assistRequest.getLocationLatLng())
                 .title(assistRequest.getTitle()).snippet(CustomDateTimeUtil.getDateWithTime(assistRequest.getDateTime()))
-                .icon(BitMapDescriptorFromVector.requestTypeMarker(getActivity(), assistRequest.getType()))));
+                .icon(BitMapDescriptorFromVector.requestTypeMarker(getActivity(), assistRequest.getType())));
+
+        marker.setTag(documentSnapshot.getId());
+        assistRequest.setMarker(marker);
 
         assistRequests.put(documentSnapshot.getId(), assistRequest);
     }

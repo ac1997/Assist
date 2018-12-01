@@ -106,7 +106,6 @@ public class CurrentRequestActivity extends AppCompatActivity implements CustomC
         setupFragment();
 
         TextView textViewName = findViewById(R.id.textViewCurrentRequestName);
-        TextView textViewViewProfile = findViewById(R.id.textViewCurrentRequestViewProfile);
         imageViewProfile = findViewById(R.id.imageViewCurrentRequestProfilePicture);
         viewActionCall = findViewById(R.id.viewCurrentRequestCall);
 
@@ -273,15 +272,14 @@ public class CurrentRequestActivity extends AppCompatActivity implements CustomC
     }
 
     @Override
-    protected void onStop() {
-        super.onStop();
-
-        fusedLocationClient.removeLocationUpdates(locationCallback);
-    }
-
-    @Override
     public void onDestroy() {
         super.onDestroy();
+
+        fusedLocationClient.removeLocationUpdates(locationCallback);
+
+        if (isVolunteerView) {
+            removeData();
+        }
 
         if (listenerRegistration != null)
             listenerRegistration.remove();
@@ -329,6 +327,7 @@ public class CurrentRequestActivity extends AppCompatActivity implements CustomC
                 isStored = false;
                 locationData.put("latLng", new GeoPoint(currentLocation.getLatitude(), currentLocation.getLongitude()));
             } else {
+                locationData.put("latLng", null);
                 isStored = true;
             }
 
@@ -412,6 +411,21 @@ public class CurrentRequestActivity extends AppCompatActivity implements CustomC
         });
     }
 
+    private void removeData() {
+        db.collection("locations").document(Objects.requireNonNull(auth.getCurrentUser()).getUid()).delete()
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d(TAG, "DocumentSnapshot successfully deleted!");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e(TAG, "Error deleting document", e);
+                    }
+                });
+    }
 
     private boolean checkPermissions() {
         return ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)

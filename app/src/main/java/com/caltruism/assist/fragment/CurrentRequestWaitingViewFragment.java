@@ -39,8 +39,6 @@ public class CurrentRequestWaitingViewFragment extends Fragment implements Custo
         textViewSubText = view.findViewById(R.id.textViewCurrentRequestWaitingSubtext);
         textViewFootNote = view.findViewById(R.id.textViewCurrentRequestWaitingFootnote);
 
-//        DrawableImageViewTarget imageViewTarget = new DrawableImageViewTarget(imageView);
-
         setOfflineView();
     }
 

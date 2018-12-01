@@ -65,7 +65,9 @@
                         android:layout_marginEnd="16dp"
                         android:layout_marginStart="16dp"
                         android:layout_marginTop="8dp"
+                        android:ellipsize="end"
                         android:gravity="center"
+                        android:singleLine="true"
                         android:text="Request Title Placeholder"
                         android:textAppearance="@style/TextAppearance.AppCompat.Headline"
                         android:textColor="@color/mainTextLighterBlack"
@@ -106,6 +108,8 @@
                         android:layout_marginEnd="16dp"
                         android:layout_marginStart="16dp"
                         android:layout_marginTop="30dp"
+                        android:ellipsize="end"
+                        android:singleLine="true"
                         android:text="Jane Deer"
                         android:textColor="@color/mainTextLighterBlack"
                         android:textSize="16sp"
@@ -118,7 +122,7 @@
                         style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginEnd="32dp"
+                        android:layout_marginEnd="16dp"
                         android:layout_marginTop="16dp"
                         android:text="View Profile"
                         app:backgroundTint="@android:color/white"
@@ -327,7 +331,7 @@
                         app:layout_constraintTop_toBottomOf="@+id/textViewRequestDetailsLocationTitle" />
 
 
-                    <com.caltruism.assist.util.CustomMapView
+                    <com.google.android.gms.maps.MapView
                         android:id="@+id/mapViewRequestDetails"
                         android:layout_width="0dp"
                         android:layout_height="200dp"

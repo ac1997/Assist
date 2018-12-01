@@ -71,7 +71,7 @@ public class DisabledRequestListViewFragment extends Fragment implements CustomC
     @Override
     public void onDataRemoved(HashSet<String> removedId) {
         for (String id : removedId) {
-            int removeIndex = dataSet.indexOf(new AssistRequest(id));
+            int removeIndex = dataSet.indexOf(id);
             dataSet.remove(removeIndex);
             adapter.notifyItemRemoved(removeIndex);
         }

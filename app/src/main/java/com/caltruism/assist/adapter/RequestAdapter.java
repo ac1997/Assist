@@ -33,6 +33,7 @@ public class RequestAdapter extends RecyclerView.Adapter<RequestAdapter.ViewHold
 
     private static final int MINUTES_TO_CURRENT_REQUEST_VIEW = 10;
 
+    private ColorStateList greyColorStateList;
     private ColorStateList accentColorStateList;
     private ArrayList<AssistRequest> dataSet;
     private boolean isVolunteerView;
@@ -118,6 +119,7 @@ public class RequestAdapter extends RecyclerView.Adapter<RequestAdapter.ViewHold
     }
 
     public RequestAdapter(Context context, ArrayList<AssistRequest> dataSet, boolean isVolunteerView) {
+        this.greyColorStateList = ColorStateList.valueOf(ContextCompat.getColor(context, R.color.colorGrey4));
         this.accentColorStateList = ColorStateList.valueOf(ContextCompat.getColor(context, R.color.colorAccent));
         this.dataSet = dataSet;
         this.isVolunteerView = isVolunteerView;
@@ -162,10 +164,11 @@ public class RequestAdapter extends RecyclerView.Adapter<RequestAdapter.ViewHold
             viewHolder.getTextViewDistance().setVisibility(View.GONE);
         }
 
-        if (dataSet.get(i).isNow()) {
+        if (dataSet.get(i).isNow() && !CustomDateTimeUtil.isExpired(dataSet.get(i).getDateTime(), dataSet.get(i).getDuration())) {
             viewHolder.getImageViewTime().setImageTintList(this.accentColorStateList);
             viewHolder.getTextViewTime().setText(Html.fromHtml("<font color='#f48760'>Now</font>", Html.FROM_HTML_MODE_LEGACY));
         } else {
+            viewHolder.getImageViewTime().setImageTintList(this.greyColorStateList);
             viewHolder.getTextViewTime().setText(dataSet.get(i).getTimeString());
         }
 
@@ -173,6 +176,7 @@ public class RequestAdapter extends RecyclerView.Adapter<RequestAdapter.ViewHold
             viewHolder.getTextViewUser().setText(dataSet.get(i).getPostedByName());
         } else {
             if (dataSet.get(i).getStatus() == Constants.REQUEST_STATUS_ACCEPTED) {
+                viewHolder.getImageViewTime().setImageTintList(this.greyColorStateList);
                 viewHolder.getTextViewUser().setText(dataSet.get(i).getAcceptedByMainName());
             } else {
                 viewHolder.getImageViewUser().setImageTintList(this.accentColorStateList);
@@ -185,7 +189,8 @@ public class RequestAdapter extends RecyclerView.Adapter<RequestAdapter.ViewHold
             public void onClick(View v) {
                 Intent intent;
 
-                if (CustomDateTimeUtil.isValidCurrent(dataSet.get(i).getDateTime(), dataSet.get(i).getDuration(), MINUTES_TO_CURRENT_REQUEST_VIEW) &&
+                if (!CustomDateTimeUtil.isExpired(dataSet.get(i).getDateTime(), dataSet.get(i).getDuration()) &&
+                        CustomDateTimeUtil.isCurrent(dataSet.get(i).getDateTime(), MINUTES_TO_CURRENT_REQUEST_VIEW) &&
                         dataSet.get(i).getStatus() == Constants.REQUEST_STATUS_ACCEPTED)
                     intent = new Intent(viewHolder.getContext(), CurrentRequestActivity.class);
                 else

@@ -253,7 +253,7 @@
                     app:layout_constraintTop_toBottomOf="@+id/textViewAddRequestSummaryLocationTitle" />
 
 
-                <com.caltruism.assist.util.CustomMapView
+                <com.google.android.gms.maps.MapView
                     android:id="@+id/mapViewAddRequestSummary"
                     android:layout_width="0dp"
                     android:layout_height="200dp"

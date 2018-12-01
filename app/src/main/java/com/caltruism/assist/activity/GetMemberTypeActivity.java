@@ -44,16 +44,14 @@ public class GetMemberTypeActivity extends AppCompatActivity {
     private static final int ERROR0 = 0;
     private static final int ERROR1 = 1;
     private static final int ERROR2 = 2;
-    private static final int ERROR3 = 3;
 
     private ImageView imageViewProfile;
+    private Snackbar snackbarUploading;
 
     private FirebaseAuth auth;
 
     private HashMap<String, Object> userData;
     private String profilePictureURL;
-    private boolean isUploading = false;
-
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -105,12 +103,12 @@ public class GetMemberTypeActivity extends AppCompatActivity {
         buttonVolunteer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (isUploading)
-                    showSnackbar(ERROR3);
-                else if (profilePictureURL == null)
-                    showSnackbar(ERROR2);
-                else
-                    addUserData(getResources().getString(R.string.volunteer_type));
+                if (!snackbarUploading.isShown()) {
+                    if (profilePictureURL == null)
+                        showSnackbar(ERROR2);
+                    else
+                        addUserData(getResources().getString(R.string.volunteer_type));
+                }
             }
         });
 
@@ -118,14 +116,16 @@ public class GetMemberTypeActivity extends AppCompatActivity {
         buttonDisabled.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (isUploading)
-                    showSnackbar(ERROR3);
-                else if (profilePictureURL == null)
-                    showSnackbar(ERROR2);
-                else
-                    addUserData(getResources().getString(R.string.disabled_type));
+                if (!snackbarUploading.isShown()) {
+                    if (profilePictureURL == null)
+                        showSnackbar(ERROR2);
+                    else
+                        addUserData(getResources().getString(R.string.disabled_type));
+                }
             }
         });
+
+        snackbarUploading = Snackbar.make(GetMemberTypeActivity.this.findViewById(R.id.getMemberTypeConstraintLayout), "Uploading profile picture...", Snackbar.LENGTH_INDEFINITE);
 
         auth = FirebaseAuth.getInstance();
     }
@@ -135,7 +135,7 @@ public class GetMemberTypeActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == IMAGE_REQUEST_CODE && resultCode == RESULT_OK) {
-            isUploading = true;
+            snackbarUploading.show();
             Uri selectedProfilePicture = data.getData();
             imageViewProfile.setImageURI(selectedProfilePicture);
 
@@ -164,7 +164,7 @@ public class GetMemberTypeActivity extends AppCompatActivity {
                         Log.e(TAG, "Failed to get profile picture url");
                         showSnackbar(ERROR1);
                     }
-                    isUploading = false;
+                    snackbarUploading.dismiss();
                 }
             });
 
@@ -219,9 +219,6 @@ public class GetMemberTypeActivity extends AppCompatActivity {
                 break;
             case ERROR2:
                 message = "Please upload a profile picture.";
-                break;
-            case ERROR3:
-                message = "Uploading profile picture...";
                 break;
             case ERROR0:
             default:

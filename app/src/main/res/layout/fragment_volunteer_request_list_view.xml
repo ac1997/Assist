@@ -13,4 +13,42 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/imageViewVolunteerRequestListEmpty"
+        android:layout_width="128dp"
+        android:layout_height="128dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:tint="@color/colorGrey4"
+        app:layout_constraintBottom_toTopOf="@+id/textViewVolunteerRequestListEmpty"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_chainStyle="packed"
+        app:srcCompat="@drawable/ic_note_add_solid" />
+
+    <TextView
+        android:id="@+id/textViewVolunteerRequestListEmpty"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="16dp"
+        android:text="Loading posted requests..."
+        android:textColor="@color/colorGrey3"
+        android:textSize="24sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imageViewVolunteerRequestListEmpty"
+        app:layout_constraintVertical_chainStyle="packed" />
+
+    <android.support.constraint.Group
+        android:id="@+id/groupVolunteerRequestListEmpty"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:constraint_referenced_ids="textViewVolunteerRequestListEmpty,imageViewVolunteerRequestListEmpty" />
 </android.support.constraint.ConstraintLayout>

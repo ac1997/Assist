@@ -48,10 +48,7 @@ public class CurrentRequestMapViewFragment extends Fragment implements
 
     private MapView mapView;
     private Button buttonShareLocation;
-    private Button buttonStopSharingLocaton;
-
-    private FirebaseFirestore db;
-    private FirebaseAuth auth;
+    private Button buttonStopSharingLocation;
 
     private GoogleMap map;
     private Location currentLocation;
@@ -93,31 +90,31 @@ public class CurrentRequestMapViewFragment extends Fragment implements
         mapView.getMapAsync(this);
 
         buttonShareLocation = view.findViewById(R.id.buttonCurrentRequestShareLocation);
-        buttonStopSharingLocaton = view.findViewById(R.id.buttonCurrentRequestStopSharingLocation);
+        buttonStopSharingLocation = view.findViewById(R.id.buttonCurrentRequestStopSharingLocation);
 
         if (isVolunteerView) {
             buttonShareLocation.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     buttonShareLocation.setVisibility(View.INVISIBLE);
-                    buttonStopSharingLocaton.setVisibility(View.VISIBLE);
+                    buttonStopSharingLocation.setVisibility(View.VISIBLE);
 
                     callbackListener.onSharingLocationPermissionChange(true);
                 }
             });
 
-            buttonStopSharingLocaton.setOnClickListener(new View.OnClickListener() {
+            buttonStopSharingLocation.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     buttonShareLocation.setVisibility(View.VISIBLE);
-                    buttonStopSharingLocaton.setVisibility(View.GONE);
+                    buttonStopSharingLocation.setVisibility(View.GONE);
 
                     callbackListener.onSharingLocationPermissionChange(false);
                 }
             });
         } else {
             buttonShareLocation.setVisibility(View.GONE);
-            buttonStopSharingLocaton.setVisibility(View.GONE);
+            buttonStopSharingLocation.setVisibility(View.GONE);
         }
     }
 
@@ -194,7 +191,7 @@ public class CurrentRequestMapViewFragment extends Fragment implements
     public void onTaskCompleted(PolylineOptions polylineOptions) {
         if (!isVolunteerView)
             polylineOptions.startCap(new CustomCap(BitMapDescriptorFromVector.otherUserCap(getActivity())));
-//        this.polylineOptions = polylineOptions;
+
         if (polyline != null)
             polyline.remove();
 

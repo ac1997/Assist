@@ -359,7 +359,10 @@ public class AddRequestActivity extends AppCompatActivity implements CustomCallb
                     if (currentStep != step)
                         updateUI(step);
                 } else {
-                    showSnackbar("Please complete this step first.");
+                    int stepToComplete = 1;
+                    if (highestStepCompleted != 0)
+                        stepToComplete = highestStepCompleted + 1;
+                    showSnackbar(String.format("Please complete step %d first.", stepToComplete));
                 }
             }
         });
