@@ -744,7 +744,7 @@ public class AddRequestActivity extends AppCompatActivity implements CustomCallb
         requestData.put("title", requestTitle);
         requestData.put("description", requestDescription);
         requestData.put("isNow", requestIsNow);
-        requestData.put("date", requestDateTime / DateUtils.MINUTE_IN_MILLIS);
+        requestData.put("date", requestDateTime / DateUtils.SECOND_IN_MILLIS);
         requestData.put("startTime", startTime);
         requestData.put("endTime", startTime + requestDuration);
         requestData.put("duration", requestDuration);

@@ -176,7 +176,7 @@ public class AssistRequest implements Comparable<AssistRequest>, Parcelable {
         this.title = ds.getString("title");
         this.description = ds.getString("description");
         this.isNow = ds.getBoolean("isNow");
-        this.dateTime = ds.getLong("date") * DateUtils.MINUTE_IN_MILLIS;
+        this.dateTime = ds.getLong("date") * DateUtils.SECOND_IN_MILLIS;
         this.startTime = ds.getLong("startTime").intValue();
         this.endTime = ds.getLong("endTime").intValue();
         this.duration = ds.getLong("duration").intValue();

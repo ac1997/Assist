@@ -301,6 +301,22 @@ public class CurrentRequestActivity extends AppCompatActivity implements CustomC
             listenerRegistration.remove();
     }
 
+    @Override
+    public void onBackPressed() {
+        if (!isTaskRoot()) {
+            super.onBackPressed();
+            finish();
+        } else {
+            if (isVolunteerView) {
+                startActivity(new Intent(this, VolunteerMainActivity.class));
+                finish();
+            } else {
+                startActivity(new Intent(this, DisabledMainActivity.class));
+                finish();
+            }
+        }
+    }
+
     private void startLocationUpdates() {
         settingsClient.checkLocationSettings(locationSettingsRequest)
                 .addOnSuccessListener(this, new OnSuccessListener<LocationSettingsResponse>() {
@@ -499,7 +515,8 @@ public class CurrentRequestActivity extends AppCompatActivity implements CustomC
 
     @Override
     public void onNewDurationData(int durationInMins) {
-        storeData(String.valueOf(durationInMins));
+        if (isVolunteerView)
+            storeData(String.valueOf(durationInMins));
     }
 
     private BroadcastReceiver messageReceiver = new BroadcastReceiver() {

@@ -202,14 +202,23 @@ public class RequestDetailsActivity extends AppCompatActivity implements OnMapRe
                     assert document != null;
                     if (document.exists()) {
                         assistRequest = new AssistRequest(document);
-                        setUpViews();
 
-                        if (map != null) {
-                            map.addMarker(new MarkerOptions().position(assistRequest.getLocationLatLng())
-                                    .icon(BitMapDescriptorFromVector.regularMarker(RequestDetailsActivity.this)));
-                            map.moveCamera(CameraUpdateFactory.newLatLngZoom(assistRequest.getLocationLatLng(), Constants.DEFAULT_ZOOM));
+                        if (CustomDateTimeUtil.isCurrent(assistRequest.getDateTime(), Constants.MINUTES_TO_CURRENT_REQUEST_VIEW)) {
+                            Intent intent = new Intent(RequestDetailsActivity.this, CurrentRequestActivity.class);
+                            intent.putExtra("isVolunteerView", false);
+                            intent.putExtra("requestData", assistRequest);
+                            startActivity(intent);
+                            finish();
                         } else {
-                            isQueryData = false;
+                            setUpViews();
+
+                            if (map != null) {
+                                map.addMarker(new MarkerOptions().position(assistRequest.getLocationLatLng())
+                                        .icon(BitMapDescriptorFromVector.regularMarker(RequestDetailsActivity.this)));
+                                map.moveCamera(CameraUpdateFactory.newLatLngZoom(assistRequest.getLocationLatLng(), Constants.DEFAULT_ZOOM));
+                            } else {
+                                isQueryData = false;
+                            }
                         }
                     } else {
                         Log.e(TAG, "Requests not exist with id: " + requestId);

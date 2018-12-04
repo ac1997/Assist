@@ -60,7 +60,7 @@ public class DisabledRequestListViewFragment extends Fragment implements CustomC
 
     @Override
     public void onDataAdded(ArrayList<AssistRequest> addedDataSet) {
-        if (groupEmpty.getVisibility() == View.VISIBLE)
+        if (groupEmpty != null && groupEmpty.getVisibility() == View.VISIBLE)
             groupEmpty.setVisibility(View.GONE);
 
         for (AssistRequest assistRequest : addedDataSet)

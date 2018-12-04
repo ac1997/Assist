@@ -27,6 +27,7 @@ import java.util.HashMap;
 public class VolunteerRequestListViewFragment extends Fragment implements CustomCallbackListener.VolunteerRequestListChildFragmentCallbackListener {
 
     private RequestAdapter adapter;
+    private TextView textViewEmptyMainText;
     private Group groupEmpty;
 
     private Location currentLocation;
@@ -48,6 +49,7 @@ public class VolunteerRequestListViewFragment extends Fragment implements Custom
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
+        textViewEmptyMainText = view.findViewById(R.id.textViewVolunteerRequestListEmpty);
         groupEmpty = view.findViewById(R.id.groupVolunteerRequestListEmpty);
     }
 
@@ -60,19 +62,23 @@ public class VolunteerRequestListViewFragment extends Fragment implements Custom
 
     @Override
     public void onNewDataSet(HashMap<String, AssistRequest> data) {
-        TextView textView = getView().findViewById(R.id.textViewVolunteerRequestListEmpty);
-        textView.setText("No posted requests");
+        textViewEmptyMainText.setText("No posted requests");
 
         if (data != null) {
-            if (groupEmpty.getVisibility() == View.VISIBLE)
-                groupEmpty.setVisibility(View.GONE);
-
             assistRequests.clear();
-            assistRequests.putAll(data);
-
             dataSet.clear();
-            dataSet.addAll(data.values());
-            Collections.sort(dataSet);
+
+            if (data.size() == 0) {
+                onEmptyDataSet();
+            } else {
+                if (groupEmpty.getVisibility() == View.VISIBLE)
+                    groupEmpty.setVisibility(View.GONE);
+
+                assistRequests.putAll(data);
+                dataSet.addAll(data.values());
+                Collections.sort(dataSet);
+            }
+
             adapter.notifyDataSetChanged();
         }
     }
@@ -104,5 +110,13 @@ public class VolunteerRequestListViewFragment extends Fragment implements Custom
     public void onDataModified(DocumentSnapshot documentSnapshot) {
         assistRequests.get(documentSnapshot.getId()).modifiedData(documentSnapshot, currentLocation);
         adapter.notifyItemChanged(dataSet.indexOf(assistRequests.get(documentSnapshot.getId())));
+    }
+
+    @Override
+    public void onEmptyDataSet() {
+        textViewEmptyMainText.setText("No posted requests");
+
+        if (groupEmpty.getVisibility() == View.GONE)
+            groupEmpty.setVisibility(View.VISIBLE);
     }
 }

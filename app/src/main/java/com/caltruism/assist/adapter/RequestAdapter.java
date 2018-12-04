@@ -31,8 +31,6 @@ public class RequestAdapter extends RecyclerView.Adapter<RequestAdapter.ViewHold
 
     private final static String TAG = "RequestAdapter";
 
-    private static final int MINUTES_TO_CURRENT_REQUEST_VIEW = 10;
-
     private ColorStateList greyColorStateList;
     private ColorStateList accentColorStateList;
     private ArrayList<AssistRequest> dataSet;
@@ -189,8 +187,7 @@ public class RequestAdapter extends RecyclerView.Adapter<RequestAdapter.ViewHold
             public void onClick(View v) {
                 Intent intent;
 
-                if (!CustomDateTimeUtil.isExpired(dataSet.get(i).getDateTime(), dataSet.get(i).getDuration()) &&
-                        CustomDateTimeUtil.isCurrent(dataSet.get(i).getDateTime(), MINUTES_TO_CURRENT_REQUEST_VIEW) &&
+                if (CustomDateTimeUtil.isCurrent(dataSet.get(i).getDateTime(), Constants.MINUTES_TO_CURRENT_REQUEST_VIEW) &&
                         dataSet.get(i).getStatus() == Constants.REQUEST_STATUS_ACCEPTED)
                     intent = new Intent(viewHolder.getContext(), CurrentRequestActivity.class);
                 else
