@@ -191,6 +191,9 @@ public class VolunteerRequestMapViewFragment extends Fragment implements CustomC
     public void onDataRemoved(String documentId) {
         assistRequests.get(documentId).getMarker().remove();
         assistRequests.remove(documentId);
+
+        if (assistRequests.size() == 0)
+            onEmptyDataSet();
     }
 
     @Override

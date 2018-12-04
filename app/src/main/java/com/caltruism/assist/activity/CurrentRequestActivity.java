@@ -71,6 +71,7 @@ public class CurrentRequestActivity extends AppCompatActivity implements CustomC
 
     private static final String TAG = "CurrentRequestActivity";
     private static final int REQUEST_PERMISSIONS_REQUEST_CODE = 0;
+    private static final int REQUEST_DETAILS_VIEW_REQUEST_CODE = 1;
     private static final int REQUEST_CHECK_SETTINGS = 0x1;
 
     private Toolbar toolbar;
@@ -96,7 +97,7 @@ public class CurrentRequestActivity extends AppCompatActivity implements CustomC
 
     private boolean isVolunteerView;
     private AssistRequest assistRequest;
-    private boolean isStored;
+    private String storedDuration;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -135,7 +136,7 @@ public class CurrentRequestActivity extends AppCompatActivity implements CustomC
 
                 if (isVolunteerView) {
                     mapViewFragment.onNewOriginLocation(currentLocation);
-                    storeData(null);
+//                    storeData(null);
                 }
             }
         };
@@ -168,7 +169,7 @@ public class CurrentRequestActivity extends AppCompatActivity implements CustomC
             Intent intent = new Intent(this, RequestDetailsActivity.class);
             intent.putExtra("isVolunteerView", isVolunteerView);
             intent.putExtra("requestData", assistRequest);
-            startActivity(intent);
+            startActivityForResult(intent, REQUEST_DETAILS_VIEW_REQUEST_CODE);
         }
 
         return super.onOptionsItemSelected(item);
@@ -348,28 +349,25 @@ public class CurrentRequestActivity extends AppCompatActivity implements CustomC
                 });
     }
 
-    private void storeData(String durationInMins) {
-        if (isSharedLocation || !isStored) {
+    private void storeData(final String durationInMins) {
+        if (isSharedLocation || storedDuration == null || !storedDuration.equals(durationInMins)) {
             HashMap<String, Object> locationData = new HashMap<>();
 
             locationData.put("requestID", assistRequest.getId());
             locationData.put("isShared", isSharedLocation);
 
-            if (isSharedLocation) {
-                isStored = false;
+            if (isSharedLocation)
                 locationData.put("latLng", new GeoPoint(currentLocation.getLatitude(), currentLocation.getLongitude()));
-            } else {
+            else
                 locationData.put("latLng", null);
-                isStored = true;
-            }
 
-            if (durationInMins != null)
-                locationData.put("duration", durationInMins);
+            locationData.put("duration", durationInMins);
 
             db.collection("locations").document(Objects.requireNonNull(auth.getCurrentUser()).getUid()).set(locationData, SetOptions.merge())
                     .addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void aVoid) {
+                            storedDuration = durationInMins;
                             Log.d(TAG, "Document added/updated with ID: " + auth.getCurrentUser().getUid());
                         }
                     }).addOnFailureListener(new OnFailureListener() {
@@ -457,6 +455,17 @@ public class CurrentRequestActivity extends AppCompatActivity implements CustomC
                         Log.e(TAG, "Error deleting document", e);
                     }
                 });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        if (requestCode == REQUEST_DETAILS_VIEW_REQUEST_CODE) {
+            if (resultCode == RESULT_FIRST_USER) {
+                finish();
+            }
+        } else {
+            super.onActivityResult(requestCode, resultCode, data);
+        }
     }
 
     private boolean checkPermissions() {

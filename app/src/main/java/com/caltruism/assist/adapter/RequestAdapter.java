@@ -178,7 +178,8 @@ public class RequestAdapter extends RecyclerView.Adapter<RequestAdapter.ViewHold
             }
         }
 
-        if (dataSet.get(i).isNow() && !CustomDateTimeUtil.isExpired(dataSet.get(i).getDateTime(), dataSet.get(i).getDuration())) {
+        if (!isHistoryView && (dataSet.get(i).isNow() || CustomDateTimeUtil.isNow(dataSet.get(i).getDateTime()))
+                && !CustomDateTimeUtil.isExpired(dataSet.get(i).getDateTime(), dataSet.get(i).getDuration())) {
             viewHolder.getImageViewTime().setImageTintList(this.accentColorStateList);
             viewHolder.getTextViewTime().setText(Html.fromHtml("<font color='#f48760'>Now</font>", Html.FROM_HTML_MODE_LEGACY));
         } else {
@@ -190,7 +191,7 @@ public class RequestAdapter extends RecyclerView.Adapter<RequestAdapter.ViewHold
             viewHolder.getTextViewUser().setText(dataSet.get(i).getPostedByName());
         } else {
             if (dataSet.get(i).getStatus() == Constants.REQUEST_STATUS_ACCEPTED) {
-                viewHolder.getImageViewTime().setImageTintList(this.greyColorStateList);
+                viewHolder.getImageViewUser().setImageTintList(this.greyColorStateList);
                 viewHolder.getTextViewUser().setText(dataSet.get(i).getAcceptedByMainName());
             } else {
                 viewHolder.getImageViewUser().setImageTintList(this.accentColorStateList);

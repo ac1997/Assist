@@ -419,7 +419,7 @@ public class RequestDetailsActivity extends AppCompatActivity implements OnMapRe
                     @Override
                     public void onSuccess(Void aVoid) {
                         Log.d(TAG, "DocumentSnapshot updated with ID: " + assistRequest.getId());
-                        setResult(Activity.RESULT_OK);
+                        setResult(Activity.RESULT_FIRST_USER);
                         finish();
                     }
                 }).addOnFailureListener(new OnFailureListener() {
@@ -446,7 +446,7 @@ public class RequestDetailsActivity extends AppCompatActivity implements OnMapRe
                     @Override
                     public void onSuccess(Void aVoid) {
                         Log.d(TAG, "DocumentSnapshot updated with ID: " + assistRequest.getId());
-                        setResult(Activity.RESULT_OK);
+                        setResult(Activity.RESULT_FIRST_USER);
                         finish();
                     }
                 }).addOnFailureListener(new OnFailureListener() {

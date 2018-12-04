@@ -18,7 +18,7 @@ public final class Constants {
     public static final int REQUEST_STATUS_CANCELLED = 4;
     public static final int REQUEST_STATUS_EXPIRED = 5;
 
-    public static final long UPDATE_INTERVAL_IN_MILLISECONDS = 3000;
+    public static final long UPDATE_INTERVAL_IN_MILLISECONDS = 5000;
     public static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS = UPDATE_INTERVAL_IN_MILLISECONDS / 2;
 
     public static final float DEFAULT_ZOOM = 15;
