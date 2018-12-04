@@ -40,7 +40,7 @@ public class VolunteerTaskListViewFragment extends Fragment implements CustomCal
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        adapter = new RequestAdapter(getActivity(), dataSet, true);
+        adapter = new RequestAdapter(getActivity(), dataSet, true, true);
 
         recyclerView = view.findViewById(R.id.recyclerViewVolunteerTaskList);
         recyclerView.setAdapter(adapter);
@@ -70,7 +70,7 @@ public class VolunteerTaskListViewFragment extends Fragment implements CustomCal
     @Override
     public void onDataRemoved(HashSet<String> removedId) {
         for (String id : removedId) {
-            int removeIndex = dataSet.indexOf(id);
+            int removeIndex = dataSet.indexOf(new AssistRequest(id));
             dataSet.remove(removeIndex);
             adapter.notifyItemRemoved(removeIndex);
         }

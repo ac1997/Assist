@@ -42,7 +42,7 @@ public class DisabledRequestListViewFragment extends Fragment implements CustomC
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        adapter = new RequestAdapter(getActivity(), dataSet, false);
+        adapter = new RequestAdapter(getActivity(), dataSet, false, false);
 
         recyclerView = view.findViewById(R.id.recyclerViewDisabledRequestList);
         recyclerView.setAdapter(adapter);

@@ -63,7 +63,7 @@ public class DisabledRequestHistoryFragment extends Fragment {
 
         groupEmpty = view.findViewById(R.id.groupDisabledRequestHistoryEmpty);
 
-        adapter = new RequestAdapter(getActivity(), dataSet, true);
+        adapter = new RequestAdapter(getActivity(), dataSet, true, true);
 
         RecyclerView recyclerView = view.findViewById(R.id.recyclerViewDisabledRequestHistory);
         recyclerView.setAdapter(adapter);
