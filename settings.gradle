@@ -1,1 +1,1 @@
-include ':app', ':geofirestore'
+include ':app', ':geofirestore', ':floatingsearchview'

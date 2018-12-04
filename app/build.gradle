@@ -44,11 +44,11 @@ dependencies {
     implementation 'com.facebook.android:facebook-login:4.38.1'
 
     implementation 'com.shuhart.stepview:stepview:1.4.0'
-    implementation 'com.github.arimorty:floatingsearchview:2.1.1'
     implementation 'de.hdodenhof:circleimageview:2.2.0'
     implementation 'com.github.bumptech.glide:glide:4.8.0'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.8.0'
 
+    implementation project(':floatingsearchview')
     implementation project(':geofirestore')
 }
 
