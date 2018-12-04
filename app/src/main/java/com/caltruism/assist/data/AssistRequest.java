@@ -253,8 +253,8 @@ public class AssistRequest implements Comparable<AssistRequest>, Parcelable {
                 return "Completed";
             case Constants.REQUEST_STATUS_NO_SHOW:
                 return "No Show";
-            case Constants.REQUEST_STATUS_CANCELLED:
-                return "Cancelled";
+            case Constants.REQUEST_STATUS_CANCELED:
+                return "Canceled";
             case Constants.REQUEST_STATUS_EXPIRED:
                 return "Expired";
             default:
@@ -427,8 +427,12 @@ public class AssistRequest implements Comparable<AssistRequest>, Parcelable {
         return String.format(Locale.getDefault(), "%.1f mi", this.distance);
     }
 
-    public static int insertInOrder(ArrayList<AssistRequest> arrayList, AssistRequest assistRequest) {
-        int pos = Collections.binarySearch(arrayList, assistRequest);
+    public static int insertInOrder(ArrayList<AssistRequest> arrayList, AssistRequest assistRequest, boolean isReverse) {
+        int pos;
+        if (isReverse)
+            pos = Collections.binarySearch(arrayList,assistRequest, Collections.reverseOrder());
+        else
+            pos = Collections.binarySearch(arrayList, assistRequest);
 
         if (pos < 0) {
             pos = -pos - 1;

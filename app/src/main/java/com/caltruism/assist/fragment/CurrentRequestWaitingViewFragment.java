@@ -47,7 +47,10 @@ public class CurrentRequestWaitingViewFragment extends Fragment implements Custo
         if (!isOnlineView)
             setOnlineView();
 
-        textViewMainText.setText(durationInMins);
+        if (durationInMins.equals("0"))
+            textViewMainText.setText("<1");
+        else
+            textViewMainText.setText(durationInMins);
     }
 
     @Override
@@ -69,7 +72,7 @@ public class CurrentRequestWaitingViewFragment extends Fragment implements Custo
 
         Glide.with(getActivity()).setDefaultRequestOptions(new RequestOptions().centerCrop())
                 .load(R.drawable.walking_static).into(imageView);
-        textViewMainText.setText("Ouch...");
+        textViewMainText.setText("Sorry...");
         textViewSubText.setText("Volunteer is currently offline.");
         textViewFootNote.setVisibility(View.GONE);
     }

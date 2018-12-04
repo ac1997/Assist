@@ -414,7 +414,7 @@ public class RequestDetailsActivity extends AppCompatActivity implements OnMapRe
     }
 
     private void cancelRequest() {
-        db.collection("requests").document(assistRequest.getId()).update("status", Constants.REQUEST_STATUS_CANCELLED)
+        db.collection("requests").document(assistRequest.getId()).update("status", Constants.REQUEST_STATUS_CANCELED)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {

@@ -2,6 +2,7 @@ package com.caltruism.assist.activity;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -136,7 +137,6 @@ public class CurrentRequestActivity extends AppCompatActivity implements CustomC
 
                 if (isVolunteerView) {
                     mapViewFragment.onNewOriginLocation(currentLocation);
-//                    storeData(null);
                 }
             }
         };
@@ -356,7 +356,7 @@ public class CurrentRequestActivity extends AppCompatActivity implements CustomC
             locationData.put("requestID", assistRequest.getId());
             locationData.put("isShared", isSharedLocation);
 
-            if (isSharedLocation)
+            if (isSharedLocation && currentLocation != null)
                 locationData.put("latLng", new GeoPoint(currentLocation.getLatitude(), currentLocation.getLongitude()));
             else
                 locationData.put("latLng", null);
@@ -400,10 +400,12 @@ public class CurrentRequestActivity extends AppCompatActivity implements CustomC
                             fragmentTransaction.commit();
 
                             GeoPoint gp = (GeoPoint) documentSnapshot.get("latLng");
-                            Location location = new Location(LocationManager.GPS_PROVIDER);
-                            location.setLatitude(gp.getLatitude());
-                            location.setLongitude(gp.getLongitude());
-                            mapViewFragment.onNewOriginLocation(location);
+                            if (gp != null) {
+                                Location location = new Location(LocationManager.GPS_PROVIDER);
+                                location.setLatitude(gp.getLatitude());
+                                location.setLongitude(gp.getLongitude());
+                                mapViewFragment.onNewOriginLocation(location);
+                            }
                         } else {
                             FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
 
@@ -417,7 +419,8 @@ public class CurrentRequestActivity extends AppCompatActivity implements CustomC
 
                             fragmentTransaction.commit();
 
-                            waitingViewFragment.onNewDuration(documentSnapshot.getString("duration"));
+                            if (documentSnapshot.getString("duration") != null)
+                                waitingViewFragment.onNewDuration(documentSnapshot.getString("duration"));
                         }
                     } else {
                         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
@@ -455,6 +458,23 @@ public class CurrentRequestActivity extends AppCompatActivity implements CustomC
                         Log.e(TAG, "Error deleting document", e);
                     }
                 });
+    }
+
+    private void removeLatLng() {
+        db.collection("locations").document(Objects.requireNonNull(auth.getCurrentUser()).getUid()).update(
+                "latLng", null,
+                "isShared", isSharedLocation)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d(TAG, "DocumentSnapshot updated with ID: " + assistRequest.getId());
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.w(TAG, "Error updating document", e);
+            }
+        });
     }
 
     @Override
@@ -497,7 +517,7 @@ public class CurrentRequestActivity extends AppCompatActivity implements CustomC
                                            @NonNull int[] grantResults) {
         if (requestCode == REQUEST_PERMISSIONS_REQUEST_CODE) {
             if (grantResults.length <= 0) {
-                Log.i(TAG, "User interaction was cancelled.");
+                Log.i(TAG, "User interaction was canceled.");
             } else if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 startLocationUpdates();
             } else {
@@ -520,6 +540,11 @@ public class CurrentRequestActivity extends AppCompatActivity implements CustomC
     @Override
     public void onSharingLocationPermissionChange(boolean isSharing) {
         isSharedLocation = isSharing;
+
+        if (isSharing)
+            storeData(null);
+        else
+            removeLatLng();
     }
 
     @Override

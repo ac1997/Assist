@@ -2065,4 +2065,8 @@ public class FloatingSearchView extends FrameLayout {
             //do nothing
         }
     }
+
+    public MenuView getmMenuView() {
+        return mMenuView;
+    }
 }

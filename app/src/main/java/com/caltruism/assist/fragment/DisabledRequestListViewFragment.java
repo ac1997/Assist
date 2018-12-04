@@ -30,6 +30,8 @@ public class DisabledRequestListViewFragment extends Fragment implements CustomC
 
     private ArrayList<AssistRequest> dataSet = new ArrayList<>();
     private boolean isWaitingView;
+    private boolean isCreated = false;
+    private ArrayList<AssistRequest> toBeAddedData = new ArrayList<>();
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -56,17 +58,20 @@ public class DisabledRequestListViewFragment extends Fragment implements CustomC
         }
 
         groupEmpty = view.findViewById(R.id.groupDisabledRequestListEmpty);
+        isCreated = true;
+
+        if (toBeAddedData.size() > 0)
+            addData(toBeAddedData);
     }
 
     @Override
     public void onDataAdded(ArrayList<AssistRequest> addedDataSet) {
-        if (groupEmpty != null && groupEmpty.getVisibility() == View.VISIBLE)
-            groupEmpty.setVisibility(View.GONE);
-
-        for (AssistRequest assistRequest : addedDataSet)
-            adapter.notifyItemInserted(AssistRequest.insertInOrder(dataSet, assistRequest));
-
-        addedDataSet.clear();
+        if (addedDataSet.size() > 0) {
+            if (isCreated)
+                addData(addedDataSet);
+            else
+                toBeAddedData.addAll(addedDataSet);
+        }
     }
 
     @Override
@@ -96,5 +101,15 @@ public class DisabledRequestListViewFragment extends Fragment implements CustomC
         }
 
         modifiedDataSet.clear();
+    }
+
+    private void addData(ArrayList<AssistRequest> addedDataSet) {
+        if (groupEmpty.getVisibility() == View.VISIBLE)
+            groupEmpty.setVisibility(View.GONE);
+
+        for (AssistRequest assistRequest : addedDataSet)
+            adapter.notifyItemInserted(AssistRequest.insertInOrder(dataSet, assistRequest, false));
+
+        addedDataSet.clear();
     }
 }

@@ -62,7 +62,7 @@ public class VolunteerTaskListViewFragment extends Fragment implements CustomCal
             groupEmpty.setVisibility(View.GONE);
 
         for (AssistRequest assistRequest : addedDataSet)
-            adapter.notifyItemInserted(AssistRequest.insertInOrder(dataSet, assistRequest));
+            adapter.notifyItemInserted(AssistRequest.insertInOrder(dataSet, assistRequest, true));
 
         addedDataSet.clear();
     }

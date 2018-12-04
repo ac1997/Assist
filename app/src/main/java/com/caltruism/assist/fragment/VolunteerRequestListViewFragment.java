@@ -90,7 +90,7 @@ public class VolunteerRequestListViewFragment extends Fragment implements Custom
 
         AssistRequest request = new AssistRequest(documentSnapshot, currentLocation);
         assistRequests.put(documentSnapshot.getId(), request);
-        adapter.notifyItemInserted(AssistRequest.insertInOrder(dataSet, new AssistRequest(documentSnapshot)));
+        adapter.notifyItemInserted(AssistRequest.insertInOrder(dataSet, new AssistRequest(documentSnapshot), false));
     }
 
     @Override

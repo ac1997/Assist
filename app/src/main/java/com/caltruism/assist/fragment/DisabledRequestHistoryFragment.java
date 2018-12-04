@@ -148,6 +148,7 @@ public class DisabledRequestHistoryFragment extends Fragment {
                 dataSet.add(new AssistRequest(documentSnapshot));
 
             Collections.sort(dataSet);
+            Collections.reverse(dataSet);
             adapter.notifyDataSetChanged();
         }
     }
@@ -157,6 +158,6 @@ public class DisabledRequestHistoryFragment extends Fragment {
             groupEmpty.setVisibility(View.GONE);
 
         Log.e(TAG, "Document entered id: " + documentSnapshot.getId());
-        adapter.notifyItemInserted(AssistRequest.insertInOrder(dataSet, new AssistRequest(documentSnapshot)));
+        adapter.notifyItemInserted(AssistRequest.insertInOrder(dataSet, new AssistRequest(documentSnapshot), true));
     }
 }
