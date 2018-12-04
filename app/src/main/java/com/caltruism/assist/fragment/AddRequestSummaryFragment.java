@@ -99,14 +99,14 @@ public class AddRequestSummaryFragment extends Fragment implements
     @Override
     public void onMapReady(GoogleMap googleMap) {
         map = googleMap;
-        map.setMapStyle(MapStyleOptions.loadRawResourceStyle(getActivity(), R.raw.map_style_json));
-        map.getUiSettings().setMyLocationButtonEnabled(false);
-        map.getUiSettings().setMapToolbarEnabled(false);
-        googleMap.getUiSettings().setScrollGesturesEnabled(false);
-        map.setMinZoomPreference(Constants.MIN_ZOOM);
-        map.setMaxZoomPreference(Constants.MAX_ZOOM);
+        googleMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(getActivity(), R.raw.map_style_json));
+        googleMap.getUiSettings().setMyLocationButtonEnabled(false);
+        googleMap.getUiSettings().setMapToolbarEnabled(false);
+        googleMap.getUiSettings().setAllGesturesEnabled(false);
+        googleMap.setMinZoomPreference(Constants.MIN_ZOOM);
+        googleMap.setMaxZoomPreference(Constants.MAX_ZOOM);
         if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            map.setMyLocationEnabled(true);
+            googleMap.setMyLocationEnabled(true);
         }
 
         marker = googleMap.addMarker(new MarkerOptions().position(requestLocationLatLng)
