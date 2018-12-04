@@ -1,13 +1,21 @@
 package com.caltruism.assist.activity;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
 
+import com.caltruism.assist.BuildConfig;
 import com.caltruism.assist.R;
 import com.caltruism.assist.util.SharedPreferencesHelper;
 import com.caltruism.assist.util.TokenUtil;
@@ -29,12 +37,75 @@ import java.util.Objects;
 public class MainEmptyActivity extends AppCompatActivity {
 
     private static final String TAG = "MainEmptyActivity";
+    private static final int REQUEST_PERMISSIONS_REQUEST_CODE = 0;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.launch_screen);
+    }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (!checkPermissions())
+            requestPermissions();
+        else
+            permissionsGranted();
+    }
+
+    private boolean checkPermissions() {
+        return ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private void requestPermissions() {
+        if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
+            // TODO: Rephrase
+            Snackbar.make(findViewById(android.R.id.content), "Location permission is needed for core functionality",
+                    Snackbar.LENGTH_INDEFINITE).setAction("Ok", new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    ActivityCompat.requestPermissions(MainEmptyActivity.this,
+                            new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                            REQUEST_PERMISSIONS_REQUEST_CODE);
+                }
+            }).show();
+        } else {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    REQUEST_PERMISSIONS_REQUEST_CODE);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        if (requestCode == REQUEST_PERMISSIONS_REQUEST_CODE) {
+            if (grantResults.length <= 0) {
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                        REQUEST_PERMISSIONS_REQUEST_CODE);
+            } else if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                permissionsGranted();
+            } else {
+                // TODO: Rephrase
+                Snackbar.make(findViewById(android.R.id.content), "We need your location to provide better user experience.",
+                        Snackbar.LENGTH_INDEFINITE).setAction("Settings", new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Intent intent = new Intent();
+                        intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                        intent.setData(Uri.fromParts("package", BuildConfig.APPLICATION_ID, null));
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(intent);
+                    }
+                }).show();
+            }
+        }
+    }
+
+    private void permissionsGranted() {
         final FirebaseFirestore db = FirebaseFirestore.getInstance();
         final FirebaseAuth auth = FirebaseAuth.getInstance();
 
