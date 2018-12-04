@@ -12,6 +12,7 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
@@ -26,10 +27,17 @@ import com.caltruism.assist.fragment.VolunteerTaskListFragment;
 import com.caltruism.assist.util.Constants;
 import com.caltruism.assist.util.CustomCallbackListener;
 import com.caltruism.assist.util.SharedPreferencesHelper;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.Objects;
 
 public class VolunteerMainActivity extends AppCompatActivity implements
         CustomCallbackListener.VolunteerRequestListFragmentCallbackListener, NavigationView.OnNavigationItemSelectedListener {
+
+    private static final String TAG = "VolunteerMainActivity";
 
     private NavigationView navigationView;
     private DrawerLayout drawerLayout;
@@ -52,7 +60,7 @@ public class VolunteerMainActivity extends AppCompatActivity implements
         SharedPreferences sharedPreferences = getSharedPreferences(Constants.USER_DATA_SHARED_PREFERENCE, Context.MODE_PRIVATE);
 
         RequestOptions requestOptions = new RequestOptions().placeholder(R.drawable.ic_user_solid).centerCrop();
-        Glide.with(this).setDefaultRequestOptions(requestOptions).load(sharedPreferences.getString("pictureURL", null)).into(imageViewProfile);
+        Glide.with(this).setDefaultRequestOptions(requestOptions).load(sharedPreferences.getString("pictureUrl", null)).into(imageViewProfile);
 
         textViewUsername.setText(sharedPreferences.getString("name", null));
         textViewPhoneNumber.setText(sharedPreferences.getString("phoneNumber", null));
@@ -93,10 +101,23 @@ public class VolunteerMainActivity extends AppCompatActivity implements
                         .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                FirebaseAuth.getInstance().signOut();
-                                SharedPreferencesHelper.clearPreferences(VolunteerMainActivity.this);
-                                startActivity(new Intent(VolunteerMainActivity.this, WelcomeActivity.class));
-                                finish();
+                                FirebaseFirestore.getInstance().collection("tokens").document(Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid()).delete()
+                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                            @Override
+                                            public void onSuccess(Void aVoid) {
+                                                Log.d(TAG, "DocumentSnapshot successfully deleted!");
+                                                FirebaseAuth.getInstance().signOut();
+                                                SharedPreferencesHelper.clearPreferences(VolunteerMainActivity.this);
+                                                startActivity(new Intent(VolunteerMainActivity.this, WelcomeActivity.class));
+                                                finish();
+                                            }
+                                        })
+                                        .addOnFailureListener(new OnFailureListener() {
+                                            @Override
+                                            public void onFailure(@NonNull Exception e) {
+                                                Log.e(TAG, "Error deleting document", e);
+                                            }
+                                        });
                             }
                         }).setNegativeButton("No", null).show();
                 return false;

@@ -64,6 +64,7 @@ import java.util.Set;
 
 import static android.app.Activity.RESULT_OK;
 import static com.google.android.gms.location.places.AutocompleteFilter.TYPE_FILTER_CITIES;
+import static com.google.android.gms.location.places.AutocompleteFilter.TYPE_FILTER_REGIONS;
 
 public class VolunteerRequestListFragment extends Fragment {
 
@@ -314,6 +315,7 @@ public class VolunteerRequestListFragment extends Fragment {
 
             @Override
             public void onGeoQueryReady() {
+                Log.e(TAG, "Initial query completed");
                 notifyNewDataSet();
                 notifyNewLocations();
             }
@@ -327,7 +329,7 @@ public class VolunteerRequestListFragment extends Fragment {
 
     private void openAutocompleteActivity() {
         try {
-            AutocompleteFilter typeFilter = new AutocompleteFilter.Builder().setTypeFilter(TYPE_FILTER_CITIES).build();
+            AutocompleteFilter typeFilter = new AutocompleteFilter.Builder().setTypeFilter(TYPE_FILTER_REGIONS).setCountry("US").build();
             Intent intent = new PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_OVERLAY).setFilter(typeFilter).build(getActivity());
             startActivityForResult(intent, REQUEST_CODE_AUTOCOMPLETE);
         } catch (GooglePlayServicesRepairableException e) {
@@ -373,12 +375,14 @@ public class VolunteerRequestListFragment extends Fragment {
     private void notifyNewDataSet() {
         isInitialQueryCompleted = true;
 
-        if (oldLocationKeySet != null && !oldLocationKeySet.equals(assistRequests.keySet())) {
+        if (!oldLocationKeySet.equals(assistRequests.keySet())) {
             oldLocationKeySet.clear();
             oldLocationKeySet.addAll(assistRequests.keySet());
 
             listViewFragment.onNewDataSet(assistRequests);
             mapViewFragment.onNewDataSet(assistRequests);
+        } else if (assistRequests.size() == 0) {
+            listViewFragment.onEmptyDataSet();
         }
     }
 

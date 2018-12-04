@@ -2,9 +2,11 @@ package com.caltruism.assist.activity;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -12,6 +14,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -29,6 +32,8 @@ import com.caltruism.assist.data.AssistRequest;
 import com.caltruism.assist.util.BitMapDescriptorFromVector;
 import com.caltruism.assist.util.Constants;
 import com.caltruism.assist.util.CustomDateTimeUtil;
+import com.caltruism.assist.util.CustomRequestAcceptedDialog;
+import com.caltruism.assist.util.SharedPreferencesHelper;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
@@ -45,6 +50,7 @@ import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.HashMap;
+import java.util.Objects;
 
 public class RequestDetailsActivity extends AppCompatActivity implements OnMapReadyCallback {
 
@@ -69,9 +75,11 @@ public class RequestDetailsActivity extends AppCompatActivity implements OnMapRe
     private Button buttonActionButton;
 
     private FirebaseFirestore db;
+    private GoogleMap map;
 
     private boolean isVolunteerView;
     private AssistRequest assistRequest;
+    private boolean isQueryData;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -80,8 +88,15 @@ public class RequestDetailsActivity extends AppCompatActivity implements OnMapRe
 
         db = FirebaseFirestore.getInstance();
 
-        isVolunteerView = getIntent().getExtras().getBoolean("isVolunteerView");
-        assistRequest = getIntent().getExtras().getParcelable("requestData");
+        if (Objects.requireNonNull(getIntent().getExtras()).containsKey("requestData")) {
+            isVolunteerView = getIntent().getExtras().getBoolean("isVolunteerView");
+            assistRequest = getIntent().getExtras().getParcelable("requestData");
+            isQueryData = false;
+        } else {
+            isVolunteerView = false;
+            queryRequestData(getIntent().getExtras().getString("requestId"));
+            isQueryData = true;
+        }
 
         mapView = findViewById(R.id.mapViewRequestDetails);
         mapView.onCreate(savedInstanceState);
@@ -103,11 +118,14 @@ public class RequestDetailsActivity extends AppCompatActivity implements OnMapRe
         buttonActionButton = findViewById(R.id.buttonRequestDetailsActionButton);
 
         setupToolbar();
-        setUpViews();
+
+        if (!isQueryData)
+            setUpViews();
     }
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
+        map = googleMap;
         googleMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(this, R.raw.map_style_json));
         googleMap.getUiSettings().setMyLocationButtonEnabled(false);
         googleMap.getUiSettings().setMapToolbarEnabled(false);
@@ -118,21 +136,24 @@ public class RequestDetailsActivity extends AppCompatActivity implements OnMapRe
             googleMap.setMyLocationEnabled(true);
         }
 
-        googleMap.addMarker(new MarkerOptions().position(assistRequest.getLocationLatLng())
-                 .icon(BitMapDescriptorFromVector.regularMarker(this)));
-        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(assistRequest.getLocationLatLng(), Constants.DEFAULT_ZOOM));
+        if (!isQueryData) {
+            googleMap.addMarker(new MarkerOptions().position(assistRequest.getLocationLatLng())
+                    .icon(BitMapDescriptorFromVector.regularMarker(this)));
+            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(assistRequest.getLocationLatLng(), Constants.DEFAULT_ZOOM));
+        }
     }
 
     @Override
-    public void onResume() {
-        mapView.onResume();
+    protected void onResume() {
         super.onResume();
+        LocalBroadcastManager.getInstance(this).registerReceiver(messageReceiver, new IntentFilter("disabled-request-accepted"));
+        mapView.onResume();
     }
 
-
     @Override
-    public void onPause() {
+    protected void onPause() {
         super.onPause();
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(messageReceiver);
         mapView.onPause();
     }
 
@@ -156,8 +177,61 @@ public class RequestDetailsActivity extends AppCompatActivity implements OnMapRe
 
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
-        finish();
+        if (!isTaskRoot()) {
+            super.onBackPressed();
+            finish();
+        } else {
+            if (isVolunteerView) {
+                startActivity(new Intent(this, VolunteerMainActivity.class));
+                finish();
+            } else {
+                startActivity(new Intent(this, DisabledMainActivity.class));
+                finish();
+            }
+        }
+    }
+
+    private void queryRequestData(final String requestId) {
+        db.collection("requests").document(requestId).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                Context context = RequestDetailsActivity.this;
+
+                if (task.isSuccessful()) {
+                    DocumentSnapshot document = task.getResult();
+                    assert document != null;
+                    if (document.exists()) {
+                        assistRequest = new AssistRequest(document);
+
+                        if (CustomDateTimeUtil.isCurrent(assistRequest.getDateTime(), Constants.MINUTES_TO_CURRENT_REQUEST_VIEW)) {
+                            Intent intent = new Intent(RequestDetailsActivity.this, CurrentRequestActivity.class);
+                            intent.putExtra("isVolunteerView", false);
+                            intent.putExtra("requestData", assistRequest);
+                            startActivity(intent);
+                            finish();
+                        } else {
+                            setUpViews();
+
+                            if (map != null) {
+                                map.addMarker(new MarkerOptions().position(assistRequest.getLocationLatLng())
+                                        .icon(BitMapDescriptorFromVector.regularMarker(RequestDetailsActivity.this)));
+                                map.moveCamera(CameraUpdateFactory.newLatLngZoom(assistRequest.getLocationLatLng(), Constants.DEFAULT_ZOOM));
+                            } else {
+                                isQueryData = false;
+                            }
+                        }
+                    } else {
+                        Log.e(TAG, "Requests not exist with id: " + requestId);
+                        startActivity(new Intent(context, DisabledMainActivity.class));
+                        finish();
+                    }
+                } else {
+                    Log.e(TAG, "Get failed with ", task.getException());
+                    startActivity(new Intent(context, DisabledMainActivity.class));
+                    finish();
+                }
+            }
+        });
     }
 
     public void setupToolbar() {
@@ -336,8 +410,7 @@ public class RequestDetailsActivity extends AppCompatActivity implements OnMapRe
     }
 
     private void setUpProfileImageView(String uid) {
-        db.collection("users").document(uid)
-                .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+        db.collection("users").document(uid).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                 if (task.isSuccessful()) {
@@ -347,7 +420,7 @@ public class RequestDetailsActivity extends AppCompatActivity implements OnMapRe
 
                     if (document.exists()) {
                         Context context = RequestDetailsActivity.this;
-                        Object profileImageUrl = document.get("pictureURL");
+                        Object profileImageUrl = document.get("pictureUrl");
 
                         if (profileImageUrl != null) {
                             String url = profileImageUrl.toString();
@@ -364,4 +437,11 @@ public class RequestDetailsActivity extends AppCompatActivity implements OnMapRe
             }
         });
     }
+
+    private BroadcastReceiver messageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, final Intent intent) {
+            CustomRequestAcceptedDialog.showDialog(RequestDetailsActivity.this, intent);
+        }
+    };
 }

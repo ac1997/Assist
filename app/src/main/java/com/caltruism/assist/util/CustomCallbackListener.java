@@ -29,6 +29,7 @@ public class CustomCallbackListener {
         void onDataAdded(DocumentSnapshot documentSnapshot);
         void onDataRemoved(String documentId);
         void onDataModified(DocumentSnapshot documentSnapshot);
+        void onEmptyDataSet();
     }
 
     public interface AddRequestFragmentCallbackListener {

@@ -17,6 +17,7 @@ import com.bumptech.glide.signature.ObjectKey;
 import com.caltruism.assist.R;
 import com.caltruism.assist.util.CustomLoadingDialog;
 import com.caltruism.assist.util.SharedPreferencesHelper;
+import com.caltruism.assist.util.TokenUtil;
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
@@ -246,6 +247,7 @@ public class SignInActivity extends AppCompatActivity {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                 if (task.isSuccessful()) {
+                    TokenUtil.onNewToken();
                     DocumentSnapshot document = task.getResult();
 
                     assert document != null;
@@ -312,9 +314,9 @@ public class SignInActivity extends AppCompatActivity {
                     String email = response.getJSONObject().getString("email");
                     String firstName = response.getJSONObject().getString("first_name");
                     String lastName = response.getJSONObject().getString("last_name");
-                    String pictureURL = Profile.getCurrentProfile().getProfilePictureUri(200, 200).toString();
+                    String pictureUrl = Profile.getCurrentProfile().getProfilePictureUri(200, 200).toString();
 
-                    initUser(email, firstName, lastName, pictureURL);
+                    initUser(email, firstName, lastName, pictureUrl);
                 } catch (JSONException e) {
                     customLoadingDialog.hideDialog();
                     Log.e(TAG, "Facebook sign in failed", e);
@@ -333,17 +335,19 @@ public class SignInActivity extends AppCompatActivity {
         String email = acct.getEmail();
         String firstName = acct.getGivenName();
         String lastName = acct.getFamilyName();
-        String pictureURL = acct.getPhotoUrl().toString();
+        String pictureUrl = acct.getPhotoUrl().toString();
 
-        initUser(email, firstName, lastName, pictureURL);
+        initUser(email, firstName, lastName, pictureUrl);
     }
 
-    private void initUser(String email, String firstName, String lastName, String pictureURL) {
+    private void initUser(String email, String firstName, String lastName, String pictureUrl) {
+        TokenUtil.onNewToken();
+
         HashMap<String, Object> userData = new HashMap<>();
         userData.put("email", email);
         userData.put("firstName", firstName);
         userData.put("lastName", lastName);
-        userData.put("pictureURL", pictureURL);
+        userData.put("pictureUrl", pictureUrl);
 
         userData.put("ratings", 0.0);
 

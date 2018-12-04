@@ -10,13 +10,21 @@ import android.util.Log;
 
 import com.caltruism.assist.R;
 import com.caltruism.assist.util.SharedPreferencesHelper;
+import com.caltruism.assist.util.TokenUtil;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreSettings;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
+
+import java.util.HashMap;
+import java.util.Objects;
 
 public class MainEmptyActivity extends AppCompatActivity {
 
@@ -27,8 +35,8 @@ public class MainEmptyActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.launch_screen);
 
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        FirebaseAuth auth = FirebaseAuth.getInstance();
+        final FirebaseFirestore db = FirebaseFirestore.getInstance();
+        final FirebaseAuth auth = FirebaseAuth.getInstance();
 
         FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
                 .setPersistenceEnabled(true)
@@ -36,9 +44,9 @@ public class MainEmptyActivity extends AppCompatActivity {
         db.setFirestoreSettings(settings);
 
         if (auth.getCurrentUser() != null) {
-            DocumentReference docRef = db.collection("users").document(auth.getCurrentUser().getUid());
+            TokenUtil.onNewToken();
 
-            docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            db.collection("users").document(auth.getCurrentUser().getUid()).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                 @Override
                 public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                     Intent intent;

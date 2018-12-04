@@ -15,7 +15,7 @@ public class SharedPreferencesHelper {
         Object memberFirstNameObject = ds.get("firstName");
         Object memberLastNameObject = ds.get("lastName");
         Object memberPhoneNumber = ds.get("phoneNumber");
-        Object memberPictureURLObject = ds.get("pictureURL");
+        Object memberPictureURLObject = ds.get("pictureUrl");
         Object memberRatingsObject = ds.get("ratings");
         Object memberTypeObject = ds.get("memberType");
 
@@ -31,8 +31,8 @@ public class SharedPreferencesHelper {
         if (memberPhoneNumber != null && !sharedPreferences.contains("phoneNumber"))
             editor.putString("phoneNumber", memberPhoneNumber.toString());
 
-        if (memberPictureURLObject != null && !sharedPreferences.contains("pictureURL"))
-            editor.putString("pictureURL", memberPictureURLObject.toString());
+        if (memberPictureURLObject != null && !sharedPreferences.contains("pictureUrl"))
+            editor.putString("pictureUrl", memberPictureURLObject.toString());
 
         if (memberRatingsObject != null && !sharedPreferences.contains("ratings"))
             editor.putFloat("ratings", Float.parseFloat(memberRatingsObject.toString()));
@@ -50,7 +50,7 @@ public class SharedPreferencesHelper {
         Object memberFirstNameObject = userData.get("firstName");
         Object memberLastNameObject = userData.get("lastName");
         Object memberPhoneNumber = userData.get("phoneNumber");
-        Object memberPictureURLObject = userData.get("pictureURL");
+        Object memberPictureURLObject = userData.get("pictureUrl");
         Object memberRatingsObject = userData.get("ratings");
         Object memberTypeObject = userData.get("memberType");
 
@@ -66,8 +66,8 @@ public class SharedPreferencesHelper {
         if (memberPhoneNumber != null && !sharedPreferences.contains("phoneNumber"))
             editor.putString("phoneNumber", memberPhoneNumber.toString());
 
-        if (memberPictureURLObject != null && !sharedPreferences.contains("pictureURL"))
-            editor.putString("pictureURL", memberPictureURLObject.toString());
+        if (memberPictureURLObject != null && !sharedPreferences.contains("pictureUrl"))
+            editor.putString("pictureUrl", memberPictureURLObject.toString());
 
         if (memberRatingsObject != null && !sharedPreferences.contains("ratings"))
             editor.putFloat("ratings", Float.parseFloat(memberRatingsObject.toString()));

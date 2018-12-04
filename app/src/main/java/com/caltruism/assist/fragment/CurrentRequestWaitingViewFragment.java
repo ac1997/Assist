@@ -60,9 +60,8 @@ public class CurrentRequestWaitingViewFragment extends Fragment implements Custo
 
         Glide.with(getActivity()).setDefaultRequestOptions(new RequestOptions().centerCrop())
                 .load(R.drawable.walking).into(imageView);
-        textViewMainText.setVisibility(View.VISIBLE);
         textViewSubText.setText("MIN AWAY");
-        textViewFootNote.setText("Switching to map view when volunteer shares their location");
+        textViewFootNote.setVisibility(View.VISIBLE);
     }
 
     private void setOfflineView() {
@@ -70,9 +69,8 @@ public class CurrentRequestWaitingViewFragment extends Fragment implements Custo
 
         Glide.with(getActivity()).setDefaultRequestOptions(new RequestOptions().centerCrop())
                 .load(R.drawable.walking_static).into(imageView);
-        // TODO: Rephrase
-        textViewMainText.setVisibility(View.INVISIBLE);
+        textViewMainText.setText("Ouch...");
         textViewSubText.setText("Volunteer is currently offline.");
-        textViewFootNote.setText("We will show the minute countdown once the volunteer is online");
+        textViewFootNote.setVisibility(View.GONE);
     }
 }

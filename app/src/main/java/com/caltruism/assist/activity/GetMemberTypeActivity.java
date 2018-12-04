@@ -51,7 +51,7 @@ public class GetMemberTypeActivity extends AppCompatActivity {
     private FirebaseAuth auth;
 
     private HashMap<String, Object> userData;
-    private String profilePictureURL;
+    private String profilePictureUrl;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -71,15 +71,15 @@ public class GetMemberTypeActivity extends AppCompatActivity {
         else if (sharedPreferences.contains("firstName"))
             firstName = sharedPreferences.getString("firstName", null);
 
-        if (userData.containsKey("pictureURL"))
-            profilePictureURL = (String) userData.get("pictureURL");
-        else if (sharedPreferences.contains("pictureURL"))
-            profilePictureURL = sharedPreferences.getString("pictureURL", null);
+        if (userData.containsKey("pictureUrl"))
+            profilePictureUrl = (String) userData.get("pictureUrl");
+        else if (sharedPreferences.contains("pictureUrl"))
+            profilePictureUrl = sharedPreferences.getString("pictureUrl", null);
 
         imageViewProfile = findViewById(R.id.imageViewGetMemberTypeProfilePicture);
-        if (profilePictureURL != null) {
+        if (profilePictureUrl != null) {
             RequestOptions requestOptions = new RequestOptions().placeholder(R.drawable.ic_user_solid).centerCrop();
-            Glide.with(this).setDefaultRequestOptions(requestOptions).load(profilePictureURL).into(imageViewProfile);
+            Glide.with(this).setDefaultRequestOptions(requestOptions).load(profilePictureUrl).into(imageViewProfile);
         }
 
         TextView name = findViewById(R.id.textViewGetMemberTypeName);
@@ -104,7 +104,7 @@ public class GetMemberTypeActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 if (!snackbarUploading.isShown()) {
-                    if (profilePictureURL == null)
+                    if (profilePictureUrl == null)
                         showSnackbar(ERROR2);
                     else
                         addUserData(getResources().getString(R.string.volunteer_type));
@@ -117,7 +117,7 @@ public class GetMemberTypeActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 if (!snackbarUploading.isShown()) {
-                    if (profilePictureURL == null)
+                    if (profilePictureUrl == null)
                         showSnackbar(ERROR2);
                     else
                         addUserData(getResources().getString(R.string.disabled_type));
@@ -158,8 +158,8 @@ public class GetMemberTypeActivity extends AppCompatActivity {
                 @Override
                 public void onComplete(@NonNull Task<Uri> task) {
                     if (task.isSuccessful()) {
-                        profilePictureURL = task.getResult().toString();
-                        userData.put("pictureURL", profilePictureURL);
+                        profilePictureUrl = task.getResult().toString();
+                        userData.put("pictureUrl", profilePictureUrl);
                     } else {
                         Log.e(TAG, "Failed to get profile picture url");
                         showSnackbar(ERROR1);

@@ -16,6 +16,7 @@ import android.widget.TextView;
 import com.caltruism.assist.R;
 import com.caltruism.assist.util.CustomLoadingDialog;
 import com.caltruism.assist.util.SharedPreferencesHelper;
+import com.caltruism.assist.util.TokenUtil;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -149,6 +150,7 @@ public class SignUpActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(Void aVoid) {
                         Log.d(TAG, "Document added/updated with ID: " + auth.getCurrentUser().getUid());
+                        TokenUtil.onNewToken();
                         Intent intent = new Intent(SignUpActivity.this, GetMemberPhoneNumberActivity.class);
                         intent.putExtra("userData", userData);
                         startActivity(intent);

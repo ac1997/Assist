@@ -18,11 +18,12 @@ public final class Constants {
     public static final int REQUEST_STATUS_CANCELLED = 4;
     public static final int REQUEST_STATUS_EXPIRED = 5;
 
-    public static final long UPDATE_INTERVAL_IN_MILLISECONDS = 1000;
-    public static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS = UPDATE_INTERVAL_IN_MILLISECONDS / 2;
+    public static final long UPDATE_INTERVAL_IN_MILLISECONDS = 3000;
+    public static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS = UPDATE_INTERVAL_IN_MILLISECONDS;
 
     public static final float DEFAULT_ZOOM = 15;
     public static final float MIN_ZOOM = 10;
     public static final float MAX_ZOOM = 20;
 
+    public static final int MINUTES_TO_CURRENT_REQUEST_VIEW = 15;
 }
