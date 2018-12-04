@@ -95,8 +95,7 @@ public class CustomDateTimeUtil {
     }
 
     public static boolean isNow(long dateTimeMili) {
-        dateTimeMili += 3 * DateUtils.MINUTE_IN_MILLIS;
-        return dateTimeMili - 10 * DateUtils.MINUTE_IN_MILLIS <= (System.currentTimeMillis() - 1000);
+        return (dateTimeMili - 10 * DateUtils.MINUTE_IN_MILLIS) <= (System.currentTimeMillis() - 1000 + DateUtils.MINUTE_IN_MILLIS) ;
     }
 
     public static boolean isExpired(long dateTimeMili, int duration) {

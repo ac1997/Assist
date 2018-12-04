@@ -80,7 +80,6 @@ public class VolunteerRequestListFragment extends Fragment {
     private CustomCallbackListener.VolunteerRequestListFragmentCallbackListener callbackListener;
 
     private FloatingSearchView searchView;
-    private MenuView menuView;
 
     private VolunteerRequestListViewFragment listViewFragment;
     private VolunteerRequestMapViewFragment mapViewFragment;
@@ -241,15 +240,14 @@ public class VolunteerRequestListFragment extends Fragment {
                 } else if (currentFragment != itemId) {
                     currentFragment = itemId;
 
-                    if (itemId == R.id.actionListView)
+                    if (itemId == R.id.actionListView) {
                         showListViewFragment();
-                    else if (itemId == R.id.actionMapView)
+                    } else if (itemId == R.id.actionMapView) {
                         showMapViewFragment();
+                    }
                 }
             }
         });
-
-        menuView = searchView.getmMenuView();
     }
 
     private void initializeFragments() {

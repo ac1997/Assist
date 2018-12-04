@@ -572,6 +572,7 @@ public class FloatingSearchView extends FrameLayout {
             public boolean onMenuItemSelected(MenuBuilder menu, MenuItem item) {
 
                 if (mActionMenuItemListener != null) {
+                    item.setIcon(R.drawable.ic_search_black_24dp);
                     mActionMenuItemListener.onActionMenuItemSelected(item);
                 }
 
@@ -2064,9 +2065,5 @@ public class FloatingSearchView extends FrameLayout {
         public void onMenuClosed() {
             //do nothing
         }
-    }
-
-    public MenuView getmMenuView() {
-        return mMenuView;
     }
 }

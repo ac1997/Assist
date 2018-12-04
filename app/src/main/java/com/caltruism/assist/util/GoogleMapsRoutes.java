@@ -33,7 +33,7 @@ public class GoogleMapsRoutes {
         this.context = context;
         this.callbackListener = callbackListener;
 
-        String url = String.format("https://maps.googleapis.com/maps/api/directions/json?origin=%s,%s&destination=%s,%s&mode=walking&key=AIzaSyA02-vDGwNxALg9kzyrY6f_kVk3j4NAzIo",
+        String url = String.format("https:/ rections/json?origin=%s,%s&destination=%s,%s&mode=walking&key=AIzaSyA02-vDGwNxALg9kzyrY6f_kVk3j4NAzIo",
                 origin.latitude, origin.longitude, dest.latitude, dest.longitude);
         FetchUrl FetchUrl = new FetchUrl();
         FetchUrl.execute(url);

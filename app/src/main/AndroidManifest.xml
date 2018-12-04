@@ -17,7 +17,8 @@
         android:theme="@style/AppTheme">
         <activity
             android:name=".activity.MainEmptyActivity"
-            android:theme="@style/AppTheme.Launcher" >
+            android:theme="@style/AppTheme.Launcher"
+            android:screenOrientation="sensorPortrait">
 
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -28,38 +29,49 @@
 
         <activity
             android:name=".activity.WelcomeActivity"
-            android:theme="@style/SignInSignUpTheme" />
+            android:theme="@style/SignInSignUpTheme"
+            android:screenOrientation="sensorPortrait" />
 
         <activity
             android:name=".activity.SignInActivity"
-            android:theme="@style/SignInSignUpTheme" />
+            android:theme="@style/SignInSignUpTheme"
+            android:screenOrientation="sensorPortrait" />
         <activity
             android:name=".activity.SignUpActivity"
-            android:theme="@style/SignInSignUpTheme" />
+            android:theme="@style/SignInSignUpTheme"
+            android:screenOrientation="sensorPortrait" />
 
         <activity
             android:name=".activity.GetMemberTypeActivity"
-            android:theme="@style/SignInSignUpTheme"/>
+            android:theme="@style/SignInSignUpTheme"
+            android:screenOrientation="sensorPortrait" />
 
         <activity
             android:name=".activity.GetMemberPhoneNumberActivity"
-            android:theme="@style/SignInSignUpTheme"/>
+            android:theme="@style/SignInSignUpTheme"
+            android:screenOrientation="sensorPortrait" />
 
-        <activity android:name=".activity.VolunteerMainActivity" />
-        <activity android:name=".activity.DisabledMainActivity" />
+        <activity android:name=".activity.VolunteerMainActivity"
+            android:screenOrientation="sensorPortrait" />
 
-        <activity android:name=".activity.RequestDetailsActivity">
+        <activity android:name=".activity.DisabledMainActivity"
+            android:screenOrientation="sensorPortrait" />
+
+        <activity android:name=".activity.RequestDetailsActivity"
+            android:screenOrientation="sensorPortrait">
             <intent-filter>
                 <action android:name=".RequestDetails" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
 
-        <activity android:name=".activity.CurrentRequestActivity" />
+        <activity android:name=".activity.CurrentRequestActivity"
+            android:screenOrientation="sensorPortrait" />
 
         <activity
             android:name=".activity.AddRequestActivity"
-            android:windowSoftInputMode="adjustPan|stateAlwaysHidden" />
+            android:windowSoftInputMode="adjustPan|stateAlwaysHidden"
+            android:screenOrientation="sensorPortrait" />
 
         <meta-data
             android:name="com.google.android.gms.version"
