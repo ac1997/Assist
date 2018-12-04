@@ -2,8 +2,10 @@ package com.caltruism.assist.activity;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -17,6 +19,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -35,6 +38,7 @@ import com.caltruism.assist.fragment.CurrentRequestMapViewFragment;
 import com.caltruism.assist.fragment.CurrentRequestWaitingViewFragment;
 import com.caltruism.assist.util.Constants;
 import com.caltruism.assist.util.CustomCallbackListener;
+import com.caltruism.assist.util.CustomRequestAcceptedDialog;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -233,7 +237,7 @@ public class CurrentRequestActivity extends AppCompatActivity implements CustomC
 
                     if (document.exists()) {
                         Context context = CurrentRequestActivity.this;
-                        Object profileImageUrl = document.get("pictureURL");
+                        Object profileImageUrl = document.get("pictureUrl");
                         final Object phoneNumber = document.get("phoneNumber");
 
                         if (profileImageUrl != null) {
@@ -269,6 +273,18 @@ public class CurrentRequestActivity extends AppCompatActivity implements CustomC
             requestPermissions();
         else
             startLocationUpdates();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        LocalBroadcastManager.getInstance(this).registerReceiver(messageReceiver, new IntentFilter("disabled-request-accepted"));
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(messageReceiver);
     }
 
     @Override
@@ -485,4 +501,11 @@ public class CurrentRequestActivity extends AppCompatActivity implements CustomC
     public void onNewDurationData(int durationInMins) {
         storeData(String.valueOf(durationInMins));
     }
+
+    private BroadcastReceiver messageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, final Intent intent) {
+            CustomRequestAcceptedDialog.showDialog(CurrentRequestActivity.this, intent);
+        }
+    };
 }

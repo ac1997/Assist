@@ -11,7 +11,6 @@ import com.bumptech.glide.request.target.DrawableImageViewTarget;
 import com.caltruism.assist.R;
 
 public class CustomLoadingDialog {
-
     private Context context;
     private Dialog dialog;
 
@@ -20,11 +19,10 @@ public class CustomLoadingDialog {
     }
 
     public void showDialog() {
-
         dialog = new Dialog(context);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setCancelable(false);
-        dialog.setContentView(R.layout.loading_layout);
+        dialog.setContentView(R.layout.dialog_loading_layout);
 
         ImageView imageView = dialog.findViewById(R.id.customLoadingView);
         DrawableImageViewTarget imageViewTarget = new DrawableImageViewTarget(imageView);

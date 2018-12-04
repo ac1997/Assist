@@ -7,6 +7,7 @@ import android.support.constraint.Group;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -71,7 +72,7 @@ public class DisabledRequestListViewFragment extends Fragment implements CustomC
     @Override
     public void onDataRemoved(HashSet<String> removedId) {
         for (String id : removedId) {
-            int removeIndex = dataSet.indexOf(id);
+            int removeIndex = dataSet.indexOf(new AssistRequest(id));
             dataSet.remove(removeIndex);
             adapter.notifyItemRemoved(removeIndex);
         }

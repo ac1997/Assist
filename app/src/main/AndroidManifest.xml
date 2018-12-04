@@ -28,7 +28,7 @@
 
         <activity
             android:name=".activity.WelcomeActivity"
-            android:theme="@style/SignInSignUpTheme"/>
+            android:theme="@style/SignInSignUpTheme" />
 
         <activity
             android:name=".activity.SignInActivity"
@@ -45,13 +45,16 @@
             android:name=".activity.GetMemberPhoneNumberActivity"
             android:theme="@style/SignInSignUpTheme"/>
 
-        <activity
-            android:name=".activity.GetMemberTypeActivity"
-            android:theme="@style/SignInSignUpTheme"/>
-
         <activity android:name=".activity.VolunteerMainActivity" />
         <activity android:name=".activity.DisabledMainActivity" />
-        <activity android:name=".activity.RequestDetailsActivity" />
+
+        <activity android:name=".activity.RequestDetailsActivity">
+            <intent-filter>
+                <action android:name=".RequestDetails" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
         <activity android:name=".activity.CurrentRequestActivity" />
 
         <activity
@@ -90,6 +93,13 @@
                 <data android:scheme="@string/fb_login_protocol_scheme" />
             </intent-filter>
         </activity>
+
+        <service android:name=".service.CustomFirebaseMessagingService">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
     </application>
 
 </manifest>

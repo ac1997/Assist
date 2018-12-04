@@ -3,9 +3,11 @@ package com.caltruism.assist.activity;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -21,6 +23,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -41,6 +44,7 @@ import com.caltruism.assist.fragment.AddRequestSummaryFragment;
 import com.caltruism.assist.util.Constants;
 import com.caltruism.assist.util.CustomCallbackListener;
 import com.caltruism.assist.util.CustomDateTimeUtil;
+import com.caltruism.assist.util.CustomRequestAcceptedDialog;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -259,6 +263,18 @@ public class AddRequestActivity extends AppCompatActivity implements CustomCallb
         super.onStop();
 
         fusedLocationClient.removeLocationUpdates(locationCallback);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        LocalBroadcastManager.getInstance(this).registerReceiver(messageReceiver, new IntentFilter("disabled-request-accepted"));
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(messageReceiver);
     }
 
     @Override
@@ -762,4 +778,11 @@ public class AddRequestActivity extends AppCompatActivity implements CustomCallb
         Snackbar snackbar = Snackbar.make(AddRequestActivity.this.findViewById(R.id.addRequestConstraintLayout), message, Snackbar.LENGTH_SHORT);
         snackbar.show();
     }
+
+    private BroadcastReceiver messageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, final Intent intent) {
+            CustomRequestAcceptedDialog.showDialog(AddRequestActivity.this, intent);
+        }
+    };
 }

@@ -194,7 +194,6 @@ public class DisabledRequestListFragment extends Fragment {
     }
 
     private void onDataAdded(DocumentSnapshot documentSnapshot) {
-        Log.e(TAG, "Document entered id: " + documentSnapshot.getId());
         AssistRequest assistRequest = new AssistRequest(documentSnapshot);
         assistRequestStatus.put(documentSnapshot.getId(), assistRequest.getStatus());
 
@@ -207,7 +206,6 @@ public class DisabledRequestListFragment extends Fragment {
     }
 
     private void onDataRemoved(DocumentSnapshot documentSnapshot) {
-        Log.e(TAG, "Document removed id: " + documentSnapshot.getId());
         assistRequestStatus.remove(documentSnapshot.getId());
         int status = documentSnapshot.getLong("status").intValue();
 
@@ -220,7 +218,6 @@ public class DisabledRequestListFragment extends Fragment {
     }
 
     private void onDataModified(DocumentSnapshot documentSnapshot) {
-        Log.e(TAG, "Document modified id: " + documentSnapshot.getId());
         int newStatus = documentSnapshot.getLong("status").intValue();
 
         if (assistRequestStatus.get(documentSnapshot.getId()) == newStatus) {

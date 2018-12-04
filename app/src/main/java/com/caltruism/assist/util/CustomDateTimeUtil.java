@@ -42,7 +42,7 @@ public class CustomDateTimeUtil {
         } else {
             Calendar calendar = Calendar.getInstance();
             calendar.setTimeInMillis(timeStamp);
-            SimpleDateFormat sdf = new SimpleDateFormat("EEEE, MMMM dd", Locale.US);
+            SimpleDateFormat sdf = new SimpleDateFormat("EEEE, MMMM d", Locale.US);
             return sdf.format(calendar.getTime());
         }
     }
