@@ -130,7 +130,7 @@ public class CurrentRequestMapViewFragment extends Fragment implements
         map.setMyLocationEnabled(true);
 
         if (isVolunteerView)
-            map.setPadding(0, 0, 0, 128);
+            map.setPadding(0, 0, 0, 168);
 
         if (originLatLng != null) {
             GoogleMapsRoutes googleMapsRoutes = new GoogleMapsRoutes(getActivity(),

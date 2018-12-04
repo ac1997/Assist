@@ -43,7 +43,7 @@ public class VolunteerRequestListViewFragment extends Fragment implements Custom
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        adapter = new RequestAdapter(getActivity(), dataSet, true);
+        adapter = new RequestAdapter(getActivity(), dataSet, true, false);
 
         RecyclerView recyclerView = view.findViewById(R.id.recyclerViewVolunteerRequestList);
         recyclerView.setAdapter(adapter);
@@ -90,7 +90,7 @@ public class VolunteerRequestListViewFragment extends Fragment implements Custom
 
         AssistRequest request = new AssistRequest(documentSnapshot, currentLocation);
         assistRequests.put(documentSnapshot.getId(), request);
-        adapter.notifyItemInserted(AssistRequest.insertInOrder(dataSet, new AssistRequest(documentSnapshot)));
+        adapter.notifyItemInserted(AssistRequest.insertInOrder(dataSet, new AssistRequest(documentSnapshot), false));
     }
 
     @Override

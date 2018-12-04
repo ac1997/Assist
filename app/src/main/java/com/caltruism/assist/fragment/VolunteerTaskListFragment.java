@@ -129,7 +129,7 @@ public class VolunteerTaskListFragment extends Fragment {
         CollectionReference colRef = FirebaseFirestore.getInstance().collection("requests");
         listenerRegistration = colRef.whereArrayContains("acceptedBy", userData)
                 .whereGreaterThanOrEqualTo("status", Constants.REQUEST_STATUS_ACCEPTED)
-                .whereLessThanOrEqualTo("status", Constants.REQUEST_STATUS_CANCELLED)
+                .whereLessThanOrEqualTo("status", Constants.REQUEST_STATUS_CANCELED)
                 .addSnapshotListener(new EventListener<QuerySnapshot>() {
                     @Override
                     public void onEvent(@javax.annotation.Nullable QuerySnapshot queryDocumentSnapshots, @javax.annotation.Nullable FirebaseFirestoreException e) {

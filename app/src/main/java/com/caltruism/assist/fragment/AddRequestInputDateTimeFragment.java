@@ -188,9 +188,8 @@ public class AddRequestInputDateTimeFragment extends Fragment implements CustomC
     private void updateTime() {
         String time;
         long now = System.currentTimeMillis() - 1000;
-        long requestTime = requestDateAndTime.getTimeInMillis() + 3 * DateUtils.MINUTE_IN_MILLIS;
 
-        if (requestTime < now) {
+        if (requestDateAndTime.getTimeInMillis() + DateUtils.MINUTE_IN_MILLIS < now) {
             // TODO: CHANGE PHRASE
             Snackbar.make(getView().findViewById(R.id.addRequestInputDateTimeConstraintLayout), "Time past. Please select again.", Snackbar.LENGTH_SHORT).show();
             TimePickerDialog timePickerDialog = new TimePickerDialog(getContext(), timeSetListener,
@@ -198,7 +197,7 @@ public class AddRequestInputDateTimeFragment extends Fragment implements CustomC
                     requestDateAndTime.get(Calendar.MINUTE), false);
             timePickerDialog.show();
             return;
-        } else if (requestTime - 10 * DateUtils.MINUTE_IN_MILLIS <= now) {
+        } else if (CustomDateTimeUtil.isNow(DateUtils.MINUTE_IN_MILLIS)) {
             time = "Now";
             isNow = true;
         } else {
@@ -206,6 +205,16 @@ public class AddRequestInputDateTimeFragment extends Fragment implements CustomC
             time = sdf.format(requestDateAndTime.getTime());
             isNow = false;
         }
+
+
+//        else if (requestTime - 10 * DateUtils.MINUTE_IN_MILLIS <= now) {
+//            time = "Now";
+//            isNow = true;
+//        } else {
+//            SimpleDateFormat sdf = new SimpleDateFormat("hh:mm a", Locale.US);
+//            time = sdf.format(requestDateAndTime.getTime());
+//            isNow = false;
+//        }
         editTextTime.setText(time);
         handleDataChange(DATE_TIME_KEY, null);
     }

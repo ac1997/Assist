@@ -243,6 +243,25 @@ public class AssistRequest implements Comparable<AssistRequest>, Parcelable {
         return status;
     }
 
+    public String getStatusString() {
+        switch (status) {
+            case Constants.REQUEST_STATUS_WAITING:
+                return "Waiting";
+            case Constants.REQUEST_STATUS_ACCEPTED:
+                return "Accepted";
+            case Constants.REQUEST_STATUS_COMPLETED:
+                return "Completed";
+            case Constants.REQUEST_STATUS_NO_SHOW:
+                return "No Show";
+            case Constants.REQUEST_STATUS_CANCELED:
+                return "Canceled";
+            case Constants.REQUEST_STATUS_EXPIRED:
+                return "Expired";
+            default:
+                return "";
+        }
+    }
+
     public void setStatus(int status) {
         this.status = status;
     }
@@ -397,16 +416,23 @@ public class AssistRequest implements Comparable<AssistRequest>, Parcelable {
             return null;
     }
 
-    public boolean isAccepted() {
-        return this.acceptedBy.size() > 0;
+    public void addAcceptedBy(String uid, String name) {
+        if (this.acceptedBy == null)
+            this.acceptedBy = new ArrayList<User>();
+
+        this.acceptedBy.add(new User(uid, name));
     }
 
     public String getDistanceString() {
         return String.format(Locale.getDefault(), "%.1f mi", this.distance);
     }
 
-    public static int insertInOrder(ArrayList<AssistRequest> arrayList, AssistRequest assistRequest) {
-        int pos = Collections.binarySearch(arrayList, assistRequest);
+    public static int insertInOrder(ArrayList<AssistRequest> arrayList, AssistRequest assistRequest, boolean isReverse) {
+        int pos;
+        if (isReverse)
+            pos = Collections.binarySearch(arrayList,assistRequest, Collections.reverseOrder());
+        else
+            pos = Collections.binarySearch(arrayList, assistRequest);
 
         if (pos < 0) {
             pos = -pos - 1;

@@ -35,6 +35,7 @@ public class RequestAdapter extends RecyclerView.Adapter<RequestAdapter.ViewHold
     private ColorStateList accentColorStateList;
     private ArrayList<AssistRequest> dataSet;
     private boolean isVolunteerView;
+    private boolean isHistoryView;
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
 
@@ -116,11 +117,12 @@ public class RequestAdapter extends RecyclerView.Adapter<RequestAdapter.ViewHold
         }
     }
 
-    public RequestAdapter(Context context, ArrayList<AssistRequest> dataSet, boolean isVolunteerView) {
+    public RequestAdapter(Context context, ArrayList<AssistRequest> dataSet, boolean isVolunteerView, boolean isHistoryView) {
         this.greyColorStateList = ColorStateList.valueOf(ContextCompat.getColor(context, R.color.colorGrey4));
         this.accentColorStateList = ColorStateList.valueOf(ContextCompat.getColor(context, R.color.colorAccent));
         this.dataSet = dataSet;
         this.isVolunteerView = isVolunteerView;
+        this.isHistoryView = isHistoryView;
     }
 
     @NonNull
@@ -157,12 +159,27 @@ public class RequestAdapter extends RecyclerView.Adapter<RequestAdapter.ViewHold
         }
 
         if (isVolunteerView) {
-            viewHolder.getTextViewDistance().setText(dataSet.get(i).getDistanceString());
+            if (isHistoryView) {
+                if (dataSet.get(i).getStatus() == Constants.REQUEST_STATUS_ACCEPTED || dataSet.get(i).getStatus() == Constants.REQUEST_STATUS_COMPLETED)
+                    viewHolder.getTextViewDistance().setText(Html.fromHtml("<font color='#27AE60'>" + dataSet.get(i).getStatusString() + "</font>", Html.FROM_HTML_MODE_LEGACY));
+                else
+                    viewHolder.getTextViewDistance().setText(Html.fromHtml("<font color='#EB5757'>" + dataSet.get(i).getStatusString() + "</font>", Html.FROM_HTML_MODE_LEGACY));
+            } else {
+                viewHolder.getTextViewDistance().setText(dataSet.get(i).getDistanceString());
+            }
         } else {
-            viewHolder.getTextViewDistance().setVisibility(View.GONE);
+            if (isHistoryView) {
+                if (dataSet.get(i).getStatus() == Constants.REQUEST_STATUS_COMPLETED)
+                    viewHolder.getTextViewDistance().setText(Html.fromHtml("<font color='#27AE60'>" + dataSet.get(i).getStatusString() + "</font>", Html.FROM_HTML_MODE_LEGACY));
+                else
+                    viewHolder.getTextViewDistance().setText(Html.fromHtml("<font color='#EB5757'>" + dataSet.get(i).getStatusString() + "</font>", Html.FROM_HTML_MODE_LEGACY));
+            } else {
+                viewHolder.getTextViewDistance().setVisibility(View.GONE);
+            }
         }
 
-        if (dataSet.get(i).isNow() && !CustomDateTimeUtil.isExpired(dataSet.get(i).getDateTime(), dataSet.get(i).getDuration())) {
+        if (!isHistoryView && (dataSet.get(i).isNow() || CustomDateTimeUtil.isNow(dataSet.get(i).getDateTime()))
+                && !CustomDateTimeUtil.isExpired(dataSet.get(i).getDateTime(), dataSet.get(i).getDuration())) {
             viewHolder.getImageViewTime().setImageTintList(this.accentColorStateList);
             viewHolder.getTextViewTime().setText(Html.fromHtml("<font color='#f48760'>Now</font>", Html.FROM_HTML_MODE_LEGACY));
         } else {
@@ -174,7 +191,7 @@ public class RequestAdapter extends RecyclerView.Adapter<RequestAdapter.ViewHold
             viewHolder.getTextViewUser().setText(dataSet.get(i).getPostedByName());
         } else {
             if (dataSet.get(i).getStatus() == Constants.REQUEST_STATUS_ACCEPTED) {
-                viewHolder.getImageViewTime().setImageTintList(this.greyColorStateList);
+                viewHolder.getImageViewUser().setImageTintList(this.greyColorStateList);
                 viewHolder.getTextViewUser().setText(dataSet.get(i).getAcceptedByMainName());
             } else {
                 viewHolder.getImageViewUser().setImageTintList(this.accentColorStateList);

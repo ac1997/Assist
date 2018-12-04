@@ -313,9 +313,23 @@ public class RequestDetailsActivity extends AppCompatActivity implements OnMapRe
             textViewUsername.setText(assistRequest.getPostedByName());
 
             // TODO: Set view profile button listener
-            if (assistRequest.isAccepted()) {
-                buttonActionButton.setVisibility(View.GONE);
-            } else {
+            if (assistRequest.getStatus() == Constants.REQUEST_STATUS_ACCEPTED) {
+                buttonActionButton.setText("Cancel Request");
+                buttonActionButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        // TODO: Rephrase
+                        new AlertDialog.Builder(RequestDetailsActivity.this).setTitle("Cancel request?")
+                                .setMessage("Are you sure you want to cancel this request?")
+                                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        cancelAcceptedRequest();
+                                    }
+                                }).setNegativeButton("No", null).show();
+                    }
+                });
+            } else if (assistRequest.getStatus() == Constants.REQUEST_STATUS_WAITING) {
                 buttonActionButton.setText("Accept Request");
                 buttonActionButton.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -331,9 +345,11 @@ public class RequestDetailsActivity extends AppCompatActivity implements OnMapRe
                                 }).setNegativeButton("No", null).show();
                     }
                 });
+            } else {
+                buttonActionButton.setVisibility(View.GONE);
             }
         } else {
-            if (assistRequest.isAccepted()) {
+            if (assistRequest.getStatus() == Constants.REQUEST_STATUS_ACCEPTED) {
                 setUpProfileImageView(assistRequest.getAcceptedByMainUid());
                 textViewUsername.setText(assistRequest.getAcceptedByMainName());
                 // TODO: Set view profile button listener
@@ -342,30 +358,37 @@ public class RequestDetailsActivity extends AppCompatActivity implements OnMapRe
                 buttonViewProfile.setVisibility(View.GONE);
             }
 
-            buttonActionButton.setText("Cancel Request");
-            buttonActionButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    // TODO: Rephrase
-                    new AlertDialog.Builder(RequestDetailsActivity.this).setTitle("Cancel request?")
-                            .setMessage("Are you sure you want to cancel this request? This action cannot be undone.")
-                            .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    cancelRequest();
-                                }
-                            }).setNegativeButton("No", null).show();
-                }
-            });
+            if (assistRequest.getStatus() == Constants.REQUEST_STATUS_WAITING || assistRequest.getStatus() == Constants.REQUEST_STATUS_ACCEPTED) {
+                buttonActionButton.setText("Cancel Request");
+                buttonActionButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        // TODO: Rephrase
+                        new AlertDialog.Builder(RequestDetailsActivity.this).setTitle("Cancel request?")
+                                .setMessage("Are you sure you want to cancel this request? This action cannot be undone.")
+                                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        cancelRequest();
+                                    }
+                                }).setNegativeButton("No", null).show();
+                    }
+                });
+            } else {
+                buttonActionButton.setVisibility(View.GONE);
+            }
         }
     }
 
     private void acceptRequest() {
         HashMap<String, Object> acceptedBy = new HashMap<>();
         SharedPreferences sharedPreferences = getSharedPreferences(Constants.USER_DATA_SHARED_PREFERENCE, Context.MODE_PRIVATE);
+        String acceptedByName = sharedPreferences.getString("name", null);
+        String acceptedByUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
-        acceptedBy.put("name", sharedPreferences.getString("name", null));
-        acceptedBy.put("uid", FirebaseAuth.getInstance().getCurrentUser().getUid());
+        acceptedBy.put("name", acceptedByName);
+        acceptedBy.put("uid", acceptedByUid);
+        assistRequest.addAcceptedBy(acceptedByUid, acceptedByName);
 
         db.collection("requests").document(assistRequest.getId()).update(
                 "status", Constants.REQUEST_STATUS_ACCEPTED,
@@ -391,12 +414,12 @@ public class RequestDetailsActivity extends AppCompatActivity implements OnMapRe
     }
 
     private void cancelRequest() {
-        db.collection("requests").document(assistRequest.getId()).update("status", Constants.REQUEST_STATUS_CANCELLED)
+        db.collection("requests").document(assistRequest.getId()).update("status", Constants.REQUEST_STATUS_CANCELED)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
                         Log.d(TAG, "DocumentSnapshot updated with ID: " + assistRequest.getId());
-                        setResult(Activity.RESULT_OK);
+                        setResult(Activity.RESULT_FIRST_USER);
                         finish();
                     }
                 }).addOnFailureListener(new OnFailureListener() {
@@ -407,6 +430,33 @@ public class RequestDetailsActivity extends AppCompatActivity implements OnMapRe
                         snackbar.show();
                     }
                 });
+    }
+
+    private void cancelAcceptedRequest() {
+        HashMap<String, Object> acceptedBy = new HashMap<>();
+        SharedPreferences sharedPreferences = getSharedPreferences(Constants.USER_DATA_SHARED_PREFERENCE, Context.MODE_PRIVATE);
+
+        acceptedBy.put("name", sharedPreferences.getString("name", null));
+        acceptedBy.put("uid", FirebaseAuth.getInstance().getCurrentUser().getUid());
+
+        db.collection("requests").document(assistRequest.getId()).update(
+                "status", Constants.REQUEST_STATUS_WAITING,
+                "acceptedBy", FieldValue.arrayRemove(acceptedBy))
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d(TAG, "DocumentSnapshot updated with ID: " + assistRequest.getId());
+                        setResult(Activity.RESULT_FIRST_USER);
+                        finish();
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.w(TAG, "Error updating document", e);
+                Snackbar snackbar = Snackbar.make(RequestDetailsActivity.this.findViewById(R.id.requestDetailsConstraintLayout), "Error cancelling request, please try again.", Snackbar.LENGTH_SHORT);
+                snackbar.show();
+            }
+        });
     }
 
     private void setUpProfileImageView(String uid) {

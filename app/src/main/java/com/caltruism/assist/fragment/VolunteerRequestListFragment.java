@@ -24,6 +24,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.arlib.floatingsearchview.FloatingSearchView;
+import com.arlib.floatingsearchview.util.view.MenuView;
 import com.caltruism.assist.BuildConfig;
 import com.caltruism.assist.R;
 import com.caltruism.assist.data.AssistRequest;
@@ -79,6 +80,7 @@ public class VolunteerRequestListFragment extends Fragment {
     private CustomCallbackListener.VolunteerRequestListFragmentCallbackListener callbackListener;
 
     private FloatingSearchView searchView;
+    private MenuView menuView;
 
     private VolunteerRequestListViewFragment listViewFragment;
     private VolunteerRequestMapViewFragment mapViewFragment;
@@ -246,6 +248,8 @@ public class VolunteerRequestListFragment extends Fragment {
                 }
             }
         });
+
+        menuView = searchView.getmMenuView();
     }
 
     private void initializeFragments() {
@@ -440,7 +444,7 @@ public class VolunteerRequestListFragment extends Fragment {
                                            @NonNull int[] grantResults) {
         if (requestCode == REQUEST_PERMISSIONS_REQUEST_CODE) {
             if (grantResults.length <= 0) {
-                Log.i(TAG, "User interaction was cancelled.");
+                Log.i(TAG, "User interaction was canceled.");
             } else if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 if (isUsingCurrentLocation)
                     getNearByRequests();

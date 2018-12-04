@@ -699,7 +699,7 @@ public class AddRequestActivity extends AppCompatActivity implements CustomCallb
                                            @NonNull int[] grantResults) {
         if (requestCode == REQUEST_PERMISSIONS_REQUEST_CODE) {
             if (grantResults.length <= 0) {
-                Log.i(TAG, "User interaction was cancelled.");
+                Log.i(TAG, "User interaction was canceled.");
             } else if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 startLocationUpdates();
                 updateFragment();

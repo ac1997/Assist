@@ -77,8 +77,12 @@ public class CustomDateTimeUtil {
         int hour = totalMinutes / 60;
         int minute = totalMinutes % 60;
 
-        if (hour > 0)
+        if (hour > 0 && minute > 0)
             return String.format(Locale.getDefault(), "%d hr %d mins", hour, minute);
+        else if (hour == 1)
+            return String.format(Locale.getDefault(), "%d hour", hour);
+        else if (hour > 1)
+            return String.format(Locale.getDefault(), "%d hours", hour);
         else
             return String.format(Locale.getDefault(), "%d minutes", minute);
     }
@@ -90,11 +94,16 @@ public class CustomDateTimeUtil {
         return calendar.get(Calendar.HOUR_OF_DAY) * 60 + calendar.get(Calendar.MINUTE);
     }
 
-    public static boolean isExpired(long dataTimeMili, int duration) {
-        return (System.currentTimeMillis() - 1000) > (dataTimeMili + duration * DateUtils.MINUTE_IN_MILLIS);
+    public static boolean isNow(long dateTimeMili) {
+        dateTimeMili += 3 * DateUtils.MINUTE_IN_MILLIS;
+        return dateTimeMili - 10 * DateUtils.MINUTE_IN_MILLIS <= (System.currentTimeMillis() - 1000);
     }
 
-    public static boolean isCurrent(long dataTimeMili, int rangeInMin) {
-        return (System.currentTimeMillis() - 1000) >= (dataTimeMili - rangeInMin * DateUtils.MINUTE_IN_MILLIS);
+    public static boolean isExpired(long dateTimeMili, int duration) {
+        return (System.currentTimeMillis() - 1000) > (dateTimeMili + (duration + 5) * DateUtils.MINUTE_IN_MILLIS);
+    }
+
+    public static boolean isCurrent(long dateTimeMili, int rangeInMin) {
+        return (System.currentTimeMillis() - 1000) >= (dateTimeMili - rangeInMin * DateUtils.MINUTE_IN_MILLIS);
     }
 }
