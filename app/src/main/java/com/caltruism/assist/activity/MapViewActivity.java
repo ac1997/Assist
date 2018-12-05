@@ -16,13 +16,13 @@ import android.widget.TextView;
 import com.caltruism.assist.R;
 import com.caltruism.assist.util.BitMapDescriptorFromVector;
 import com.caltruism.assist.util.Constants;
+import com.caltruism.assist.util.CustomDateTimeUtil;
 import com.caltruism.assist.util.CustomRequestAcceptedDialog;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 public class MapViewActivity extends AppCompatActivity implements OnMapReadyCallback {
@@ -32,7 +32,9 @@ public class MapViewActivity extends AppCompatActivity implements OnMapReadyCall
     private MapView mapView;
 
     private GoogleMap map;
-    private LatLng location;
+    private LatLng locationLatLng;
+    private String locationName;
+    private String locationAddress;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -43,7 +45,9 @@ public class MapViewActivity extends AppCompatActivity implements OnMapReadyCall
         mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(this);
 
-        location = getIntent().getExtras().getParcelable("location");
+        locationLatLng = getIntent().getExtras().getParcelable("locationLatLng");
+        locationName = getIntent().getExtras().getString("locationName");
+        locationAddress = getIntent().getExtras().getString("locationAddress");;
 
         setupToolbar();
     }
@@ -61,14 +65,20 @@ public class MapViewActivity extends AppCompatActivity implements OnMapReadyCall
     @Override
     public void onMapReady(GoogleMap googleMap) {
         map = googleMap;
-        map.setMapStyle(MapStyleOptions.loadRawResourceStyle(this, R.raw.map_style_json));
         map.getUiSettings().setMyLocationButtonEnabled(false);
         map.getUiSettings().setMapToolbarEnabled(false);
         map.setMyLocationEnabled(true);
 
-        map.addMarker(new MarkerOptions().position(location)
-                .icon(BitMapDescriptorFromVector.regularMarker(this)));
-        map.moveCamera(CameraUpdateFactory.newLatLngZoom(location, Constants.DEFAULT_ZOOM));
+        if (locationName == null || locationName.length() == 0) {
+            map.addMarker(new MarkerOptions().position(locationLatLng)
+                    .title(locationAddress)
+                    .icon(BitMapDescriptorFromVector.regularMarker(this)));
+        } else {
+            map.addMarker(new MarkerOptions().position(locationLatLng)
+                    .title(locationName).snippet(locationAddress)
+                    .icon(BitMapDescriptorFromVector.regularMarker(this)));
+        }
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(locationLatLng, Constants.DEFAULT_ZOOM));
     }
 
     @Override

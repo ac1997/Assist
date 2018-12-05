@@ -147,7 +147,9 @@ public class RequestDetailsActivity extends AppCompatActivity implements OnMapRe
             @Override
             public void onMapClick(LatLng latLng) {
                 Intent intent = new Intent(RequestDetailsActivity.this, MapViewActivity.class);
-                intent.putExtra("location", assistRequest.getLocationLatLng());
+                intent.putExtra("locationLatLng", assistRequest.getLocationLatLng());
+                intent.putExtra("locationName", assistRequest.getLocationName());
+                intent.putExtra("locationAddress", assistRequest.getLocationAddress());
                 startActivity(intent);
             }
         });
