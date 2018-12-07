@@ -299,7 +299,7 @@ public class MenuView extends LinearLayout {
             if (mActionItems.get(actionItemIndex).getItemId() != showAlwaysActionItem.getItemId()) {
 
                 ImageView action = (ImageView) getChildAt(actionItemIndex);
-                action.setImageDrawable(showAlwaysActionItem.getIcon());
+//                action.setImageDrawable(showAlwaysActionItem.getIcon());
                 Util.setIconColor(action, mOverflowIconColor);
                 action.setOnClickListener(new OnClickListener() {
                     @Override
@@ -561,5 +561,21 @@ public class MenuView extends LinearLayout {
 
         //clear anims if any to avoid leak
         cancelChildAnimListAndClear();
+    }
+
+
+    public void swapIcon(MenuItem item) {
+        if (mMenu == -1) {
+            return;
+        }
+
+        for (int actionItemIndex = 0; actionItemIndex < mActionItems.size(); actionItemIndex++) {
+            if (mActionItems.get(actionItemIndex).getItemId() == item.getItemId()) {
+                ImageView action = (ImageView) getChildAt(actionItemIndex);
+                action.setImageDrawable(mActionItems.get(actionItemIndex).getIcon());
+                Util.setIconColor(action, mOverflowIconColor);
+                break;
+            }
+        }
     }
 }

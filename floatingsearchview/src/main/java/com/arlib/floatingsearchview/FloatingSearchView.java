@@ -2065,4 +2065,12 @@ public class FloatingSearchView extends FrameLayout {
             //do nothing
         }
     }
+
+    public void moveSelectorBeginning() {
+        mSearchInput.setSelection(0);
+    }
+
+    public void swapMenuIcon(MenuItem item) {
+        mMenuView.swapIcon(item);
+    }
 }

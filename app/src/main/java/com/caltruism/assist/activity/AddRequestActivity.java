@@ -211,7 +211,7 @@ public class AddRequestActivity extends AppCompatActivity implements CustomCallb
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_create_request, menu);
+        getMenuInflater().inflate(R.menu.menu_close, menu);
         return true;
     }
 
