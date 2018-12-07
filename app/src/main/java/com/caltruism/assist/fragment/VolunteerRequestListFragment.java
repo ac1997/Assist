@@ -27,6 +27,9 @@ import com.arlib.floatingsearchview.FloatingSearchView;
 import com.arlib.floatingsearchview.util.view.MenuView;
 import com.caltruism.assist.BuildConfig;
 import com.caltruism.assist.R;
+import com.caltruism.assist.activity.FilterActivity;
+import com.caltruism.assist.activity.MapViewActivity;
+import com.caltruism.assist.activity.RequestDetailsActivity;
 import com.caltruism.assist.data.AssistRequest;
 import com.caltruism.assist.util.Constants;
 import com.caltruism.assist.util.CustomCallbackListener;
@@ -80,10 +83,10 @@ public class VolunteerRequestListFragment extends Fragment {
     private CustomCallbackListener.VolunteerRequestListFragmentCallbackListener callbackListener;
 
     private FloatingSearchView searchView;
-    private MenuView menuView;
 
     private VolunteerRequestListViewFragment listViewFragment;
     private VolunteerRequestMapViewFragment mapViewFragment;
+    private boolean isListView;
 
     private FusedLocationProviderClient fusedLocationClient;
     private SettingsClient settingsClient;
@@ -96,7 +99,6 @@ public class VolunteerRequestListFragment extends Fragment {
     private GeoQueryDataEventListener geoQueryDataEventListener;
     private boolean isInitialQueryCompleted = false;
 
-    private int currentFragment;
     private Set<String> oldLocationKeySet = new HashSet<>();
     private HashMap<String, AssistRequest> assistRequests = new HashMap<>();
     private boolean isUsingCurrentLocation = true;
@@ -135,7 +137,7 @@ public class VolunteerRequestListFragment extends Fragment {
         }
 
         initializeFragments();
-        currentFragment = R.id.actionListView;
+        isListView = true;
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(getActivity());
         settingsClient = LocationServices.getSettingsClient(getActivity());
@@ -193,7 +195,8 @@ public class VolunteerRequestListFragment extends Fragment {
 
             if (resultCode == RESULT_OK) {
                 Place place = PlaceAutocomplete.getPlace(getActivity(), data);
-                searchView.setSearchText(place.getAddress());
+                searchView.setSearchText(place.getAddress().toString().replaceAll(", USA", ""));
+                searchView.moveSelectorBeginning();
                 cameraLocation = place.getLatLng();
                 isUsingCurrentLocation = false;
                 mapViewFragment.onNewLocations(currentLocation, cameraLocation, false, true);
@@ -235,21 +238,24 @@ public class VolunteerRequestListFragment extends Fragment {
         searchView.setOnMenuItemClickListener(new FloatingSearchView.OnMenuItemClickListener() {
             @Override
             public void onActionMenuItemSelected(MenuItem item) {
-                int itemId = item.getItemId();
-                if (itemId == R.id.actionFilter) {
-                    // FILTER
-                } else if (currentFragment != itemId) {
-                    currentFragment = itemId;
-
-                    if (itemId == R.id.actionListView)
-                        showListViewFragment();
-                    else if (itemId == R.id.actionMapView)
+                if (item.getItemId() == R.id.actionFilter) {
+                    Intent intent = new Intent(getActivity(), FilterActivity.class);
+                    startActivity(intent);
+                } else if (item.getItemId() == R.id.actionChangeView) {
+                    if (isListView) {
+                        isListView = false;
+                        item.setIcon(R.drawable.ic_menu_list);
+                        searchView.swapMenuIcon(item);
                         showMapViewFragment();
+                    } else {
+                        isListView = true;
+                        item.setIcon(R.drawable.ic_menu_map);
+                        searchView.swapMenuIcon(item);
+                        showListViewFragment();
+                    }
                 }
             }
         });
-
-        menuView = searchView.getmMenuView();
     }
 
     private void initializeFragments() {

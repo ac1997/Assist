@@ -197,7 +197,7 @@ public class AddRequestInputDateTimeFragment extends Fragment implements CustomC
                     requestDateAndTime.get(Calendar.MINUTE), false);
             timePickerDialog.show();
             return;
-        } else if (CustomDateTimeUtil.isNow(DateUtils.MINUTE_IN_MILLIS)) {
+        } else if (CustomDateTimeUtil.isNow(requestDateAndTime.getTimeInMillis())) {
             time = "Now";
             isNow = true;
         } else {

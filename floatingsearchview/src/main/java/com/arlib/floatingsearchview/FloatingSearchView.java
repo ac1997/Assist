@@ -2066,7 +2066,11 @@ public class FloatingSearchView extends FrameLayout {
         }
     }
 
-    public MenuView getmMenuView() {
-        return mMenuView;
+    public void moveSelectorBeginning() {
+        mSearchInput.setSelection(0);
+    }
+
+    public void swapMenuIcon(MenuItem item) {
+        mMenuView.swapIcon(item);
     }
 }

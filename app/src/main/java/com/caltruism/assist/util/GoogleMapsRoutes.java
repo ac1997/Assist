@@ -35,6 +35,7 @@ public class GoogleMapsRoutes {
 
         String url = String.format("https://maps.googleapis.com/maps/api/directions/json?origin=%s,%s&destination=%s,%s&mode=walking&key=AIzaSyA02-vDGwNxALg9kzyrY6f_kVk3j4NAzIo",
                 origin.latitude, origin.longitude, dest.latitude, dest.longitude);
+        Log.e(TAG, url);
         FetchUrl FetchUrl = new FetchUrl();
         FetchUrl.execute(url);
 
@@ -112,16 +113,18 @@ public class GoogleMapsRoutes {
         @Override
         protected void onPostExecute(List<HashMap<String, String>> result) {
             ArrayList<LatLng> points = new ArrayList<>();
-            PolylineOptions polylineOptions = new PolylineOptions();;
+            PolylineOptions polylineOptions = new PolylineOptions();
 
-            for (int i = 0; i < result.size(); i++) {
-                HashMap<String, String> point = result.get(i);
+            if (result != null) {
+                for (int i = 0; i < result.size(); i++) {
+                    HashMap<String, String> point = result.get(i);
 
-                double lat = Double.parseDouble(point.get("lat"));
-                double lng = Double.parseDouble(point.get("lng"));
-                LatLng position = new LatLng(lat, lng);
+                    double lat = Double.parseDouble(point.get("lat"));
+                    double lng = Double.parseDouble(point.get("lng"));
+                    LatLng position = new LatLng(lat, lng);
 
-                points.add(position);
+                    points.add(position);
+                }
             }
 
             polylineOptions.addAll(points);

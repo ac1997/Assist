@@ -38,6 +38,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -129,7 +130,7 @@ public class RequestDetailsActivity extends AppCompatActivity implements OnMapRe
         googleMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(this, R.raw.map_style_json));
         googleMap.getUiSettings().setMyLocationButtonEnabled(false);
         googleMap.getUiSettings().setMapToolbarEnabled(false);
-        googleMap.getUiSettings().setScrollGesturesEnabled(false);
+        googleMap.getUiSettings().setAllGesturesEnabled(false);
         googleMap.setMinZoomPreference(Constants.MIN_ZOOM);
         googleMap.setMaxZoomPreference(Constants.MAX_ZOOM);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
@@ -141,6 +142,17 @@ public class RequestDetailsActivity extends AppCompatActivity implements OnMapRe
                     .icon(BitMapDescriptorFromVector.regularMarker(this)));
             googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(assistRequest.getLocationLatLng(), Constants.DEFAULT_ZOOM));
         }
+
+        googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+            @Override
+            public void onMapClick(LatLng latLng) {
+                Intent intent = new Intent(RequestDetailsActivity.this, MapViewActivity.class);
+                intent.putExtra("locationLatLng", assistRequest.getLocationLatLng());
+                intent.putExtra("locationName", assistRequest.getLocationName());
+                intent.putExtra("locationAddress", assistRequest.getLocationAddress());
+                startActivity(intent);
+            }
+        });
     }
 
     @Override
